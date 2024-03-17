@@ -1,6 +1,11 @@
 from rest_framework import serializers
 from .models import User, BankDetails, BBPSModelFields
 
+class RegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['role_id', 'name', 'email', 'mobile', 'password', 'address', 'device_id', 'video_kyc']
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

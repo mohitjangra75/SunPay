@@ -52,7 +52,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     city_id = models.IntegerField(blank=True, null=True)
     package_id = models.IntegerField(blank=True, null=True)
     parent_id = models.IntegerField(blank=True, null=True)
-    is_active = models.BooleanField(default=True)
     login_pin = models.CharField(max_length=10, blank=True, null=True)
     is_email_verify = models.BooleanField(default=False)
     is_mobile_verify = models.BooleanField(default=False)
@@ -104,13 +103,26 @@ class User(AbstractBaseUser, PermissionsMixin):
     start_val = models.IntegerField(default=0,blank=True, null=True,)
     end_val = models.IntegerField(default=2001,blank=True, null=True,)
     available_balance = models.IntegerField(blank=True, null=True,)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
     
-
+    
     USERNAME_FIELD = 'username'
     objects = UserManager()
 
     def __str__(self):
         return self.username
+
+    def save(self, *args, **kwargs):
+        if self.role_id == 1:
+            self.username = 'SRT101'
+        elif self.role_id == 2:
+            self.username = 'SDT101'
+        elif self.role_id == 3:
+            self.username = 'Adm1'
+        elif self.role_id == 4:
+            self.username = 'EMP101'
+        super().save(*args, **kwargs)
+
 
 class BankDetails(models.Model):
     beneficiary_name = models.CharField(max_length=255, blank=True, null=True)

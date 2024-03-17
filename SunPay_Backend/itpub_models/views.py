@@ -3,11 +3,51 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
-from .serializers import UserSerializer, BeneficiarySerializer,BBPSFieldsSerializer
+from rest_framework.decorators import api_view
+from .serializers import UserSerializer, BeneficiarySerializer, BBPSFieldsSerializer, RegistrationSerializer
 from .services import add_beneficary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout
 from .models import User, BankDetails, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSModelFields, BBPSTransactions
 import uuid
+from django.http import JsonResponse
+        
+class RegisterAdmin(APIView):
+    @api_view(['POST'])
+    def post(self, request, format=None):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            ip_address = request.META.get('REMOTE_ADDR')
+            serializer.save(ip_address=ip_address)
+            return Response({'message': 'Form data saved successfully for Admin'})
+        return Response(serializer.errors, status=400)
 
+class RegisterUser(APIView):
+    @api_view(['POST'])
+    def post(self, request, format=None):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            ip_address = request.META.get('REMOTE_ADDR')
+            serializer.save(ip_address=ip_address)
+            return Response({'message': 'Form data saved successfully for User'})
+        return Response(serializer.errors, status=400)
+
+class GetAdmin(APIView):
+    def get(self, request, id, format=None):
+        try:
+            user = User.objects.get(id=id)
+            serializer = UserSerializer(user)
+            return Response(serializer.data)
+        except User.DoesNotExist:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+class GetUser(APIView):
+    def get(self, request, id):
+        try:
+            user = User.objects.get(id=id)
+            serializer = UserSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        
 class LoginAPIView(APIView):
     def post(self, request, *args, **kwargs):
         login_id = request.data.get('login_id')
