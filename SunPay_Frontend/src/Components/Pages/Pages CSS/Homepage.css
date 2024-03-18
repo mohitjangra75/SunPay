@@ -1,0 +1,182 @@
+.Homecompcont{
+  background: url(../Images\ Homepage/aboutimgback.jpg);
+  background-size: cover;
+}
+
+.wrapper{
+    /* height: 90vh; */
+    background-image: linear-gradient(#ea5a32, #00a958);
+    padding-top: 10vh;
+}
+.wrapcont{
+    /* height: 70vh; */
+    width: 80vw;
+    margin-left: 10vw;
+    overflow: hidden;
+}
+.hgfd{
+    margin-top: 30px;
+    animation: slide-left 2.5s ease forwards ;
+  }
+@keyframes slide-left {
+    /* use % to specify the animation at different stages (in this case, 0% and 100%) */
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      /* adjust the value to control how much the text moves */
+      transform: translateX(80px);
+    }
+}
+
+.homimgcont img{
+    margin-top: 20px;
+    width: 400px;
+    height: 360px;
+    animation: slide-img 3s ease forwards ;
+}
+    @keyframes slide-img {
+        /* use % to specify the animation at different stages (in this case, 0% and 100%) */
+        0% {
+          transform: translateX(-360px);
+        }
+        100% {
+          /* adjust the value to control how much the text moves */
+          transform: translateX(130px);
+        }
+}
+
+.w-128a{
+    width: 400px;
+}
+/* 
+.itemwrap{
+  opacity: 0;
+  animation: slideshow 8s infinite; /* Adjust the duration and other animation properties as needed 
+}
+
+.itemwrap:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.itemwrap:nth-child(2) {
+  animation-delay: 6s;
+}
+
+.itemwrap:nth-child(3) {
+  animation-delay: 12s;
+}
+.itemwrap:nth-child(4) {
+  animation-delay: 18s;
+}
+
+.itemwrap:nth-child(5) {
+  animation-delay: 24s;
+}
+
+.itemwrap:nth-child(6) {
+  animation-delay: 30s;
+}
+
+.itemwrap:nth-child(7) {
+  animation-delay: 36s;
+}
+
+@keyframes slideshow {
+  0% {
+    opacity: 1;
+  }
+  90%{
+    opacity: 0;
+  }
+} */
+.imgl{
+  position: absolute;
+  border: 4px solid grey;
+  border-radius: 2em;
+  margin-top: 160px;
+  height: 350px;
+  width: 350px;
+}
+
+.wrapbeltext{
+  background: linear-gradient(-45deg, #ddd6d6, #444461);
+  padding-top: 3em;
+  padding-bottom: 3em;
+  display: flex;
+  column-gap: 3em;
+}
+
+  .wrpbolhead{
+    color: #ffffff;
+    margin-left: 8em;
+    font-size: 2em;
+    font-weight: 900;
+  }
+
+  .wrpbeltxt{
+    color: #ffffff;
+    padding-top: 5px;
+    margin-left: 17em;
+    font-weight: 900;
+    font-size: 1.2em;
+  }
+
+.wrapbelbtn button{
+  margin-top: 1em;
+  margin-left: 3em;
+  color: #ffffff;
+  height: 60px;
+  width: 250px;
+  border-color: white;
+  border-radius: 1em;
+  background: linear-gradient(to right,#ea5a32,#00a958);
+}
+
+.wrapbelbtn :hover{
+  background: linear-gradient(to left,#ea5a32,#00a958);
+  color: #1c5fa8;
+  cursor: pointer;
+}
+
+.wrapbelbtn p{
+  font-size: small;
+  font-weight: 900;
+}
+
+.rmoresunpitem :hover{
+  background: linear-gradient(to right,#ea5a32,#00a958);
+  color: white;
+}
+
+
+/* Service Section */
+.servicesectionhome{
+  background: linear-gradient(to right,#ea5a32,#00a958);
+}
+
+.swiperslide-content{
+  height: 610px;
+}
+
+.rwhysunpimg{
+  background-image: url(../Images\ Homepage/wh-img-1.jpg);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.emailsubscribe{
+  background: linear-gradient(-45deg, #ddd6d6, #444461); 
+}
+
+.lwhysunpitem{
+  background: linear-gradient(to right, rgb(37 99 235) 50%, white 50%);
+  background-size: 200% 100%;
+  background-position: right bottom;
+  transition: all .6s ease-out;
+}
+
+.lwhysunpitem:hover {
+  background-position: left bottom;
+  color: white; 
+}
