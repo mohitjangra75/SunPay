@@ -17,5 +17,4 @@ urlpatterns = [
     path('fund_request/', FundRequest.as_view(), name='fund_request'),
     path('pay_recharge/', PayRecharge.as_view(), name='pay_recharge'),
     path('get_biller_details/', GetBillDetails.as_view(), name='get_biller_details'),
-
 ]

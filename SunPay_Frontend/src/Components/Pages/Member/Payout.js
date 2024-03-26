@@ -1,10 +1,9 @@
-import React from 'react'
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom';
 import { AiFillDelete } from "react-icons/ai";
 import { AiOutlineCheckSquare } from "react-icons/ai";
 
-const Moneytransfer = (props) => {
+function Payout(props) {
   const [isShown, setIsShown] = useState(false);
 
   const handleClick = event => {
@@ -100,5 +99,4 @@ const Moneytransfer = (props) => {
   )
 }
 
-export default Moneytransfer
-
+export default Payout

@@ -87,6 +87,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     parent_str = models.CharField(max_length=30, blank=True, null=True)
     pattern = models.CharField(max_length=255, blank=True, null=True)
     pic = models.FileField(upload_to='profile_pics/', null=True, blank=True)
+    sign = models.FileField(upload_to='profile_pics/', null=True, blank=True)
+    shoppic = models.FileField(upload_to='profile_pics/', null=True, blank=True)
+    aadhaarfrontpic = models.FileField(upload_to='profile_pics/', null=True, blank=True)
+    aadhaarbackpic = models.FileField(upload_to='profile_pics/', null=True, blank=True)
+    pancardpic = models.FileField(upload_to='profile_pics/', null=True, blank=True)
     time = models.TimeField(blank=True, null=True)
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
@@ -240,11 +245,30 @@ class BBPSTransactions(models.Model):
     remark = models.CharField(max_length=255, blank=True, null=True)
     bill_type = models.SmallIntegerField(choices=BILL_TYPE, db_index=True,)
 
+class package():
+    ISACTIVE = models.BooleanField(default=True)
+    pack_id = models.IntegerField(blank=True, primary_key=True)
+    pack_name = models.CharField(max_length=255, blank=True, primary_key=True)
+    start_value = models.IntegerField(blank=True)
+    end_value = models.IntegerField(blank=True)
+    is_flat = models.BooleanField(blank=True)
+    payment_type = models.CharField(default=True )
+    is_distributor = models.BooleanField(default=True)
+    distributor_back = models.FloatField(blank=True, primary_key=True)
+    is_company = models.BooleanField(default=True)
+    company_back = models.FloatField(blank=True, )
+    distributor_back = models.IntegerField(blank=True, primary_key=True)
+    tds = models.FloatField(blank=True, primary_key=True)
 
-
-
-
-
-
-
-
+class Customer(models.Model):
+    ISACTIVE = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    id = models.IntegerField(blank=True, primary_key=True)
+    msrno =  models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
+    mobile_no = models.IntegerField(blank=True, null=True)
+    bank_acc_number = models.CharField(max_length=255, blank=True, null=True)
+    bank_acc_name = models.CharField(max_length=255, blank=True, null=True)
+    bene_id = models.IntegerField(blank=True, null=True)
+    bank_name = models.CharField(max_length=255, blank=True, null=True)
+    customerifsc = models.CharField(max_length=255, blank=True, null=True)
+    upi_id = models.CharField(max_length=255, blank=True, null=True)

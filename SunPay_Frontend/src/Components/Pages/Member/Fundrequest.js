@@ -8,14 +8,14 @@ const defaultValue = new Date(date).toISOString().split('T')[0]
 
 const Fundrequest = (props) => {  
 
-  // const location = useLocation();
-  //   const data = location.state.data;
   const [dataall, setDatall] = useState();  
   useEffect(() => {
     setDatall(props);
     console.log('dataall', dataall);
   }, []);
+
     console.log('Data from fundrequest', dataall)
+
   const [Date, setDate] = useState('');
   const dateInputRef = useRef(null);
 
@@ -41,11 +41,11 @@ const Fundrequest = (props) => {
             <option value="axisbnk">Axis Bank(923020043729544)</option>
           </select>
           </div>
-          {/* Balance */}
+          {/* Balance
           <div className="col-md-3">
              <label htmlFor="Balance">Balance</label><br />
              <input type="text" name="balance" className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'/>
-          </div>
+          </div> */}
            {/* Amount */}
           <div className="col-md-3">
              <label htmlFor="Amount">Amount</label>

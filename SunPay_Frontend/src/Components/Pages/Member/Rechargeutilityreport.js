@@ -5,7 +5,7 @@ const today = new Date();
 const date = today.setDate(today.getDate()); 
 const defaultValue = new Date(date).toISOString().split('T')[0]
 
-const Recharge = (props) => {
+const Rechargeutilityreport = (props) => {
     const [Date, setDate] = useState('')
     const handleChange = (e) => {
     setDate(e.target.value);
@@ -76,14 +76,19 @@ const Recharge = (props) => {
                  <table className="w-full text-sm text-left rtl:text-right mt-2 border border-black text-gray-500 dark:text-gray-400 border-collapse ">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                       <tr className='border border-black'>
-                      <th scope="col" className="px-6 py-3 border border-black">SNO</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Shop Name</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Debit</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Credit</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Balance</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Narration</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Transfer Date</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Status</th>
+                        <th scope="col" className="px-6 py-3 border border-black">SNO</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Transaction ID</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Customer Mobile No</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Reference Mobile Number</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Operator</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Operator ID</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Reflecting Refrence No</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Amount</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Charge</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Comission</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Transfer Date</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Status</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Receipt</th>
                       </tr>
                     </thead>
                   
@@ -102,4 +107,4 @@ const Recharge = (props) => {
   )
 }
 
-export default Recharge
+export default Rechargeutilityreport

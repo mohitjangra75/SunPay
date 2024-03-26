@@ -1,29 +1,21 @@
 import React from 'react'
 import { useState } from 'react';
-import { useEffect } from 'react';
 
 const today = new Date();
 const date = today.setDate(today.getDate()); 
 const defaultValue = new Date(date).toISOString().split('T')[0]
 
-const DMTreport = (props) => {
-
+const Creditcard = () => {
     const [Date, setDate] = useState('')
     const handleChange = (e) => {
     setDate(e.target.value);
   };
-  const [dataall, setDatall] = useState();  
-  useEffect(() => {
-    setDatall(props);
-    console.log('dataall from navbar', dataall);
-  }, []);
 
   return (
     <div>
-      <div className='DMTreport p-4'>
+      <div className='Creditcardhistory p-4'>
         <div className='bg-slate-300 p-2 border-2 border-red-200'>
-          <h1 className=' font-bold text-2xl border-b-2 border-gray-400'>E-WALLET  SUMMARY</h1>
-          
+          <h1 className=' font-bold text-2xl border-b-2 border-gray-400'>Credit Card Summary</h1>
           <div className='md:flex md:flex-wrap md:gap-8 mt-4'>
             {/* From Date */}
             <div className="col-md-3">
@@ -58,8 +50,8 @@ const DMTreport = (props) => {
           </div>
         </div>
 
-        <div className='bg-slate-300 p-2 mt-8 border-2 border-red-200'>
-        <h1 className=' font-bold text-2xl border-b-2 border-gray-400'>E-WALLET TRANSACTIONS</h1>
+        <div className='bg-slate-300 p-2 mt-8  border-2 border-red-200'>
+        <h1 className=' font-bold text-2xl border-b-2 border-gray-400'>CREDIT CARD PAYMENT HISTORY</h1>
 
         <div className='mt-4'>
           <div className='datefetch md:flex md:flex-wrap gap-6'>
@@ -79,22 +71,21 @@ const DMTreport = (props) => {
           </div>
 
           <div className='mt-4'>
-            <div className =" relative overflow-x-auto shadow-md border-black ">
-                 <table className=" text-sm text-left rtl:text-right mt-2 border border-black text-gray-500 dark:text-gray-400 border-collapse ">
+              <div className =" relative overflow-x-auto shadow-md border-black ">
+                 <table className="w-full text-sm text-left rtl:text-right mt-2 border border-black text-gray-500 dark:text-gray-400 border-collapse ">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                       <tr className='border border-black'>
-                      <th scope="col" className="px-6 py-3 border border-black">SNO</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Transaction ID</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Mobile No</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Beneficiary Name</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Amount</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Charge</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Commission</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Transaction Type</th>
-                      <th scope="col" className="px-6 py-3 border border-black">UTR</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Transaction Status</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Transaction Date</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Receipt</th>
+                        <th scope="col" className="px-6 py-3 border border-black">SNO</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Transaction ID</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Customer Mobile No</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Card Details</th>
+                        {/* CArd no last 4 digit, CArdholser name, CArd type */}
+                        <th scope="col" className="px-6 py-3 border border-black">Amount</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Charge</th>
+                        <th scope="col" className="px-6 py-3 border border-black">UTR</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Status</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Transfer Date</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Receipt</th>
                       </tr>
                     </thead>
                   
@@ -104,15 +95,13 @@ const DMTreport = (props) => {
                       </tr>
                     </tbody>
                  </table>
+                </div>
+              </div>
             </div>
           </div>
-              
-            </div>
-          </div>
-      </div> 
-       
+      </div>  
     </div>
   )
 }
 
-export default DMTreport
+export default Creditcard

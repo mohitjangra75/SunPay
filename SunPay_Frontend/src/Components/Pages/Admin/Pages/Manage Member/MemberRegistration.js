@@ -12,13 +12,37 @@ const MemberRegistration = () => {
   setDate(e.target.value);
 };
 
-  const [image, setimage] = useState('');
+const handleSubmit = (e) => {
+//   e.preventDefault();
+
+//   // Check if any required field is empty
+//   const errors = {};
+//   Object.keys(formData).forEach((key) => {
+//     if (!formData[key]) {
+//       errors[key] = `${key.charAt(0).toUpperCase() + key.slice(1)} is required`;
+//     }
+//   });
+//   setFormErrors(errors);
+
+//   // If there are no errors, proceed with form submission
+//   if (Object.keys(errors).length === 0) {
+//     // Handle form submission here
+//     console.log('Form submitted:', formData);
+//   }
+};
     
   function handleimgchange(e) {
       console.log(e.target.files);
       setimage(URL.createObjectURL(e.target.files[0]));
   }
 
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: ''
+  });
+  
   const [name,setname] = useState()
   const [role,setrole] = useState()
   const [pack,setpack] = useState()
@@ -30,6 +54,7 @@ const MemberRegistration = () => {
   const [pincode,setpincode] = useState()
   const [password,setpassword] = useState()
   const [tpin,settpin] = useState()
+  const [image, setimage] = useState('');
   const [status,setstatus] = useState()
   const [shopname,setshopname] = useState()
   const [shopadd,setshopadd] = useState()
@@ -41,15 +66,13 @@ const MemberRegistration = () => {
   const [pan,setpan] = useState()
 
 
-
-
-
   return (
     <div className='p-4'>
       <div className=' bg-gray-500 p-4 pb-6 px-6'>
       <h1 className='text-3xl font-black text-white border-b-4'>Member Register</h1>
       <div className="mt-4 ">
         <div className='md:flex flex-wrap gap-12'>
+        <form onSubmit={handleSubmit}>
             <div className='flex md:flex-wrap gap-8'>
               <label className="mt-2 text-white w-40 text-2xl">Role</label><br/>
                 <select id="id" onChange={setrole} className="w-72 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
@@ -188,8 +211,8 @@ const MemberRegistration = () => {
             <div className='md:flex md:flex-wrap gap-8'>
               <label className=" text-white w-44 text-2xl">Is Active</label>
               <input className=" text-2xl ml-4 py-4 px-4 border border-solid border-gray-300 rounded" onChange={(e) => setstatus(e.target.value)} type="checkbox"/>
-            </div>
-            
+            </div>  
+        </form>
         </div>
 
         <div className='mt-8 '>

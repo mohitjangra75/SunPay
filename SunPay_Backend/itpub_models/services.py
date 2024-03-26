@@ -151,3 +151,64 @@ def ansh_payout(payload):
         print(response.json())
         return {"status":False,
         "data":"Please verify details"} 
+    
+def zpay_verification(payload):
+    headers = {
+        # "ClientId":token,
+        # "ClientSecret":"NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ=",
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+    }
+    url = "https://api.zwitch.io/v1/verifications/bank-account"
+    response = requests.post(url, json=payload, headers=headers)
+    if response.ok:
+        return {"status":True,
+        "data":response.json()}
+    else:
+        print(response.json())
+        return {"status":False,
+        "data":"Please verify details"} 
+
+def zpay_transfer(payload):
+    
+    payload = {
+        "type": "account_number",
+        "currency_code": "inr",
+        "async": False
+    }
+    headers = {
+        # "ClientId":token,
+        # "ClientSecret":"NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ=",
+        "accept": "application/json",
+        "content-type": "application/json"
+    }
+    
+    url = "https://api.zwitch.io/v1/transfers"
+
+    response = requests.post(url, json=payload, headers=headers)
+    print(response.text)
+
+    if response.ok:
+        return {"status":True,
+        "data":response.json()}
+    else:
+        print(response.json())
+        return {"status":False,
+        "data":"Please verify details"} 
+
+def login(payload):
+    token = get_token()
+    header = {
+        "Token":token,
+        "Authorisedkey":"NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ=",
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+    }
+    url = "http://127.0.0.1:8000/api/login"
+    response = requests.post(url=url,json=payload, headers=headers)
+    if response.ok:
+        return {"status":True,
+        "data":response.json()}
+    else:
+        return {"status":False,
+        "data":"Please verify details"}
