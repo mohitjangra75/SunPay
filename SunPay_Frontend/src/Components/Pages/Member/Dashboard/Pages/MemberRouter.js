@@ -103,8 +103,6 @@ const MemberRouter = (props, {IsLoggedIn}) => {
           {category === 'prepaid' && <Prepaid data={data} />}
           {category === 'postpaid' && <Postpaid data={data} />}
           {category === 'fastag' && <Fastag data={data} />}
-
-
         </div>
       </div>
 

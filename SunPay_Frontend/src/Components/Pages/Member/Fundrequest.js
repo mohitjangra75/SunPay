@@ -19,6 +19,10 @@ const Fundrequest = (props) => {
   const [Date, setDate] = useState('');
   const dateInputRef = useRef(null);
 
+  const submitfundrequest = (e) => {
+    
+  };
+
   const handleChange = (e) => {
     setDate(e.target.value);
   };
@@ -83,7 +87,7 @@ const Fundrequest = (props) => {
           {/* Submit button */}
           <div className="col-md-3">
             <label htmlFor=""></label><br />
-            <input type="submit" name="submit" className='border border-gray-300 bg-blue-600 text-white text-sm rounded-lg  block w-full p-2.5 hover:cursor-pointer'/>
+            <input type="submit" name="submit" onClick={submitfundrequest} className='border border-gray-300 bg-blue-600 text-white text-sm rounded-lg  block w-full p-2.5 hover:cursor-pointer'/>
           </div>
         </div>
       </div>

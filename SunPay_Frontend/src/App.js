@@ -13,6 +13,7 @@ import Loginnew from './Components/Pages/Member/Loginnew';
 import NewMemberROuter from './Components/Pages/Member/Dashboard/Pages/NewMemberROuter';
 import PrivateRoute from './Components/Pages/Member/PrivateRoute';
 import Auth from './Components/Pages/Member/Auth';
+import Pagenotfound from './Components/Pages/Pagenotfound';
 
 function App() {
   const [IsLoggedIn, setIsLoggedIn] = useState(false);
@@ -24,6 +25,7 @@ function App() {
       <div className="">
       <Routes>
               <Route path='' element={<Home/>}></Route>
+              <Route path='*' element={<Pagenotfound/>}></Route>
               <Route path='/about-us' element={<Aboutpage/>} ></Route>
               <Route path='/services' element={<Servicepage/>} ></Route>
               <Route path='/contact-us' element={<Contactpage/>} ></Route>

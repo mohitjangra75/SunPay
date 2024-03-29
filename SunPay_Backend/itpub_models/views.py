@@ -95,10 +95,10 @@ class AddBenAccount(APIView):
 
         if not beneficiary_name and not bank_id and not account_number and not ifsc_code and not mobile_number:
             return Response({"error": "Please provide required fields"}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            user=User.objects.get(mobile_number=mobile_number)
-        except:
-            return Response({"error": "Invalid mobile number"}, status=status.HTTP_400_BAD_REQUEST)
+        # try:
+        #     user=User.objects.get(mobile_number=mobile_number)
+        # except:
+        #     return Response({"error": "Invalid mobile number"}, status=status.HTTP_400_BAD_REQUEST)
     
         payload = {
             "mobile": mobile_number,
@@ -106,11 +106,6 @@ class AddBenAccount(APIView):
             "bankid": bank_id,
             "accno": account_number,
             "ifsccode": ifsc_code,
-            "verified": "1",
-            "gst_state": "17",
-            "dob": user.dob,
-            "address": user.address,
-            "pincode": user.pin_code
         }
 
         response = add_beneficary(payload)
@@ -124,7 +119,6 @@ class AddBenAccount(APIView):
                 mobile_number=mobile_number,
                 registered_with=user,
                 bene_id = response["data"]["bene_id"],
-
             )
             return Response({"message": "Details uploaded successfully"}, status=status.HTTP_201_CREATED)
         else:
