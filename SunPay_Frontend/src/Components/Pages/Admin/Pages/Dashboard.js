@@ -54,14 +54,14 @@ const handleChange = (e) => {
           <h1 className='text-3xl underline text-white font-black'>Pending Count</h1>
           <br />
           <div className='flex text-center flex-wrap gap-16'>
-            <Link>
+            <Link to='/admin/dmtreport'>
               <div className='p-2 text-2xl md:w-40 font-black bg-white rounded-lg hover:underline'>
                 <h1 className='text-red-700'>DMT</h1>
                 <h1 className='mt-0'>72 </h1>
               </div>
             </Link>
 
-            <Link>
+            <Link to='/admin/fund-request'>
               <div className='p-2 text-2xl md:w-40 font-black bg-white rounded-lg hover:underline'>
                 <h1 className='text-red-700'>Fund Request</h1>
                 <h1 className='mt-0'>72 </h1>

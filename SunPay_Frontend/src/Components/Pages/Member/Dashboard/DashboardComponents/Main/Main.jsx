@@ -21,6 +21,7 @@ import bus from '../Data/imgs/bus.png'
 import train from '../Data/imgs/rail.png'
 import hotel from '../Data/imgs/hotel.png'
 import flight from '../Data/imgs/plane.png'
+import wallet from '../Data/imgs/wallettowallet.png'
 
 const Main = () => {
   return (
@@ -93,6 +94,12 @@ const Main = () => {
               </div>
               </NavLink>
 
+              <NavLink to='/member/wallet-to-wallet'>
+              <div className='service bg-white border-[2px]  w-24 h-24 border-slate-950 rounded-lg hover:bg-blue-500 hover:text-white'>
+                <img src={wallet} alt="" className='w-full h-full'/>
+                <h1 className='text-lg text-center mt-2 font-semibold'>Wallet to Wallet</h1>
+              </div>
+              </NavLink>
               {/* <NavLink to='/member/upi'>
                 <div className='service bg-white border-[2px]  w-24 h-24 border-slate-950 rounded-lg hover:bg-blue-500 hover:text-white'>
                   <img src={settlement} alt="" className='w-full h-full'/>

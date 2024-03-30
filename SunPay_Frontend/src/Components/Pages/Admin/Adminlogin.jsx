@@ -3,12 +3,13 @@ import './Admin Css/login.css'
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function Adminlogin() {
+export default function Adminlogin({ setAdmLoggedIn }, { AdmLoggedIn }) {
   const [login_id, setlogin_id] = useState('');
   const [password, setPassword] = useState('');
   const [pin, settpin] = useState('');
   const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
+  const [auth, setisauth] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isLoggedin, setIsLoggedin] = useState(false);
@@ -49,12 +50,16 @@ export default function Adminlogin() {
       });
       const result = await response.json();
       if (result.message === 'Login Succesfull') {
-        const data = result.data;
-        console.log(data);
-        navigate('/admin/dashboard/', {
-          state: { data: data },
-        });
-      } else {
+        const apidata = result.data;
+        localStorage.setItem('apiData', JSON.stringify(apidata));
+        setisauth(true);
+        if(auth===true){
+          setAdmLoggedIn(true);
+          navigate('/admin/dashboard', {
+            state: { data: apidata, AdmLoggedIn: AdmLoggedIn  },
+          });
+        } 
+      }  else {
         setIsVisible(false);
         alert('Invalid Credentials');
       }

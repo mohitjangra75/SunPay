@@ -14,10 +14,12 @@ import NewMemberROuter from './Components/Pages/Member/Dashboard/Pages/NewMember
 import PrivateRoute from './Components/Pages/Member/PrivateRoute';
 import Auth from './Components/Pages/Member/Auth';
 import Pagenotfound from './Components/Pages/Pagenotfound';
+import Admprivateroute from './Components/Pages/Admin/Pages/Admprivateroute';
 
 function App() {
   const [IsLoggedIn, setIsLoggedIn] = useState(false);
-
+  const [AdmLoggedIn, setAdmLoggedIn] = useState(false);
+  
   return (
     <div className="page-wrapper ">
       
@@ -29,9 +31,13 @@ function App() {
               <Route path='/about-us' element={<Aboutpage/>} ></Route>
               <Route path='/services' element={<Servicepage/>} ></Route>
               <Route path='/contact-us' element={<Contactpage/>} ></Route>
-              <Route path='/member/login' element={<Login setIsLoggedIn={setIsLoggedIn} IsLoggedIn={IsLoggedIn}/>}></Route>
-              <Route path='/admin/:category' element={<AdminDashboardRouter/>}></Route>
-              <Route path='/admin/login' element={<Adminlogin/>} ></Route>
+              
+              <Route path='/admin/login' element={<Adminlogin setAdmLoggedIn={setAdmLoggedIn} AdmLoggedIn={AdmLoggedIn}/>} ></Route>
+              <Route path='/admin' element={<Admprivateroute AdmLoggedIn={AdmLoggedIn}/>} >
+                  <Route path=':category' element={<AdminDashboardRouter/>}></Route>
+              </Route>
+
+              <Route path='/member/login' element={<Login setIsLoggedIn={setIsLoggedIn} IsLoggedIn={IsLoggedIn}/>}></Route>              
               <Route path='/member' element={<PrivateRoute IsLoggedIn={IsLoggedIn}/>} >
                   <Route path=':category' element={<MemberRouter/>}></Route> 
               </Route>
