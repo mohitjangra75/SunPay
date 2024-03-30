@@ -20,9 +20,11 @@ const Reports = (props) => {
   const menus = [
     { name: "AEPS Report", link: "/member/aeps-history", icon: VscOutput }, 
     { name: "DMT Report", link: "/member/dmt-history", icon: VscOutput }, 
-    { name: "Recharge Report", link: "/member/recharge-history", icon: VscOutput }, 
+    { name: "Recharge & Utility", link: "/member/recharge-history", icon: VscOutput },
     { name: "Account Lagger", link: "/member/account-lagger", icon: VscOutput },
-    { name: "Payout History", link: "/member/payoutDMT", icon: VscOutput }, 
+    { name: "Payout History", link: "/member/payoutDMT", icon: VscOutput },
+    { name: "Credit Card", link: "/member/credithistory", icon: VscOutput }
+ 
   ]
 
   return (

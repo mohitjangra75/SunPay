@@ -37,6 +37,79 @@ class BillType(object):
     TELEPHONE = 17
     STV = 18
 
+class CompanyDetails(models.Model):
+    comp_id = models.IntegerField(blank=True, null=True)
+    owner_name = models.CharField(max_length=255, blank=True, null=True)
+    email = models.CharField(max_length=255, blank=True, null=True)
+    alt_email = models.CharField(max_length=255, blank=True, null=True)
+    mobile = models.CharField(max_length=255, blank=True, null=True)
+    logo = models.FileField(upload_to='profile_pics/', null=True, blank=True)
+    alt_mobile = models.CharField(max_length=255, blank=True, null=True)
+    website = models.CharField(max_length=255, blank=True, null=True)
+    address = models.CharField(max_length=500, blank=True, null=True)
+    copyright = models.CharField(max_length=255, blank=True, null=True)
+    facebook = models.CharField(max_length=255, blank=True, null=True)
+    instagram = models.CharField(max_length=255, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+
+class companybank(models.Model):
+    bank_id = models.IntegerField(blank=True, null=True)
+    bank_logo = models.FileField(upload_to='profile_pics/', null=True, blank=True)
+    bank_name = models.CharField(max_length=255, blank=True, null=True)
+    ifsc = models.CharField(max_length=255, blank=True, null=True)
+    account_no = models.CharField(max_length=255, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    acc_holdername = models.CharField(max_length=255, blank=True, null=True)
+
+
+class bank(models.Model):
+    bank_id = models.IntegerField(blank=True, null=True)
+    bank_name = models.CharField(max_length=255, blank=True, null=True)
+    ifsc = models.CharField(max_length=255, blank=True, null=True)
+
+class state(models.Model):
+    state_id = models.IntegerField(blank=True, null=True)
+    state_name = models.CharField(max_length=255, blank=True, null=True)
+
+class payment_mode(object):
+    IMPS = 1
+    NEFT = 1
+    RTGS = 1
+    CASH = 2
+    UPI = 3
+    CHEQUE = 4
+    DD = 4
+
+class fundrequest(models.Model):
+    id = models.IntegerField(blank=True, null=True),
+    # user jiske through ye request lgi h
+    user_id = models.CharField(max_length=255, blank=True, null=True)
+    username = models.CharField(max_length=255, blank=True, null=True)
+    amount = models.FloatField(blank=True, null=True)
+    bank_reference = models.CharField(max_length=255, blank=True, null=True, unique=True)
+    payment_mode=  ((payment_mode.IMPS, 'IMPS'),
+		(payment_mode.NEFT, 'NEFT'),
+        (payment_mode.RTGS, 'RTGS'),
+        (payment_mode.CASH, 'CASH'),
+        (payment_mode.UPI, 'UPI'),
+        (payment_mode.CHEQUE, 'CHEQUE'),
+        (payment_mode.DD, 'DD'))
+    remark = models.CharField(max_length=255, blank=True, null=True)
+    cashslip = models.FileField(upload_to='profile_pics/', null=True, blank=True)
+    # approve only admin krega emp id
+    isapproved = models.BooleanField(default=False)
+    isupdate = models.BooleanField(default=False)
+    isdelete = models.BooleanField(default=False)
+    reason = models.CharField(max_length=500, blank=True, null=True)
+    status = (
+		(TransactionStatus.PENDING, 'PENDING'),
+		(TransactionStatus.FAILURE, 'FAILURE'),
+		(TransactionStatus.SUCCESS, 'SUCCESS'),
+	)
+    companybank = models.CharField(max_length=255, blank=True, null=True)
+    adddate = models.TimeField(blank=True, null=True)
+    approvedate = models.TimeField(blank=True, null=True)
+    lastupdate = models.TimeField(blank=True, null=True)
 
 class User(AbstractBaseUser, PermissionsMixin):
 
@@ -87,6 +160,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     parent_str = models.CharField(max_length=30, blank=True, null=True)
     pattern = models.CharField(max_length=255, blank=True, null=True)
     pic = models.FileField(upload_to='profile_pics/', null=True, blank=True)
+    sign = models.FileField(upload_to='profile_pics/', null=True, blank=True)
+    shoppic = models.FileField(upload_to='profile_pics/', null=True, blank=True)
+    aadhaarfrontpic = models.FileField(upload_to='profile_pics/', null=True, blank=True)
+    aadhaarbackpic = models.FileField(upload_to='profile_pics/', null=True, blank=True)
+    pancardpic = models.FileField(upload_to='profile_pics/', null=True, blank=True)
     time = models.TimeField(blank=True, null=True)
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
@@ -125,13 +203,16 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class BankDetails(models.Model):
+    id = models.IntegerField(blank=True, primary_key=True)
+    upi_id = models.CharField(max_length=255, blank=True, null=True)
     beneficiary_name = models.CharField(max_length=255, blank=True, null=True)
     bank_name = models.CharField(max_length=255, blank=True, null=True)
     account_number = models.CharField(max_length=255, blank=True, null=True)
     ifsc_code = models.CharField(max_length=50, blank=True, null=True)
-    mobile_number = models.CharField(max_length=15, unique=True, blank=True, null=True)
+    mobile_number = models.CharField(max_length=10, unique=True, blank=True, null=True)
     registered_with = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
     bene_id = models.IntegerField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     is_active =  models.BooleanField(default=True)
 
     def __str__(self):
@@ -240,11 +321,30 @@ class BBPSTransactions(models.Model):
     remark = models.CharField(max_length=255, blank=True, null=True)
     bill_type = models.SmallIntegerField(choices=BILL_TYPE, db_index=True,)
 
+class package():
+    ISACTIVE = models.BooleanField(default=True)
+    pack_id = models.IntegerField(blank=True, primary_key=True)
+    pack_name = models.CharField(max_length=255, blank=True, primary_key=True)
+    start_value = models.IntegerField(blank=True)
+    end_value = models.IntegerField(blank=True)
+    is_flat = models.BooleanField(blank=True)
+    payment_type = models.CharField(default=True )
+    is_distributor = models.BooleanField(default=True)
+    distributor_back = models.FloatField(blank=True, primary_key=True)
+    is_company = models.BooleanField(default=True)
+    company_back = models.FloatField(blank=True, )
+    distributor_back = models.IntegerField(blank=True, primary_key=True)
+    tds = models.FloatField(blank=True, primary_key=True)
 
-
-
-
-
-
-
-
+class Customer(models.Model):
+    ISACTIVE = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    id = models.IntegerField(blank=True, primary_key=True)
+    msrno =  models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
+    mobile_no = models.IntegerField(blank=True, null=True)
+    bank_acc_number = models.CharField(max_length=255, blank=True, null=True)
+    bank_acc_name = models.CharField(max_length=255, blank=True, null=True)
+    bene_id = models.IntegerField(blank=True, null=True)
+    bank_name = models.CharField(max_length=255, blank=True, null=True)
+    customerifsc = models.CharField(max_length=255, blank=True, null=True)
+    upi_id = models.CharField(max_length=255, blank=True, null=True)

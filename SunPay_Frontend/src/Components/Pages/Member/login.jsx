@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import './CSS/Login.css';
 // import DashboardRouter from './Dashboard/DashboardRouter'
@@ -9,21 +9,22 @@ import usernavimg from '../../Navbar/NavImages/user.png';
 import sunptext from './Loginpage Img/Sunpaytextlogin.png';
 import logimg from './Loginpage Img/loginimg.png';
 
-const Login = () => {
+const Login = ({ setIsLoggedIn }, { IsLoggedIn }) => {
   const [login_id, setlogin_id] = useState('');
   const [password, setPassword] = useState('');
   const [pin, settpin] = useState('');
+  const [auth, setisauth] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [isLoggedin, setIsLoggedin] = useState(false);
+  const [data, setData] = useState(null); 
 
   const handleLogin = async () => {
     setError(null);
     setLoading(true);
     try {
-      const response = await fetch('http://43.205.83.194/api/login/', {
+      const response = await fetch('http://127.0.0.1:8000/api/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,7 +48,7 @@ const Login = () => {
     try {
       const tpin = parseInt(pin);
       console.log(pin)
-      const response = await fetch('http://43.205.83.194/api/tpin/', {
+      const response = await fetch('http://127.0.0.1:8000/api/tpin/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -56,13 +57,18 @@ const Login = () => {
       });
       const result = await response.json();
       if (result.message === 'Login Succesfull') {
-        const data = result.data;
-        console.log(data);
-        navigate('/member/dashboard', {
-          state: { data: data },
-        });
-      } else {
-        setIsVisible(false);
+        const apidata = result.data;
+        localStorage.setItem('apiData', JSON.stringify(apidata));
+        setisauth(true);
+        if(auth===true){
+          setIsLoggedIn(true);
+          navigate('/member/dashboard', {
+            state: { data: apidata, IsLoggedIn: IsLoggedIn  },
+          });
+        } 
+      } 
+      else {
+        setisauth(true)
         alert('Invalid Credentials');
       }
     } catch (error) {
@@ -76,6 +82,7 @@ const Login = () => {
 
   return (
     <div className='loginpage w-full pt-24 pb-6'>
+      {console.log(setIsLoggedIn)}
       <nav className=' w-full top-0 left-0 fixed bg-white border-b border-gray-200 dark:border-gray-600 z-50'>
         <div className='max-w-screen-xl flex flex-wrap items-center justify-between p-2 ps-16'>
           <NavLink to='' className='flex items-center hover:bg-slate-500 p-2'>

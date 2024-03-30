@@ -84,16 +84,17 @@ const DMTreport = (props) => {
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                       <tr className='border border-black'>
                       <th scope="col" className="px-6 py-3 border border-black">SNO</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Shop Name</th>
                       <th scope="col" className="px-6 py-3 border border-black">Transaction ID</th>
                       <th scope="col" className="px-6 py-3 border border-black">Mobile No</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Transaction Type</th>
-                      <th scope="col" className="px-6 py-3 border border-black">UTR</th>
+                      <th scope="col" className="px-6 py-3 border border-black">Beneficiary Name</th>
                       <th scope="col" className="px-6 py-3 border border-black">Amount</th>
                       <th scope="col" className="px-6 py-3 border border-black">Charge</th>
                       <th scope="col" className="px-6 py-3 border border-black">Commission</th>
+                      <th scope="col" className="px-6 py-3 border border-black">Transaction Type</th>
+                      <th scope="col" className="px-6 py-3 border border-black">UTR</th>
                       <th scope="col" className="px-6 py-3 border border-black">Transaction Status</th>
                       <th scope="col" className="px-6 py-3 border border-black">Transaction Date</th>
+                      <th scope="col" className="px-6 py-3 border border-black">Receipt</th>
                       </tr>
                     </thead>
                   

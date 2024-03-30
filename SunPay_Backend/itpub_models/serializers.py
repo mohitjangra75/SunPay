@@ -4,7 +4,7 @@ from .models import User, BankDetails, BBPSModelFields
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['role_id', 'name', 'email', 'mobile', 'password', 'address', 'device_id', 'video_kyc']
+        fields = '__all__'
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

@@ -8,7 +8,6 @@ const Moneytransfer = (props) => {
   const [isShown, setIsShown] = useState(false);
 
   const handleClick = event => {
-    // 👇️ toggle shown state
     setIsShown(current => !current);
   }
 
@@ -22,10 +21,18 @@ const Moneytransfer = (props) => {
       <div className='moneytransfer p-4'>  
 
       {!isShown && (
-        <div className='bg-slate-300 p-2 border-2 border-red-200'>
+        <div className='bg-slate-300 flex gap-4 p-2 border-2 border-red-200'>
             <label htmlFor=''>Enter Customer Mobile Number</label>
            <div className='md:flex gap-8'>
             <input type="text" name="remarks" placeholder='Enter Mobile Number' className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 hover:cursor-pointer dark:focus:border-blue-500'/>
+            <input type="submit" value="Submit" onClick={handleClick}  className='p-2 bg-white border border-black hover:bg-blue-700 hover:text-white rounded-lg'/>
+           </div>
+
+              <b className='text-2xl'>OR</b>
+
+           <label htmlFor=''>Enter Account Number</label>
+           <div className='md:flex gap-8'>
+            <input type="text" name="remarks" placeholder='Enter Account Number' className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 hover:cursor-pointer dark:focus:border-blue-500'/>
             <input type="submit" value="Submit" onClick={handleClick}  className='p-2 bg-white border border-black hover:bg-blue-700 hover:text-white rounded-lg'/>
            </div>
         </div>

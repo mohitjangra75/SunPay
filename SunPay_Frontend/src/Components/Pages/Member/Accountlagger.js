@@ -83,14 +83,16 @@ const Accountlagger = (props) => {
                  <table className="w-full text-sm text-left rtl:text-right mt-2 border border-black text-gray-500 dark:text-gray-400 border-collapse ">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                       <tr className='border border-black'>
-                      <th scope="col" className="px-6 py-3 border border-black">SNO</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Shop Name</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Debit</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Credit</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Balance</th>
+                      <th scope="col" className="px-6 py-3 border border-black">S.NO</th>
+                      <th scope="col" className="px-6 py-3 border border-black">Date</th>
                       <th scope="col" className="px-6 py-3 border border-black">Narration</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Transfer Date</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Status</th>
+                      <th scope="col" className="px-6 py-3 border border-black">Debit</th>
+                      {/* Amount cut from wallet */}
+                      <th scope="col" className="px-6 py-3 border border-black">Credit</th>
+                      {/* Amount Credited */}
+                      <th scope="col" className="px-6 py-3 border border-black">TDS</th>
+                      {/* TDS */}
+                      <th scope="col" className="px-6 py-3 border border-black">Balance</th>
                       </tr>
                     </thead>
                   

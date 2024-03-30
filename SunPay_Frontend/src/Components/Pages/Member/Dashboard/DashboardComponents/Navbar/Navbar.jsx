@@ -4,9 +4,10 @@ import logo from '../Data/imgs/logo.png'
 import bbps from '../Data/imgs/bbps.png';
 import { Fragment } from 'react'
 import { Menu, Transition } from '@headlessui/react'
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useEffect } from 'react';
+import { Button } from 'reactstrap';
 
   function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
@@ -15,11 +16,14 @@ import { useEffect } from 'react';
 const Navbar = (props) => {  
     // const location = useLocation();
     // const data = location.state.data;
-    const [dataall, setDatall] = useState();  
-  useEffect(() => {
-    setDatall(props);
-    console.log('dataall from navbar', dataall);
-  }, []);
+    const navigate = useNavigate();
+    const navdata = props.data;
+
+
+  const handlelogout = () => {
+    localStorage.removeItem('apiData');
+    navigate('/member/login')
+  }
 
   return (
    
@@ -33,8 +37,8 @@ const Navbar = (props) => {
             </div>
 
             <div className='md:pl-12 md:flex md:gap-8'>
-                <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">Welcome! <br/>{props.data.name}</div>
-                <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">Wallet Balance <br/>{props.data.available_balance}</div>
+                <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">Welcome! <br/>{navdata.name}</div>
+                <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">Wallet Balance <br/>{navdata.available_balance}</div>
                 <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">AEPS Wallet <br/>₹12000</div>
                 <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">ASM <br/>MR. ABC</div>
                 <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">DIST. <br/>Mr. ABC</div>
@@ -81,9 +85,9 @@ const Navbar = (props) => {
                         </Menu.Item>
                         <Menu.Item>
                             {({ active }) => (
-                           <NavLink to='/member/login' className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>
+                           <Button onClick={handlelogout} className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>
                                 Sign Out
-                            </NavLink>
+                            </Button>
                             )}
                         </Menu.Item>
                         </Menu.Items>
