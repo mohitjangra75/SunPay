@@ -23,7 +23,6 @@ const Prepaid = (props) => {
   
   const handlesubmit = event => {
     navigate('/member/billpayreceipt')
-    
   }
 
   return (
@@ -68,14 +67,8 @@ const Prepaid = (props) => {
             </div>
 
             <div className='mt-4 flex gap-4'>
-              <label className="mt-2 text-white w-52 text-2xl">Search Plan</label><br/>
-              <select id="id" onChange={setcompany} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                    <option onChange={setcompany} selected>Set Plan</option>
-                    <option value="icicibnk">ICICI Bank(664005500851)</option>
-                    <option value="sbibnk">State Bank of India(42057935640)</option>
-                    <option value="pnbbnk">Punjab National Bank(6058002100002053)</option>
-                    <option value="axisbnk">Axis Bank(923020043729544)</option>
-                </select>
+              <label className="mt-2 text-white w-52 text-2xl">Amount</label><br/>
+              <input className=" text-xl px-4 border border-solid border-gray-300 rounded" onChange={(e) => setamount(e.target.value)} type="number" defaultValue={amount}/>
             </div>
 
             <div className='mt-4 flex gap-4'>

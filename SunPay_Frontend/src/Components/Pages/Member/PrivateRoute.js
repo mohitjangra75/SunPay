@@ -5,12 +5,15 @@ let loggedin = false;
 
 
 const PrivateRoute = ({ IsLoggedIn }) => {
+    const storedData = localStorage.getItem('apiData');
 
 
-    if(IsLoggedIn){
+    if(IsLoggedIn)
+    {
         {console.log(IsLoggedIn)}
-        return <Outlet/>
-    }else{
+        return <Outlet/>  
+    }
+    else{
         return <Navigate to={'/member/login'}/>
         
     }

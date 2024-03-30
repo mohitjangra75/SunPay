@@ -28,6 +28,7 @@ import Billpaymentreceipt from '../../Billpaymentreceipt';
 import Prepaid from '../../Prepaid';
 import Postpaid from '../../Postpaid';
 import Fastag from '../../Fastag';
+import Wallettransfer from '../../Wallettransfer';
 
 const MemberRouter = (props, {IsLoggedIn}) => {
   // const location = useLocation();
@@ -56,8 +57,6 @@ const MemberRouter = (props, {IsLoggedIn}) => {
   //   console.log('dataall', dataall);
   // }, []);
 
-
-
   return (
     
     <div className='bg-slate-50'>
@@ -72,7 +71,7 @@ const MemberRouter = (props, {IsLoggedIn}) => {
       <div className='bg-red-600 max-w-[2300px] border-2 border-black text-center text-black '>
         Small News HeadLine
       </div>
-      <div className='main h-screen w-full flex flex-1'>
+      <div className='main h-screen w-full gap-2 flex flex-1'>
         <aside className='sticky top-0'>
           <Sidebar data={data}/>
         </aside>
@@ -103,6 +102,7 @@ const MemberRouter = (props, {IsLoggedIn}) => {
           {category === 'prepaid' && <Prepaid data={data} />}
           {category === 'postpaid' && <Postpaid data={data} />}
           {category === 'fastag' && <Fastag data={data} />}
+          {category === 'wallet-to-wallet' && <Wallettransfer data={data} />}
         </div>
       </div>
 
