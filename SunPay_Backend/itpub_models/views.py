@@ -11,7 +11,7 @@ import uuid
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
-        
+from rest_framework import viewsets, status, mixins
 class RegisterAdmin(APIView):
     def post(self, request, *args, **kwargs):
         serializer = UserSerializer(data=request.data)
@@ -398,3 +398,54 @@ class AnshPayout(APIView):
             return Response({"error":"Please try again later"})
 
 
+
+class UserViewset(
+    mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
+):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+
+        user_id = self.kwargs["pk"]
+        if not user_id:
+            return Response(
+                {"details": "Pass user id"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        user = User.objects.get(id=user_id)
+
+
+        serializer = UserSerializer(user)
+
+        return Response(serializer.data)
+
+    def create(self, request):
+
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            ip_address = request.META.get('REMOTE_ADDR')
+            user = serializer.save(ip_address=ip_address)
+            return Response({"message": "User created successfully", "user_id": user.id}, status=status.HTTP_201_CREATED)
+
+        return Response("error occured please try again later", status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+
+        serializer = UserSerializer(
+            instance,
+            data=request.data,
+            partial=partial,
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs["partial"] = True
+        return self.update(request, *args, **kwargs)

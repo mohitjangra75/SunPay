@@ -1,6 +1,9 @@
 # urls.py
 from django.urls import path
 from .views import *
+from rest_framework import routers
+router = routers.SimpleRouter()
+router.register(r"users", UserViewset)
 
 urlpatterns = [
     path('register_admin/', RegisterAdmin.as_view(), name='register_admin'),
@@ -18,3 +21,5 @@ urlpatterns = [
     path('pay_recharge/', PayRecharge.as_view(), name='pay_recharge'),
     path('get_biller_details/', GetBillDetails.as_view(), name='get_biller_details'),
 ]
+
+urlpatterns += router.urls
