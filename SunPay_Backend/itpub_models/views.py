@@ -79,26 +79,10 @@ class TPINVerification(APIView):
             return Response({"error": "login_id, password, and TPIN are required fields"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            User = get_user_model()
-            print(User)
-            user = User.objects.get(username=username)
-            print({
-                "is_tpin_enabled": user.is_tpin_enabled,
-                "tpin": user.tpin,
-                "password": user.password,
-                "username": user.username,
-                "id": user.id
-            })
+            user = User.objects.get(username=username,password=password,tpin = tpin)
+            return Response({"message": "Login Successful", "data": UserSerializer(user).data}, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-
-        if not check_password(password, user.password):
-            return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-
-        if user.is_tpin_enabled and str(user.tpin) == tpin:
-            return Response({"message": "Login Successful", "data": UserSerializer(user).data}, status=status.HTTP_200_OK)
-        else:
-            return Response({"error": "Invalid TPIN"}, status=status.HTTP_401_UNAUTHORIZED)
 
 class AddBenAccount(APIView):
 
