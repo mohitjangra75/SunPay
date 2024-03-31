@@ -52,7 +52,7 @@ class CompanyDetails(models.Model):
     instagram = models.CharField(max_length=255, blank=True, null=True)
     is_active = models.BooleanField(default=True)
 
-class companybank(models.Model):
+class CompanyBank(models.Model):
     bank_id = models.IntegerField(blank=True, null=True)
     bank_logo = models.FileField(upload_to='profile_pics/', null=True, blank=True)
     bank_name = models.CharField(max_length=255, blank=True, null=True)
@@ -62,16 +62,16 @@ class companybank(models.Model):
     acc_holdername = models.CharField(max_length=255, blank=True, null=True)
 
 
-class bank(models.Model):
+class Bank(models.Model):
     bank_id = models.IntegerField(blank=True, null=True)
     bank_name = models.CharField(max_length=255, blank=True, null=True)
     ifsc = models.CharField(max_length=255, blank=True, null=True)
 
-class state(models.Model):
+class State(models.Model):
     state_id = models.IntegerField(blank=True, null=True)
     state_name = models.CharField(max_length=255, blank=True, null=True)
 
-class payment_mode(object):
+class PaymentMode(object):
     IMPS = 1
     NEFT = 1
     RTGS = 1
@@ -80,20 +80,19 @@ class payment_mode(object):
     CHEQUE = 4
     DD = 4
 
-class fundrequest(models.Model):
-    id = models.IntegerField(blank=True, null=True),
+class FundRequest(models.Model):
     # user jiske through ye request lgi h
     user_id = models.CharField(max_length=255, blank=True, null=True)
     username = models.CharField(max_length=255, blank=True, null=True)
     amount = models.FloatField(blank=True, null=True)
     bank_reference = models.CharField(max_length=255, blank=True, null=True, unique=True)
-    payment_mode=  ((payment_mode.IMPS, 'IMPS'),
-		(payment_mode.NEFT, 'NEFT'),
-        (payment_mode.RTGS, 'RTGS'),
-        (payment_mode.CASH, 'CASH'),
-        (payment_mode.UPI, 'UPI'),
-        (payment_mode.CHEQUE, 'CHEQUE'),
-        (payment_mode.DD, 'DD'))
+    payment_mode=  ((PaymentMode.IMPS, 'IMPS'),
+		(PaymentMode.NEFT, 'NEFT'),
+        (PaymentMode.RTGS, 'RTGS'),
+        (PaymentMode.CASH, 'CASH'),
+        (PaymentMode.UPI, 'UPI'),
+        (PaymentMode.CHEQUE, 'CHEQUE'),
+        (PaymentMode.DD, 'DD'))
     remark = models.CharField(max_length=255, blank=True, null=True)
     cashslip = models.FileField(upload_to='profile_pics/', null=True, blank=True)
     # approve only admin krega emp id
@@ -182,6 +181,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     end_val = models.IntegerField(default=2001,blank=True, null=True,)
     available_balance = models.IntegerField(blank=True, null=True,)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
+    distributor_name = models.CharField(max_length=30, blank=True, null=True)
+    is_distributor = models.BooleanField(default=False)
+    city = models.CharField(max_length=30, blank=True, null=True)
+    shop_adress = models.CharField(max_length=255, blank=True, null=True)
+
     
     
     USERNAME_FIELD = 'username'
@@ -212,7 +216,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class BankDetails(models.Model):
-    id = models.IntegerField(blank=True, primary_key=True)
     upi_id = models.CharField(max_length=255, blank=True, null=True)
     beneficiary_name = models.CharField(max_length=255, blank=True, null=True)
     bank_name = models.CharField(max_length=255, blank=True, null=True)
@@ -330,11 +333,12 @@ class BBPSTransactions(models.Model):
     remark = models.CharField(max_length=255, blank=True, null=True)
     bill_type = models.SmallIntegerField(choices=BILL_TYPE, db_index=True,)
 
-class package():
+class Package(models.Model):
     ISACTIVE = models.BooleanField(default=True)
     pack_id = models.IntegerField(blank=True, primary_key=True)
     pack_name = models.CharField(max_length=255, blank=True, primary_key=True)
     start_value = models.IntegerField(blank=True)
+    surcharge = models.FloatField(blank=True)
     end_value = models.IntegerField(blank=True)
     is_flat = models.BooleanField(blank=True)
     payment_type = models.CharField(default=True )
@@ -348,7 +352,6 @@ class package():
 class Customer(models.Model):
     ISACTIVE = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    id = models.IntegerField(blank=True, primary_key=True)
     msrno =  models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
     mobile_no = models.IntegerField(blank=True, null=True)
     bank_acc_number = models.CharField(max_length=255, blank=True, null=True)

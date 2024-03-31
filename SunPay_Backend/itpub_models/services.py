@@ -154,8 +154,6 @@ def ansh_payout(payload):
     
 def zpay_verification(payload):
     headers = {
-        # "ClientId":token,
-        # "ClientSecret":"NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ=",
         "Accept": "application/json",
         "Content-Type": "application/json"
     }
@@ -177,8 +175,6 @@ def zpay_transfer(payload):
         "async": False
     }
     headers = {
-        # "ClientId":token,
-        # "ClientSecret":"NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ=",
         "accept": "application/json",
         "content-type": "application/json"
     }

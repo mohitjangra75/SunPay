@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate
 from rest_framework.decorators import api_view
 from .serializers import UserSerializer, BeneficiarySerializer, BBPSFieldsSerializer, RegistrationSerializer
 from .services import add_beneficary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout
-from .models import User, BankDetails, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSModelFields, BBPSTransactions
+from .models import User, BankDetails, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSModelFields, BBPSTransactions, UserWallet, Package
 import uuid
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
@@ -172,6 +172,10 @@ class DelBenAccount(APIView):
 class GetBeneficiaryLinked(APIView):
     def get(self, request, *args, **kwargs):
         mobile_number = request.query_params.get("mobile_number")
+        account_number = request.query_params.get("account_number")
+        if account_number:
+            bank_details = BeneficiarySerializer(BankDetails.objects.get(account_number=account_number))
+            return Response({"data":bank_details.data, })
         if not mobile_number:
             return Response({"error": "Please add mobile_number in query params"}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -230,19 +234,26 @@ class SendMoneyDMT(APIView):
         mobile = request.data.get("mobile")
         mpin = request.data.get("mpin")
         surcharge = request.data.get("surcharge")
+        user_id = request.data.get("user_id")
 
         if not amount and not bene_id and not txntype and not referenceid and not mobile and not mpin:
             return Response({"error": "Please provide required fields"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            user=User.objects.get(mobile_number=mobile)
+            user=User.objects.get(id=user_id)
         except:
             return Response({"error": "Invalid mobile number"}, status=status.HTTP_400_BAD_REQUEST)
         wallet_obj = user.userwallet_set.first()
         if not (amount+surcharge)<wallet_obj.available_balance:
             return Response({"error": "Insufficient Balance"}, status=status.HTTP_400_BAD_REQUEST)
-
         if not user.mpin == mpin:
             return Response({"error": "Invalid mpin"}, status=status.HTTP_400_BAD_REQUEST)
+
+        wallet_obj.available_balance = wallet_obj.available_balance - (amount + surcharge)
+        wallet_obj.save()
+        main_wallet = UserWallet.objects.get(user_id=1)
+        main_wallet.available_balance = main_wallet.available_balance + surcharge
+        main_wallet.save()
+
         ref_id = str(uuid.uuid4()).replace('-', 'D')[1:21]
         payload = {"mobile":mobile,
              "referenceid":ref_id,     
@@ -253,7 +264,7 @@ class SendMoneyDMT(APIView):
              "gst_state":"17",     
              "bene_id":bene_id,     
              "txntype":txntype,     
-             "amount":amount + surcharge }
+             "amount":amount}
 
         response = fund_transfer(payload)
 
@@ -268,6 +279,20 @@ class SendMoneyDMT(APIView):
                 order_id = response["data"]["utr"],
                 trasaction_type = TransactionType.IMPS if txntype == "IMPS" else TransactionType.NEFT
             )
+        
+            if user.parent_id:
+                wallet_obj.refresh_from_db()
+                wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * 0.5 -  (surcharge*0.5)*0.18)
+                wallet_obj.save()
+                parent_user = UserWallet.objects.get(user_id=user.parent_id)
+                parent_user.available_balance = parent_user.available_balance + (surcharge * 0.2 - (surcharge * 0.2)*0.18) 
+                parent_user.save()
+            else:
+                wallet_obj.refresh_from_db()
+                wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * 0.7 -  (surcharge*0.7)*0.18)
+                wallet_obj.save()
+
+
             return Response({"message": "Funds transferred successfully"}, status=status.HTTP_201_CREATED)
         else:
             return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
@@ -449,3 +474,17 @@ class UserViewset(
     def partial_update(self, request, *args, **kwargs):
         kwargs["partial"] = True
         return self.update(request, *args, **kwargs)
+
+
+
+class GetPackageDetails(APIView):
+    def get(self, request, *args, **kwargs):
+        amount = request.query_params.get("amount")
+        if not (amount):
+            return Response({"error":"Please fill details"})
+        try:
+            package = Package.objects.get(start_value_gte=amount, end_value__lte=amount)
+            return Response({"surcharge_amount":amount * package.surcharge if not package.is_flat else package.surcharge})
+        except:
+            return Response({"error":"Please try again later"})
+            
