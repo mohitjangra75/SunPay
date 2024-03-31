@@ -335,19 +335,19 @@ class BBPSTransactions(models.Model):
 
 class Package(models.Model):
     ISACTIVE = models.BooleanField(default=True)
-    pack_id = models.IntegerField(blank=True, primary_key=True)
-    pack_name = models.CharField(max_length=255, blank=True, primary_key=True)
+    pack_id = models.IntegerField(blank=True, )
+    pack_name = models.CharField(max_length=255, blank=True,)
     start_value = models.IntegerField(blank=True)
     surcharge = models.FloatField(blank=True)
     end_value = models.IntegerField(blank=True)
     is_flat = models.BooleanField(blank=True)
-    payment_type = models.CharField(default=True )
+    payment_type = models.CharField(max_length=256)
     is_distributor = models.BooleanField(default=True)
-    distributor_back = models.FloatField(blank=True, primary_key=True)
+    distributor_back = models.FloatField(blank=True, )
     is_company = models.BooleanField(default=True)
     company_back = models.FloatField(blank=True, )
-    distributor_back = models.IntegerField(blank=True, primary_key=True)
-    tds = models.FloatField(blank=True, primary_key=True)
+    distributor_back = models.IntegerField(blank=True,)
+    tds = models.FloatField(blank=True, )
 
 class Customer(models.Model):
     ISACTIVE = models.BooleanField(default=True)
