@@ -1,4 +1,3 @@
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -54,7 +53,10 @@ class LoginAPIView(APIView):
         password = request.data.get('password')
         # print(login_id, password)
         if login_id and password:
-            user = authenticate(request, username=login_id, password=password)
+            try:
+                user = User.objects.get(username=login_id,password=password)
+            except:
+                return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
             if user:
                 if user.is_tpin_enabled:
                     return Response({"message": "User Found Proceed with TPIN","verification_enabled":"tpin"}, status=status.HTTP_200_OK)
