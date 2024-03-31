@@ -9,50 +9,50 @@ from .services import add_beneficary, del_beneficiary, query_remitter , register
 from .models import User, BankDetails, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSModelFields, BBPSTransactions
 import uuid
 from django.http import JsonResponse
+from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import check_password
         
 class RegisterAdmin(APIView):
-    @api_view(['POST'])
-    def post(self, request, format=None):
+    def post(self, request, *args, **kwargs):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             ip_address = request.META.get('REMOTE_ADDR')
-            serializer.save(ip_address=ip_address)
-            return Response({'message': 'Form data saved successfully for Admin'})
-        return Response(serializer.errors, status=400)
+            user = serializer.save(ip_address=ip_address)
+            return Response({"message": "User created successfully", "user_id": user.id}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class RegisterUser(APIView):
-    @api_view(['POST'])
-    def post(self, request, format=None):
+    def post(self, request, *args, **kwargs):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             ip_address = request.META.get('REMOTE_ADDR')
-            serializer.save(ip_address=ip_address)
-            return Response({'message': 'Form data saved successfully for User'})
-        return Response(serializer.errors, status=400)
+            user = serializer.save(ip_address=ip_address)
+            return Response({"message": "User created successfully", "user_id": user.id}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class GetAdmin(APIView):
     def get(self, request, id, format=None):
         try:
             user = User.objects.get(id=id)
             serializer = UserSerializer(user)
-            return Response(serializer.data)
+            return JsonResponse(serializer.data)
         except User.DoesNotExist:
-            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+            return JsonResponse({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         
 class GetUser(APIView):
     def get(self, request, id):
         try:
             user = User.objects.get(id=id)
             serializer = UserSerializer(user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return JsonResponse(serializer.data, status=status.HTTP_200_OK)
         except User.DoesNotExist:
-            return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+            return JsonResponse({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
         
 class LoginAPIView(APIView):
     def post(self, request, *args, **kwargs):
         login_id = request.data.get('login_id')
         password = request.data.get('password')
-
+        # print(login_id, password)
         if login_id and password:
             user = authenticate(request, username=login_id, password=password)
             if user:
@@ -71,18 +71,32 @@ class TPINVerification(APIView):
         tpin = request.data.get('tpin')
         username = request.data.get('login_id')
         password = request.data.get('password')
+        print(tpin, username, password)
+        
+        if not (username and password and tpin):
+            return Response({"error": "login_id, password, and TPIN are required fields"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if password and username:
-            user = authenticate(request, username=username, password=password)
-            if user:
-                if user.is_tpin_enabled and tpin == user.tpin:
-                    return Response({"message": "Login Succesfull","data":UserSerializer(user,many=False).data}, status=status.HTTP_200_OK)
-                else:
-                    return Response({"message": "Invalid TPIN",}, status=status.HTTP_200_OK)
-            else:
-                return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        try:
+            User = get_user_model()
+            print(User)
+            user = User.objects.get(username=username)
+            print({
+                "is_tpin_enabled": user.is_tpin_enabled,
+                "tpin": user.tpin,
+                "password": user.password,
+                "username": user.username,
+                "id": user.id
+            })
+        except User.DoesNotExist:
+            return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if not check_password(password, user.password):
+            return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if user.is_tpin_enabled and str(user.tpin) == tpin:
+            return Response({"message": "Login Successful", "data": UserSerializer(user).data}, status=status.HTTP_200_OK)
         else:
-            return Response({"error": "login_id and password are required fields"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Invalid TPIN"}, status=status.HTTP_401_UNAUTHORIZED)
 
 class AddBenAccount(APIView):
 

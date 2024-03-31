@@ -196,19 +196,19 @@ def zpay_transfer(payload):
         return {"status":False,
         "data":"Please verify details"} 
 
-def login(payload):
-    token = get_token()
-    header = {
-        "Token":token,
-        "Authorisedkey":"NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ=",
-        "Accept": "application/json",
-        "Content-Type": "application/json"
-    }
-    url = "http://127.0.0.1:8000/api/login"
-    response = requests.post(url=url,json=payload, headers=headers)
-    if response.ok:
-        return {"status":True,
-        "data":response.json()}
-    else:
-        return {"status":False,
-        "data":"Please verify details"}
+# def login(payload):
+#     token = get_token()
+#     header = {
+#         "Token":token,
+#         "Authorisedkey":"NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ=",
+#         "Accept": "application/json",
+#         "Content-Type": "application/json"
+#     }
+#     url = "http://127.0.0.1:8000/api/login"
+#     response = requests.post(url=url,json=payload, headers=headers)
+#     if response.ok:
+#         return {"status":True,
+#         "data":response.json()}
+#     else:
+#         return {"status":False,
+#         "data":"Please verify details"}

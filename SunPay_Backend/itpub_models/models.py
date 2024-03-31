@@ -192,14 +192,23 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def save(self, *args, **kwargs):
         if self.role_id == 1:
-            self.username = 'SRT101'
+            existing_count = User.objects.filter(role_id=1).count()
+            username_suffix = existing_count + 101
+            self.username = 'SRT{}'.format(username_suffix)
         elif self.role_id == 2:
-            self.username = 'SDT101'
+            existing_count = User.objects.filter(role_id=2).count()
+            username_suffix = existing_count + 101
+            self.username = 'SDT{}'.format(username_suffix)
         elif self.role_id == 3:
-            self.username = 'Adm1'
+            existing_count = User.objects.filter(role_id=3).count()
+            username_suffix = existing_count + 1
+            self.username = 'ADM{}'.format(username_suffix)
         elif self.role_id == 4:
-            self.username = 'EMP101'
+            existing_count = User.objects.filter(role_id=4).count()
+            username_suffix = existing_count + 101
+            self.username = 'EMP{}'.format(username_suffix)
         super().save(*args, **kwargs)
+
 
 
 class BankDetails(models.Model):
