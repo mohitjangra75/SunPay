@@ -3,6 +3,7 @@ import uuid
 import jwt
 import json
 import requests
+import random
 
 PARTNERID = "UFR008081"  # Replace with your actual PARTNERID
 
@@ -189,3 +190,34 @@ def zpay_transfer(payload):
         print(response.json())
         return {"status":False,
         "data":"Please verify details"} 
+    
+def generate_otp(length=6):
+    digits = "0123456789"
+    otp = ''.join(random.choice(digits) for _ in range(length))
+    return otp
+    
+def send_otp(mobile_number):
+    otp = generate_otp()
+    url = "http://sms.anshpe.in/rest/services/sendSMS/sendGroupSms"
+    payload = {
+        "smsContent": f"Your OTP is: {otp}",
+        "groupId": "0",
+        "routeId": "1",
+        "mobileNumbers": mobile_number,
+        "senderId": "DEMOOS",
+        "signature": "signature",
+        "smsContentType": "ENGLISH",
+        "entityid": "NoneedIfAddedInPanel",
+        "tmid": "140200000022",
+        "templateid": "NoneedIfAddedInPanel"
+    }
+    querystring = {"AUTH_KEY": 'c5ea69e56dcb107bb3ed988af8c5c3e5'}
+    headers = {
+        'Content-Type': "application/json",
+        'Cache-Control': "no-cache"
+    }
+    response = requests.post(url, json=payload, headers=headers, params=querystring)
+    print("Payload:", payload)
+    print("Response:", response)
+    print("Response JSON:", response.json())
+    return otp

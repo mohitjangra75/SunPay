@@ -185,8 +185,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_distributor = models.BooleanField(default=False)
     city = models.CharField(max_length=30, blank=True, null=True)
     shop_adress = models.CharField(max_length=255, blank=True, null=True)
-
-    
+    otp = models.IntegerField(null=True, blank=True)
     
     USERNAME_FIELD = 'username'
     objects = UserManager()
@@ -195,23 +194,25 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.username
 
     def save(self, *args, **kwargs):
-        if self.role_id == 1:
-            existing_count = User.objects.filter(role_id=1).count()
-            username_suffix = existing_count + 101
-            self.username = 'SRT{}'.format(username_suffix)
-        elif self.role_id == 2:
-            existing_count = User.objects.filter(role_id=2).count()
-            username_suffix = existing_count + 101
-            self.username = 'SDT{}'.format(username_suffix)
-        elif self.role_id == 3:
-            existing_count = User.objects.filter(role_id=3).count()
-            username_suffix = existing_count + 1
-            self.username = 'ADM{}'.format(username_suffix)
-        elif self.role_id == 4:
-            existing_count = User.objects.filter(role_id=4).count()
-            username_suffix = existing_count + 101
-            self.username = 'EMP{}'.format(username_suffix)
+        if not self.pk:
+            if self.role_id == 1:
+                existing_count = User.objects.filter(role_id=1).count()
+                username_suffix = existing_count + 101
+                self.username = 'SRT{}'.format(username_suffix)
+            elif self.role_id == 2:
+                existing_count = User.objects.filter(role_id=2).count()
+                username_suffix = existing_count + 101
+                self.username = 'SDT{}'.format(username_suffix)
+            elif self.role_id == 3:
+                existing_count = User.objects.filter(role_id=3).count()
+                username_suffix = existing_count + 1
+                self.username = 'ADM{}'.format(username_suffix)
+            elif self.role_id == 4:
+                existing_count = User.objects.filter(role_id=4).count()
+                username_suffix = existing_count + 101
+                self.username = 'EMP{}'.format(username_suffix)
         super().save(*args, **kwargs)
+
 
 
 

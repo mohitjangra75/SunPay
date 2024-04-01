@@ -4,13 +4,15 @@ from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework.decorators import api_view
 from .serializers import UserSerializer, BeneficiarySerializer, BBPSFieldsSerializer, RegistrationSerializer
-from .services import add_beneficary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout
+from .services import add_beneficary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, generate_otp, send_otp
 from .models import User, BankDetails, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSModelFields, BBPSTransactions, UserWallet, Package
 import uuid
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 from rest_framework import viewsets, status, mixins
+from django.db import transaction
+
 class RegisterAdmin(APIView):
     def post(self, request, *args, **kwargs):
         serializer = UserSerializer(data=request.data)
@@ -73,7 +75,7 @@ class TPINVerification(APIView):
         tpin = request.data.get('tpin')
         username = request.data.get('login_id')
         password = request.data.get('password')
-        print(tpin, username, password)
+        # print(tpin, username, password)
         
         if not (username and password and tpin):
             return Response({"error": "login_id, password, and TPIN are required fields"}, status=status.HTTP_400_BAD_REQUEST)
@@ -83,6 +85,48 @@ class TPINVerification(APIView):
             return Response({"message": "Login Successful", "data": UserSerializer(user).data}, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+class LoginOTPView(APIView):
+    def post(self, request):
+        username = request.data.get('login_id')
+        password = request.data.get('password')
+        # print("Login OTP", username, password)
+        if not (username and password):
+            return Response({"error": "Username and Password are required fields"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = User.objects.get(username=username, password=password)
+            # print("Login OTP", user)
+            if user is not None:
+                otp_stored = send_otp(user.mobile)
+                # print("Login OTP", send_otp)
+                with transaction.atomic():
+                    user.otp = otp_stored
+                    user.save()
+                # print("Stored OTP in user model:", otp_stored)
+                return JsonResponse({'message': 'OTP sent to your registered mobile number.', 'otp_stored': otp_stored})
+            else:
+                return JsonResponse({'error': 'Invalid username or password.'}, status=400)
+        except User.DoesNotExist:
+            return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class OTPVerification(APIView):
+    def post(self, request):
+        otp_entered = request.data.get('otp_entered')
+        username = request.data.get('login_id')
+        try:
+            user = User.objects.get(username=username)
+            otp_stored = user.otp
+            # print("OTP entered:", otp_entered, "OTP stored:", otp_stored, "Username:", username)
+            if not (otp_entered and username):
+                return Response({"error": "OTP and Username are required fields."}, status=status.HTTP_400_BAD_REQUEST)
+            if otp_entered == str(otp_stored):
+                return JsonResponse({'message': 'Login successful', "data": UserSerializer(user).data },status=status.HTTP_200_OK)
+            else:
+                return JsonResponse({'error': 'Invalid OTP.'}, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
 
 class AddBenAccount(APIView):
 
@@ -473,4 +517,5 @@ class GetPackageDetails(APIView):
             return Response({"surcharge_amount":amount * package.surcharge if not package.is_flat else package.surcharge})
         except:
             return Response({"error":"Please try again later"})
+
             

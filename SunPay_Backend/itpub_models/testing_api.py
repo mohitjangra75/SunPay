@@ -1,17 +1,17 @@
 import requests
 
-# url = 'http://localhost:8000/api/register_admin/'
+# url = 'http://localhost:8000/api/register_user/'
 # headers = {
 #     'Content-Type': 'application/json',
 # }
 # user_data = {
 #     "role_id": 1,
 #     "title_id": 2,
-#     "name": "John Smith",
-#     "email": "john@example.com",
-#     "mobile": "9996543210",
+#     "name": "Dane Joe",
+#     "email": "dane@example.com",
+#     "mobile": "9996543211",
 #     "gender_id": 1,
-#     "username": "johnsmith",
+#     "username": "danejoe",
 #     "password": "newpassword123",
 #     "address": "123 Oak St",
 #     "city_id": 3,
@@ -31,12 +31,31 @@ import requests
 #     print("Error:", response.text)
 
 
-url = 'http://127.0.0.1:8000/api/tpin/'
-data = {
-    'login_id': 'SRT102',
-    'password': 'newpassword123',
-    'tpin': 1234 
-}
-response = requests.post(url, data=data)
-print(response.status_code)
-print(response.json())
+# url = 'http://127.0.0.1:8000/api/tpin/'
+# data = {
+#     'login_id': 'SRT102',
+#     'password': 'newpassword123',
+#     'tpin': 1234 
+# }
+# response = requests.post(url, data=data)
+# print(response.status_code)
+# print(response.json())
+
+
+# base_url = "http://127.0.0.1:8000/api/"
+# login_url = base_url + "login_with_otp/"
+# verify_otp_url = base_url + "verify_otp/"
+# username = "SRT101"
+# password = "newpassword123"
+# login_response = requests.post(login_url, data={"login_id": username, "password": password})
+# print("Login with OTP:", login_response.content.decode(), login_response.status_code)
+# if login_response.status_code == 200:
+#     response_json = login_response.json()
+#     entered_otp = input("Enter OTP received: ")
+#     stored_otp = response_json.get('otp_stored') 
+#     otp_verification_response = requests.post(verify_otp_url, data={"login_id": username, "otp_entered": entered_otp, "otp_stored": stored_otp})
+#     print("OTP Verification:", otp_verification_response.content.decode(), otp_verification_response.status_code)
+# else:
+#     print("Error")
+
+

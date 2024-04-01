@@ -21,6 +21,8 @@ urlpatterns = [
     path('pay_recharge/', PayRecharge.as_view(), name='pay_recharge'),
     path('get_biller_details/', GetBillDetails.as_view(), name='get_biller_details'),
     path('get_package_details/', GetPackageDetails.as_view(), name='get_package_details'),
+    path('login_with_otp/', LoginOTPView.as_view(), name='login_with_otp'),
+    path('verify_otp/', OTPVerification.as_view(), name='verify_otp'),
 ]
 
 urlpatterns += router.urls
