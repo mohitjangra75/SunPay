@@ -6,10 +6,8 @@ router = routers.SimpleRouter()
 router.register(r"users", UserViewset)
 
 urlpatterns = [
-    path('register_admin/', RegisterAdmin.as_view(), name='register_admin'),
     path('register_user/', RegisterUser.as_view(), name='register_user'),
-    path('get_admin/<int:id>/', GetAdmin.as_view(), name='get_user'),
-    path('get_user/<int:id>/', GetUser.as_view(), name='register_user'),
+    path('get_users/', GetUser.as_view(), name='register_user'),
     path('login/', LoginAPIView.as_view(), name='login'),
     path('tpin/', TPINVerification.as_view(), name='tpin'),
     path('add_beneficiary/', AddBenAccount.as_view(), name='add_beneficiary'),

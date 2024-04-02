@@ -2,9 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
-from rest_framework.decorators import api_view
-from .serializers import UserSerializer, BeneficiarySerializer, BBPSFieldsSerializer, RegistrationSerializer
-from .services import add_beneficary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, generate_otp, send_otp
+from .serializers import UserSerializer, BeneficiarySerializer, BBPSFieldsSerializer
+from .services import add_beneficiary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp
 from .models import User, BankDetails, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSModelFields, BBPSTransactions, UserWallet, Package
 import uuid
 from django.http import JsonResponse
@@ -12,15 +11,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 from rest_framework import viewsets, status, mixins
 from django.db import transaction
-
-class RegisterAdmin(APIView):
-    def post(self, request, *args, **kwargs):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            ip_address = request.META.get('REMOTE_ADDR')
-            user = serializer.save(ip_address=ip_address)
-            return Response({"message": "User created successfully", "user_id": user.id}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class RegisterUser(APIView):
     def post(self, request, *args, **kwargs):
@@ -30,24 +20,20 @@ class RegisterUser(APIView):
             user = serializer.save(ip_address=ip_address)
             return Response({"message": "User created successfully", "user_id": user.id}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class GetAdmin(APIView):
-    def get(self, request, id, format=None):
-        try:
-            user = User.objects.get(id=id)
-            serializer = UserSerializer(user)
-            return JsonResponse(serializer.data)
-        except User.DoesNotExist:
-            return JsonResponse({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         
-class GetUser(APIView):
-    def get(self, request, id):
-        try:
-            user = User.objects.get(id=id)
-            serializer = UserSerializer(user)
-            return JsonResponse(serializer.data, status=status.HTTP_200_OK)
-        except User.DoesNotExist:
-            return JsonResponse({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+class GetUsers(APIView):
+    def get(self, request, id=None): 
+        if id is not None:
+            try:
+                user = User.objects.get(id=id)
+                serializer = UserSerializer(user)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except User.DoesNotExist:
+                return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            users = User.objects.all()
+            serializer = UserSerializer(users, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         
 class LoginAPIView(APIView):
     def post(self, request, *args, **kwargs):
@@ -136,6 +122,8 @@ class AddBenAccount(APIView):
         account_number = request.data.get("account_number")
         ifsc_code = request.data.get("ifsc_code")
         mobile_number = request.data.get("mobile_number")
+        bene_id = request.data.get("bene_id")
+        bank_name = request.data.get("bank_name")
 
         if not beneficiary_name and not bank_id and not account_number and not ifsc_code and not mobile_number:
             return Response({"error": "Please provide required fields"}, status=status.HTTP_400_BAD_REQUEST)
@@ -144,15 +132,27 @@ class AddBenAccount(APIView):
         except:
             return Response({"error": "Invalid mobile number"}, status=status.HTTP_400_BAD_REQUEST)
     
+        # payload = {
+        #     "mobile": mobile_number,
+        #     "benename": beneficiary_name,
+        #     "bankid": bank_id,
+        #     "accno": account_number,
+        #     "ifsccode": ifsc_code,
+        # }
+
         payload = {
-            "mobile": mobile_number,
-            "benename": beneficiary_name,
-            "bankid": bank_id,
-            "accno": account_number,
-            "ifsccode": ifsc_code,
+            "api_token": '1vuiyiyiniitnadhsalha$(%23$%(%26@)$@usow89342mdfu',
+            "mobile_number": mobile_number,
+            "bene_name": beneficiary_name,
+            "number": bene_id,
+            "bank_account": account_number,
+            "bank_name": bank_name,
+            "ifsc": ifsc_code,
+            "user_id": user.username,
+            "partnerSubId": 9311395921
         }
 
-        response = add_beneficary(payload)
+        response = add_beneficiary(payload)
 
         if response["status"]==True:
             bank_obj = BankDetails.objects.create(

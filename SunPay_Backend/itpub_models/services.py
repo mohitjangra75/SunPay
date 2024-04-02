@@ -17,22 +17,33 @@ def get_token():
     token = jwt.encode(jwt_request, "MmVmNDQ1ZmNmM2QyMGUyOTA2Y2U0YWFlNTE3ODAxYTE=", algorithm="HS256")
     return token
 
-def add_beneficary(payload):
-    token = get_token()
+# def add_beneficary(payload):
+#     token = get_token()
+#     headers = {
+#         "Token":token,
+#         "Authorisedkey":"NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ=",
+#         "Accept": "application/json",
+#         "Content-Type": "application/json"
+#     }
+#     url = "https://api.paysprint.in/api/v1/service/dmt/beneficiary/registerbeneficiary"
+#     response = requests.post(url=url,json=payload, headers=headers)
+#     if response.ok:
+#         return {"status":True,
+#         "data":response.json()}
+#     else:
+#         return {"status":False,
+#         "data":"Please verify details"}
+
+def add_beneficiary(payload):
+    url = "https://api.levinfintech.com/api/levin/add-beneficiary"
     headers = {
-        "Token":token,
-        "Authorisedkey":"NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ=",
-        "Accept": "application/json",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
     }
-    url = "https://api.paysprint.in/api/v1/service/dmt/beneficiary/registerbeneficiary"
-    response = requests.post(url=url,json=payload, headers=headers)
+    response = requests.post(url=url, json=payload, headers=headers)
     if response.ok:
-        return {"status":True,
-        "data":response.json()}
+        return {"status": True, "data": response.json()}
     else:
-        return {"status":False,
-        "data":"Please verify details"}
+        return {"status": False, "data": "Please verify details"}
 
 def del_beneficiary(payload):
     token = get_token()
