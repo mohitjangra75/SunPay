@@ -63,14 +63,16 @@ class CompanyBank(models.Model):
     cash_deposit_charge = models.CharField(max_length=255, blank=True, null=True)
     is_active = models.BooleanField(default=True)
 
+    def __str__(self):
+        return self.bank_name
+
 class Bank(models.Model):
     bank_name = models.CharField(max_length=255, blank=True, null=True)
     bank_code = models.CharField(max_length=255, blank=True, null=True)
     ifsc = models.CharField(max_length=255, blank=True, null=True)
 
-class State(models.Model):
-    state_id = models.IntegerField(blank=True, null=True)
-    state_name = models.CharField(max_length=255, blank=True, null=True)
+    def __str__(self):
+        return self.bank_name
 
 class PaymentMode(object):
     IMPS = 1
@@ -216,7 +218,41 @@ class User(AbstractBaseUser, PermissionsMixin):
                 self.username = 'EMP{}'.format(username_suffix)
         super().save(*args, **kwargs)
 
-
+    def pic_url(self):
+        if self.pic:
+            return self.pic.url
+        else:
+            return "Image Not Uploaded"
+    
+    def sign_url(self):
+        if self.sign:
+            return self.sign.url
+        else:
+            return "Image Not Uploaded"
+    
+    def shoppic_url(self):
+        if self.shoppic:
+            return self.shoppic.url
+        else:
+            return "Image Not Uploaded"
+    
+    def aadhaarfrontpic_url(self):
+        if self.aadhaarfrontpic:
+            return self.aadhaarfrontpic.url
+        else:
+            return "Image Not Uploaded"
+    
+    def aadhaarbackpic_url(self):
+        if self.aadhaarbackpic:
+            return self.aadhaarbackpic.url
+        else:
+            return "Image Not Uploaded"
+    
+    def pancardpic_url(self):
+        if self.pancardpic:
+            return self.pancardpic.url
+        else:
+            return "Image Not Uploaded"
 
 
 class BankDetails(models.Model):
@@ -364,3 +400,23 @@ class Customer(models.Model):
     bank_name = models.CharField(max_length=255, blank=True, null=True)
     customerifsc = models.CharField(max_length=255, blank=True, null=True)
     upi_id = models.CharField(max_length=255, blank=True, null=True)
+
+class BBPSProviders(models.Model):
+    provider_id = models.IntegerField(blank=True, null=True)
+    provider_name = models.CharField(max_length=255, blank=True, null=True)
+    type = models.CharField(max_length=255, blank=True, null=True)
+    Fields_Description = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return self.provider_name
+    
+class State(models.Model):
+    state_id = models.IntegerField(blank=True, null=True)
+    state_name = models.CharField(max_length=255, blank=True, null=True)
+    state_code = models.IntegerField(blank=True, null=True)
+    country_id = models.IntegerField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    adddate = models.TimeField(blank=True, null=True)
+
+    def __str__(self):
+        return self.state_name

@@ -37,16 +37,22 @@ class GetUsers(APIView):
         
 class BankSaved(APIView):
     def get(self, request):
-        bank = Bank.objects.all()
-        serializer = BanksSerializer(bank, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        try:
+            bank = Bank.objects.all()
+            serializer = BanksSerializer(bank, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Bank.DoesNotExist:
+            return Response({"message": "Saved Bank not found"}, status=status.HTTP_404_NOT_FOUND)
     
 class Companybank(APIView):
     def get(self, request):
-        companybank = CompanyBank.objects.all()
-        serializer = CompanyBankSerializer(companybank, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-        
+        try:
+            companybank = CompanyBank.objects.all()
+            serializer = CompanyBankSerializer(companybank, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except CompanyBank.DoesNotExist:
+            return Response({"message": "Comapany Bank not found"}, status=status.HTTP_404_NOT_FOUND)
+
 class LoginAPIView(APIView):
     def post(self, request, *args, **kwargs):
         login_id = request.data.get('login_id')
@@ -221,7 +227,7 @@ class GetBeneficiaryLinked(APIView):
         if not mobile_number:
             return Response({"error": "Please add mobile_number in query params"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            user=User.objects.get(mobile = mobile_number)
+            user=BankDetails.objects.get(mobile_number = mobile_number)
         except:
             return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
         
