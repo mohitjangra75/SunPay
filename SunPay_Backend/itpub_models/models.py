@@ -296,6 +296,10 @@ class UserWallet(models.Model):
 
     def __str__(self):
         return self.user.username
+    
+    def update_balance(self, amount):
+        self.available_balance += amount
+        self.save()
 
 class UserTransactions(models.Model):
     STATUS = (

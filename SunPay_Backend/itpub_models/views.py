@@ -376,7 +376,7 @@ class FundRequest(APIView):
         except UserWallet.DoesNotExist:
             return Response({"error": "Wallet not found for the user"}, status=status.HTTP_404_NOT_FOUND)
         opening_balance = wallet_obj.available_balance if wallet_obj else 0.0
-        running_balance = opening_balance - amount
+        running_balance = opening_balance + amount
         tr_obj = UserTransactions.objects.create(
             user=user,
             bank_ref_number=bank_ref_number,
@@ -389,6 +389,7 @@ class FundRequest(APIView):
             opening_balance=opening_balance,
             running_balance=running_balance
         )
+        wallet_obj.update_balance(amount)
         return Response({"message": "Successfully initiated fund request"})
 
 class GetBBPSTypes(APIView):

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, BankDetails, Bank, CompanyBank, BBPSProviders, State
+from .models import User, BankDetails, Bank, CompanyBank, BBPSProviders, State, UserWallet
 
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -9,7 +9,12 @@ class RegistrationSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ('id', 'username', 'email', 'password')
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        UserWallet.objects.create(user=user, available_balance=0)
+        return user
 
 class BeneficiarySerializer(serializers.ModelSerializer):
     class Meta:
