@@ -9,10 +9,11 @@ class RegistrationSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'password')
+        fields = '__all__'
 
     def create(self, validated_data):
-        user = User.objects.create_user(**validated_data)
+        username = validated_data.get('email')
+        user = User.objects.create_user(username=username, **validated_data)
         UserWallet.objects.create(user=user, available_balance=0)
         return user
 

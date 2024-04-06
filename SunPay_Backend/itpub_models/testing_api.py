@@ -1,35 +1,37 @@
 import requests
 import json
 
-# url = 'http://localhost:8000/api/register_user/'
-# headers = {
-#     'Content-Type': 'application/json',
-# }
-# user_data = {
-#     "role_id": 3,
-#     "title_id": 1,
-#     "name": "Dane Joe",
-#     "email": "123dane1@example.com",
-#     "mobile": "8708070098",
-#     "gender_id": 1,
-#     "username": "danejoe",
-#     "password": "newpassword123",
-#     "address": "123 Oak St",
-#     "city_id": 3,
-#     "package_id": 3,
-#     "parent_id": 3,
-#     "login_pin": "1234",
-#     "is_email_verify": True,
-#     "is_mobile_verify": True,
-#     "is_tpin_enabled": True,
-#     "tpin": 1357
-# }
-# response = requests.post(url, json=user_data, headers=headers)
-# if response.status_code == 201:
-#     print("User created successfully!")
-#     print("User ID:", response.json().get('user_id'))
-# else:
-#     print("Error:", response.text)
+url = 'http://localhost:8000/api/register_user/'
+headers = {
+    'Content-Type': 'application/json',
+}
+user_data = {
+    "role_id": 1,
+    "title_id": 1,
+    "name": "Gourav",
+    "email": "gouravdhalwal29@gmail.com",
+    "mobile": "9717960980",
+    "gender_id": 1,
+    "password": "admin",
+    "address": "Gurugram",
+    "package_id": "1",
+    "parent_id": "6",
+    "pin_code": "122506",
+    "shop_name": "Sunpay",
+    "state_id": 1,
+    "is_tpin_enabled": "True",
+    "tpin": 1234,
+    "is_active": "True",
+    "distributor_name": "ABC",
+    "is_distributor": "True",
+    "shop_adress": "Gurgaon"
+}
+response = requests.post(url, json=user_data, headers=headers)
+if response.status_code == 201:
+    print("User created successfully!")
+    print("User ID:", response.json().get('user_id'))
+else:
+    print("Error:", response.text)
 
 
 # url = 'http://127.0.0.1:8000/api/tpin/'
@@ -89,29 +91,29 @@ import json
 #     add_beneficiary()
 
 
-def initiate_fund_request():
-    url = "http://127.0.0.1:8000/api/fund_request/"
-    payload = {
-        "amount" : 100,
-        "bank_acc_number" : "52626263163",
-        "ref_number" : "58461",
-        "payment_mode": "cash",
-        "payment_date" : "2023-04-04",
-        "remark" : "remark",
-        "mobile_number" : "9306123897"
-    }
-    headers = {
-        "Content-Type": "application/json"
-    }
+# def initiate_fund_request():
+#     url = "http://127.0.0.1:8000/api/fund_request/"
+#     payload = {
+#         "amount" : 100,
+#         "bank_acc_number" : "52626263163",
+#         "ref_number" : "58461",
+#         "payment_mode": "cash",
+#         "payment_date" : "2023-04-04",
+#         "remark" : "remark",
+#         "mobile_number" : "9306123897"
+#     }
+#     headers = {
+#         "Content-Type": "application/json"
+#     }
 
-    response = requests.post(url, json=payload, headers=headers)
+#     response = requests.post(url, json=payload, headers=headers)
 
-    if response.status_code == 200:
-        print("Fund request initiated successfully.")
-        print("Response:", response.json())
-    else:
-        print("Failed to initiate fund request.")
-        print("Response:", response.text)
+#     if response.status_code == 200:
+#         print("Fund request initiated successfully.")
+#         print("Response:", response.json())
+#     else:
+#         print("Failed to initiate fund request.")
+#         print("Response:", response.text)
 
-if __name__ == "__main__":
-    initiate_fund_request()
+# if __name__ == "__main__":
+#     initiate_fund_request()
