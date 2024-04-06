@@ -151,58 +151,51 @@ class OTPVerification(APIView):
 
 
 class AddBenAccount(APIView):
-
     def post(self, request, *args, **kwargs):
+        upi_id = request.data.get("upi_id")
         beneficiary_name = request.data.get("beneficiary_name")
-        bank_id = request.data.get("bank_id")
+        bank_name = request.data.get("bank_name")
         account_number = request.data.get("account_number")
         ifsc_code = request.data.get("ifsc_code")
         mobile_number = request.data.get("mobile_number")
         bene_id = request.data.get("bene_id")
-        bank_name = request.data.get("bank_name")
 
-        if not beneficiary_name and not bank_id and not account_number and not ifsc_code and not mobile_number:
-            return Response({"error": "Please provide required fields"}, status=status.HTTP_400_BAD_REQUEST)
+        if not all([beneficiary_name, bank_name, account_number, ifsc_code, mobile_number]):
+            return Response({"error": "Please provide all required fields"}, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
-            user=User.objects.get(mobile_number=mobile_number)
-        except:
-            return Response({"error": "Invalid mobile number"}, status=status.HTTP_400_BAD_REQUEST)
-    
-        # payload = {
-        #     "mobile": mobile_number,
-        #     "benename": beneficiary_name,
-        #     "bankid": bank_id,
-        #     "accno": account_number,
-        #     "ifsccode": ifsc_code,
-        # }
+            user = User.objects.get(mobile=mobile_number)
+            print(user.email)
+        except User.DoesNotExist:
+            return Response({"error": "User does not exist for the provided mobile number"}, status=status.HTTP_400_BAD_REQUEST)
 
-        payload = {
-            "api_token": '1vuiyiyiniitnadhsalha$(%23$%(%26@)$@usow89342mdfu',
-            "mobile_number": mobile_number,
-            "bene_name": beneficiary_name,
-            "number": bene_id,
-            "bank_account": account_number,
-            "bank_name": bank_name,
-            "ifsc": ifsc_code,
-            "user_id": user.username,
-            "partnerSubId": 9311395921
-        }
+        response = add_beneficiary(
+            api_token='1vuiyiyiniitnadhsalha$(%23$%(%26@)$@usow89342mdfu',
+            mobile_number=mobile_number,
+            bene_name=beneficiary_name,
+            number=bene_id,
+            bank_account=account_number,
+            bank_name=bank_name,
+            ifsc=ifsc_code,
+            user_id=user.username,
+            partnerSubId=9311395921
+        )
+        print("sending response")
 
-        response = add_beneficiary(payload)
-
-        if response["status"]==True:
-            bank_obj = BankDetails.objects.create(
-                beneficiary_name = beneficiary_name,
-                bank_name = response["data"]["bankname"],
-                account_number = account_number,
-                ifsc_code= ifsc_code,
+        if response["status_id"] == 25:
+            bank_details = BankDetails.objects.create(
+                upi_id=upi_id,
+                beneficiary_name=beneficiary_name,
+                bank_name=bank_name,
+                account_number=account_number,
+                ifsc_code=ifsc_code,
                 mobile_number=mobile_number,
-                registered_with=user,
-                bene_id = response["data"]["bene_id"],
+                registered_with=user
             )
             return Response({"message": "Details uploaded successfully"}, status=status.HTTP_201_CREATED)
         else:
-            return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Failed to add beneficiary"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class DelBenAccount(APIView):
 
@@ -363,46 +356,52 @@ class SendMoneyDMT(APIView):
         else:
             return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
 
-    
 class FundRequest(APIView):
     def post(self, request, *args, **kwargs):
         amount = request.data.get("amount")
         bank_acc_number = request.data.get("bank_acc_number")
-        ref_number = request.data.get("ref_number")
+        bank_ref_number = request.data.get("bank_ref_number")
         payment_mode = request.data.get("payment_mode")
         payment_date = request.data.get("payment_date")
         remark = request.data.get("remark")
         mobile_number = request.data.get("mobile_number")
-
-        if not (bank_acc_number and amount and ref_number and payment_mode and payment_date and remark and mobile_number ):
+        if not all([amount, bank_acc_number, payment_mode, payment_date , mobile_number]):
             return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
-
-        user = User.objects.get(mobile = mobile_number)
-        wallet_obj = user.userwallet_set.first()
+        try:
+            user = User.objects.get(mobile=mobile_number)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            wallet_obj = UserWallet.objects.get(user=user)
+        except UserWallet.DoesNotExist:
+            return Response({"error": "Wallet not found for the user"}, status=status.HTTP_404_NOT_FOUND)
+        opening_balance = wallet_obj.available_balance if wallet_obj else 0.0
+        running_balance = opening_balance - amount
         tr_obj = UserTransactions.objects.create(
             user=user,
-            bank_ref_number = ref_number,
-            bank_acc_number = bank_acc_number,
-            remark =remark,
-            payment_date = payment_date,
-            transaction_status = TransactionStatus.PENDING,
-            payment_mode = payment_mode,
-            amount = amount,
-            opening_balance = wallet_obj.available_balance
+            bank_ref_number=bank_ref_number,
+            bank_acc_number=bank_acc_number,
+            remark=remark,
+            payment_date=payment_date,
+            transaction_status=TransactionStatus.PENDING,
+            payment_mode=payment_mode,
+            amount=amount,
+            opening_balance=opening_balance,
+            running_balance=running_balance
         )
-        return Response({"message": "Succesfully initiated fund request"},)
+        return Response({"message": "Successfully initiated fund request"})
 
 class GetBBPSTypes(APIView):
 
     def get(self, request, *args, **kwargs):
         bill_type = request.query_params.get("bill_type")
         if bill_type:
-            querset = BBPSModelFields.objects.filter(bill_type = bill_type)
-            data = BBPSFieldsSerializer(querset, many=True).data
+            querset = BBPSProviders.objects.filter(bill_type = bill_type)
+            data = BBPSProviderSerializer(querset, many=True).data
             return Response(data)
         else:
-            querset = BBPSModelFields.objects.all()
-            data = BBPSFieldsSerializer(querset, many=True).data
+            querset = BBPSProviders.objects.all()
+            data = BBPSProviderSerializer(querset, many=True).data
             return Response(data)
 
 class PayRecharge(APIView):

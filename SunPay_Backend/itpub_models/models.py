@@ -268,7 +268,7 @@ class BankDetails(models.Model):
     is_active =  models.BooleanField(default=True)
 
     def __str__(self):
-        return self.beneficiary_name + self.account_number
+        return self.beneficiary_name + "-" + self.registered_with.username
 
 class DMTTransactions(models.Model):
     STATUS = (
@@ -294,6 +294,9 @@ class UserWallet(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
     available_balance = models.IntegerField(blank=True, null=True)
 
+    def __str__(self):
+        return self.user.username
+
 class UserTransactions(models.Model):
     STATUS = (
 		(TransactionStatus.PENDING, 'PENDING'),
@@ -313,6 +316,8 @@ class UserTransactions(models.Model):
     opening_balance = models.FloatField()
     running_balance = models.FloatField()
 
+    def __str__(self):
+        return self.user.name
 
 class BBPSProviders(models.Model):
     BILL_TYPE = (
@@ -392,18 +397,6 @@ class Package(models.Model):
     company_back = models.FloatField(blank=True, )
     distributor_back = models.IntegerField(blank=True,)
     tds = models.FloatField(blank=True, )
-
-class Customer(models.Model):
-    ISACTIVE = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    msrno =  models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
-    mobile_no = models.IntegerField(blank=True, null=True)
-    bank_acc_number = models.CharField(max_length=255, blank=True, null=True)
-    bank_acc_name = models.CharField(max_length=255, blank=True, null=True)
-    bene_id = models.IntegerField(blank=True, null=True)
-    bank_name = models.CharField(max_length=255, blank=True, null=True)
-    customerifsc = models.CharField(max_length=255, blank=True, null=True)
-    upi_id = models.CharField(max_length=255, blank=True, null=True)
     
 class State(models.Model):
     state_id = models.IntegerField(blank=True, null=True)

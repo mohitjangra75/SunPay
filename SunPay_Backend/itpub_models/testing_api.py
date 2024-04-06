@@ -1,4 +1,5 @@
 import requests
+import json
 
 # url = 'http://localhost:8000/api/register_user/'
 # headers = {
@@ -59,3 +60,58 @@ import requests
 #     print("Error")
 
 
+# def add_beneficiary():
+#     url = "http://127.0.0.1:8000/api/add_beneficiary/"
+#     payload = {
+#         "upi_id": "Pankajbhardwaj@paytm",
+#         "beneficiary_name": "Pankaj",
+#         "bank_name": "State Bank of India",
+#         "account_number": "123456789",
+#         "ifsc_code": "ABCD1234567",
+#         "mobile_number": "9306123897",
+#         "registered_with": 37, 
+#         "bene_id": "78901234",
+#     }
+#     headers = {
+#         "Content-Type": "application/json"
+#     }
+
+#     response = requests.post(url, json=payload, headers=headers)
+
+#     if response.status_code == 201:
+#         print("Beneficiary added successfully.")
+#         print("Response:", response.json())
+#     else:
+#         print("Failed to add beneficiary.")
+#         print("Response:", response.text)
+
+# if __name__ == "__main__":
+#     add_beneficiary()
+
+
+def initiate_fund_request():
+    url = "http://127.0.0.1:8000/api/fund_request/"
+    payload = {
+        "amount" : 100,
+        "bank_acc_number" : "52626263163",
+        "ref_number" : "58461",
+        "payment_mode": "cash",
+        "payment_date" : "2023-04-04",
+        "remark" : "remark",
+        "mobile_number" : "9306123897"
+    }
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+
+    if response.status_code == 200:
+        print("Fund request initiated successfully.")
+        print("Response:", response.json())
+    else:
+        print("Failed to initiate fund request.")
+        print("Response:", response.text)
+
+if __name__ == "__main__":
+    initiate_fund_request()

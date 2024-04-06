@@ -36,16 +36,33 @@ def get_token():
 #         return {"status":False,
 #         "data":"Please verify details"}
 
-def add_beneficiary(payload):
+def add_beneficiary(api_token, mobile_number, bene_name, number, bank_account, bank_name, ifsc, user_id, partnerSubId):
     url = "https://api.levinfintech.com/api/levin/add-beneficiary"
-    headers = {
-        "Content-Type": "application/json",
+    payload = {
+        "api_token": api_token,
+        "mobile_number": mobile_number,
+        "bene_name": bene_name,
+        "number": number,
+        "bank_account": bank_account,
+        "bank_name": bank_name,
+        "ifsc": ifsc,
+        "user_id": user_id,
+        "partnerSubId": partnerSubId
     }
-    response = requests.post(url=url, json=payload, headers=headers)
+    headers = {
+        "Content-Type": "application/json"
+    }
+    response = requests.post(url, json=payload, headers=headers)
     if response.ok:
-        return {"status": True, "data": response.json()}
+        data = response.json()
+        return {
+            "status_id": data.get("status_id"),
+            "message": data.get("message"),
+            "bene_id": data.get("bene_id"),
+            "data": data.get("data")
+        }
     else:
-        return {"status": False, "data": "Please verify details"}
+        return {"status_id": None, "message": "Failed to add beneficiary", "bene_id": None, "data": None}
 
 def del_beneficiary(payload):
     token = get_token()
