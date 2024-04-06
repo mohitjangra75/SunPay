@@ -23,6 +23,8 @@ urlpatterns = [
     path('verify_otp/', OTPVerification.as_view(), name='verify_otp'),
     path('allbanks/', BankSaved.as_view(), name='allbanks'),
     path('companybanks/', Companybank.as_view(), name='companybanks'),
+    path('get_providers/', BBPSproviders.as_view(), name='BBPSproviders'),
+    path('get_state/', States.as_view(), name='States'),
 
 ]
 

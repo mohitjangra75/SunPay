@@ -2,9 +2,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
-from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, BBPSFieldsSerializer, CompanyBankSerializer
+from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, BBPSFieldsSerializer, CompanyBankSerializer, BBPSProviderSerializer, StateSerializer
 from .services import add_beneficiary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp
-from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSModelFields, BBPSTransactions, UserWallet, Package, CompanyBank
+from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSModelFields, BBPSTransactions, UserWallet, Package, CompanyBank, BBPSProviders, State
 import uuid
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
@@ -52,6 +52,24 @@ class Companybank(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except CompanyBank.DoesNotExist:
             return Response({"message": "Comapany Bank not found"}, status=status.HTTP_404_NOT_FOUND)
+
+class BBPSproviders(APIView):
+    def get(self, request):
+        try:
+            BBPS_Providers = BBPSProviders.objects.all()
+            serializer = BBPSProviderSerializer(BBPS_Providers, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except BBPSProviders.DoesNotExist:
+            return Response({"message": "Provider does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+class States(APIView):
+    def get(self, request):
+        try:
+            States_saved = State.objects.all()
+            serializer = StateSerializer(States_saved, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except State.DoesNotExist:
+            return Response({"message": "State does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
 class LoginAPIView(APIView):
     def post(self, request, *args, **kwargs):
