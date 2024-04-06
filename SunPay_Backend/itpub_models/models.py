@@ -416,7 +416,8 @@ class State(models.Model):
     state_code = models.IntegerField(blank=True, null=True)
     country_id = models.IntegerField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
-    adddate = models.TimeField(blank=True, null=True)
+    created_date = models.TimeField(blank=True, null=True)
+    update_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.state_name

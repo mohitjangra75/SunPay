@@ -4,6 +4,8 @@ import jwt
 import json
 import requests
 import random
+import csv
+from .models import BBPSProviders, State
 
 PARTNERID = "UFR008081"  # Replace with your actual PARTNERID
 
@@ -232,3 +234,41 @@ def send_otp(mobile_number):
     print("Response:", response)
     print("Response JSON:", response.json())
     return otp
+
+def data_load_bbps_providers(file_path):
+    with open(file_path, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            provider_id = row['provider_id']
+            provider_name = row['name']
+            type = row['type']
+            fields_description = row['Fields Description']
+            bbps_provider = BBPSProviders.objects.create(
+                provider_id=provider_id,
+                provider_name=provider_name,
+                type=type,
+                Fields_Description=fields_description
+            )
+            bbps_provider.save()
+
+def data_load_state(file_path):
+    with open(file_path, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            state_id = row['statecode']
+            state_name = row['name']
+            state_code = row['statecode']
+            country_id = row['country_id']
+            is_active = row['is_active']
+            created_date = datetime.strptime(row['created_date'], '%d-%m-%Y %H:%M')
+            update_date = None if row['update_date'] == 'NULL' else datetime.strptime(row['update_date'], '%d-%m-%Y %H:%M')
+            state = State.objects.create(
+                state_id=state_id,
+                state_name=state_name,
+                state_code=state_code,
+                country_id=country_id,
+                is_active=is_active,
+                created_date=created_date,
+                update_date=update_date
+            )
+            state.save()
