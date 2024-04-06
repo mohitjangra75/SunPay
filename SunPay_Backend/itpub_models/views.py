@@ -2,9 +2,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
-from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, BBPSFieldsSerializer, CompanyBankSerializer, BBPSProviderSerializer, StateSerializer
+from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, CompanyBankSerializer, BBPSProviderSerializer, StateSerializer
 from .services import add_beneficiary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp
-from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSModelFields, BBPSTransactions, UserWallet, Package, CompanyBank, BBPSProviders, State
+from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSTransactions, UserWallet, Package, CompanyBank, BBPSProviders, State
 import uuid
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
@@ -35,7 +35,7 @@ class GetUsers(APIView):
             serializer = UserSerializer(users, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         
-class BankSaved(APIView):
+class GetBanks(APIView):
     def get(self, request):
         try:
             bank = Bank.objects.all()
@@ -125,9 +125,9 @@ class LoginOTPView(APIView):
                     user.otp = otp_stored
                     user.save()
                 # print("Stored OTP in user model:", otp_stored)
-                return JsonResponse({'message': 'OTP sent to your registered mobile number.', 'otp_stored': otp_stored})
+                return Response({'message': 'OTP sent to your registered mobile number.', 'otp_stored': otp_stored})
             else:
-                return JsonResponse({'error': 'Invalid username or password.'}, status=400)
+                return Response({'error': 'Invalid username or password.'}, status=400)
         except User.DoesNotExist:
             return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -143,9 +143,9 @@ class OTPVerification(APIView):
             if not (otp_entered and username):
                 return Response({"error": "OTP and Username are required fields."}, status=status.HTTP_400_BAD_REQUEST)
             if otp_entered == str(otp_stored):
-                return JsonResponse({'message': 'Login successful', "data": UserSerializer(user).data },status=status.HTTP_200_OK)
+                return Response({'message': 'Login successful', "data": UserSerializer(user).data },status=status.HTTP_200_OK)
             else:
-                return JsonResponse({'error': 'Invalid OTP.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'Invalid OTP.'}, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
             return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 

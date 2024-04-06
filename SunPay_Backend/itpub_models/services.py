@@ -5,7 +5,7 @@ import json
 import requests
 import random
 import csv
-from .models import BBPSProviders, State
+from .models import BBPSProviders, State, BillType
 
 PARTNERID = "UFR008081"  # Replace with your actual PARTNERID
 
@@ -241,12 +241,13 @@ def data_load_bbps_providers(file_path):
         for row in reader:
             provider_id = row['provider_id']
             provider_name = row['name']
-            type = row['type']
+            type_value = row['type']
             fields_description = row['Fields Description']
+            type_value = getattr(BillType, type_value)
             bbps_provider = BBPSProviders.objects.create(
                 provider_id=provider_id,
                 provider_name=provider_name,
-                type=type,
+                type=type_value,
                 Fields_Description=fields_description
             )
             bbps_provider.save()

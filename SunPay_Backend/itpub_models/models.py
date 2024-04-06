@@ -314,31 +314,35 @@ class UserTransactions(models.Model):
     running_balance = models.FloatField()
 
 
-class BBPSModelFields(models.Model):
+class BBPSProviders(models.Model):
     BILL_TYPE = (
         (BillType.ELECTRICITY ,'ELECTRICITY'),
-            (BillType.GAS ,'GAS'),
-            (BillType.WATER ,'WATER'),
-            (BillType.LIC ,'LIC'),
-            (BillType.INSURANCE ,'INSURANCE'),
-            (BillType.MUNICIPAL_TAXES_AND_SERVICES ,'MUNICIPAL_TAXES_AND_SERVICES'),
-            (BillType.FASTAG ,'FASTAG'),
-            (BillType.LOAN_REPAYMENT ,'LOAN_REPAYMENT'),
-            (BillType.EDUCATION_FEES ,'EDUCATION_FEES'),
-            (BillType.BROADBAND ,'BROADBAND'),
-            (BillType.CABLE ,'CABLE'),
-            (BillType.TRAFFIC_CHALLAN ,'TRAFFIC_CHALLAN'),
-            (BillType.DIGITAL_VOUCHER ,'DIGITAL_VOUCHER'),
-            (BillType.MOBILE ,'MOBILE'),
-            (BillType.DTH ,'DTH'),
-            (BillType.DATACARD ,'DATACARD'),
-            (BillType.POSTPAID ,'POSTPAID'),
-            (BillType.TELEPHONE ,'TELEPHONE',),
-            (BillType.STV ,'STV'),
+        (BillType.GAS ,'GAS'),
+        (BillType.WATER ,'WATER'),
+        (BillType.LIC ,'LIC'),
+        (BillType.INSURANCE ,'INSURANCE'),
+        (BillType.MUNICIPAL_TAXES_AND_SERVICES ,'MUNICIPAL_TAXES_AND_SERVICES'),
+        (BillType.FASTAG ,'FASTAG'),
+        (BillType.LOAN_REPAYMENT ,'LOAN_REPAYMENT'),
+        (BillType.EDUCATION_FEES ,'EDUCATION_FEES'),
+        (BillType.BROADBAND ,'BROADBAND'),
+        (BillType.CABLE ,'CABLE'),
+        (BillType.TRAFFIC_CHALLAN ,'TRAFFIC_CHALLAN'),
+        (BillType.DIGITAL_VOUCHER ,'DIGITAL_VOUCHER'),
+        (BillType.MOBILE ,'MOBILE'),
+        (BillType.DTH ,'DTH'),
+        (BillType.DATACARD ,'DATACARD'),
+        (BillType.POSTPAID ,'POSTPAID'),
+        (BillType.TELEPHONE ,'TELEPHONE',),
+        (BillType.STV ,'STV'),
 	)
     provider_id = models.IntegerField( blank=True, null=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
-    bill_type = models.SmallIntegerField(choices=BILL_TYPE, db_index=True,)
+    provider_name = models.CharField(max_length=255, blank=True, null=True)
+    type = models.SmallIntegerField(choices=BILL_TYPE, db_index=True, blank=True, null=True)
+    Fields_Description = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return self.provider_name
 
 class BBPSTransactions(models.Model):
     STATUS = (
@@ -369,9 +373,9 @@ class BBPSTransactions(models.Model):
 	)
     user =  models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    transaction_status = models.SmallIntegerField(choices=STATUS, db_index=True,)
+    transaction_status = models.SmallIntegerField(choices=STATUS, db_index=True)
     remark = models.CharField(max_length=255, blank=True, null=True)
-    bill_type = models.SmallIntegerField(choices=BILL_TYPE, db_index=True,)
+    bill_type = models.SmallIntegerField(choices=BILL_TYPE, db_index=True)
 
 class Package(models.Model):
     ISACTIVE = models.BooleanField(default=True)
@@ -400,15 +404,6 @@ class Customer(models.Model):
     bank_name = models.CharField(max_length=255, blank=True, null=True)
     customerifsc = models.CharField(max_length=255, blank=True, null=True)
     upi_id = models.CharField(max_length=255, blank=True, null=True)
-
-class BBPSProviders(models.Model):
-    provider_id = models.IntegerField(blank=True, null=True)
-    provider_name = models.CharField(max_length=255, blank=True, null=True)
-    type = models.CharField(max_length=255, blank=True, null=True)
-    Fields_Description = models.CharField(max_length=255, blank=True, null=True)
-
-    def __str__(self):
-        return self.provider_name
     
 class State(models.Model):
     state_id = models.IntegerField(blank=True, null=True)
