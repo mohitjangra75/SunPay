@@ -2,9 +2,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
-from .serializers import UserSerializer, BeneficiarySerializer, BBPSFieldsSerializer
+from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, BBPSFieldsSerializer, CompanyBankSerializer
 from .services import add_beneficiary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp
-from .models import User, BankDetails, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSModelFields, BBPSTransactions, UserWallet, Package
+from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSModelFields, BBPSTransactions, UserWallet, Package, CompanyBank
 import uuid
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
@@ -34,6 +34,18 @@ class GetUsers(APIView):
             users = User.objects.all()
             serializer = UserSerializer(users, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
+        
+class BankSaved(APIView):
+    def get(self, request):
+        bank = Bank.objects.all()
+        serializer = BanksSerializer(bank, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class Companybank(APIView):
+    def get(self, request):
+        companybank = CompanyBank.objects.all()
+        serializer = CompanyBankSerializer(companybank, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
         
 class LoginAPIView(APIView):
     def post(self, request, *args, **kwargs):
@@ -209,7 +221,7 @@ class GetBeneficiaryLinked(APIView):
         if not mobile_number:
             return Response({"error": "Please add mobile_number in query params"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            user=User.objects.get(mobile_number=mobile_number)
+            user=User.objects.get(mobile = mobile_number)
         except:
             return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -341,7 +353,7 @@ class FundRequest(APIView):
         if not (bank_acc_number and amount and ref_number and payment_mode and payment_date and remark and mobile_number ):
             return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user = User.objects.get(mobile_number = mobile_number)
+        user = User.objects.get(mobile = mobile_number)
         wallet_obj = user.userwallet_set.first()
         tr_obj = UserTransactions.objects.create(
             user=user,

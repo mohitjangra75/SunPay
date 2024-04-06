@@ -57,14 +57,15 @@ class CompanyBank(models.Model):
     bank_logo = models.FileField(upload_to='profile_pics/', null=True, blank=True)
     bank_name = models.CharField(max_length=255, blank=True, null=True)
     ifsc = models.CharField(max_length=255, blank=True, null=True)
+    branchname = models.CharField(max_length=255, blank=True, null=True)
+    account_holdername = models.CharField(max_length=255, blank=True, null=True)
     account_no = models.CharField(max_length=255, blank=True, null=True)
+    cash_deposit_charge = models.CharField(max_length=255, blank=True, null=True)
     is_active = models.BooleanField(default=True)
-    acc_holdername = models.CharField(max_length=255, blank=True, null=True)
-
 
 class Bank(models.Model):
-    bank_id = models.IntegerField(blank=True, null=True)
     bank_name = models.CharField(max_length=255, blank=True, null=True)
+    bank_code = models.CharField(max_length=255, blank=True, null=True)
     ifsc = models.CharField(max_length=255, blank=True, null=True)
 
 class State(models.Model):
@@ -175,7 +176,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_tpin_enabled = models.BooleanField(default=False)
     tpin = models.IntegerField(blank=True, null=True, unique=True)
     is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
     mpin = models.IntegerField(blank=True, null=True, unique=True)
     start_val = models.IntegerField(default=0,blank=True, null=True,)
     end_val = models.IntegerField(default=2001,blank=True, null=True,)
@@ -183,6 +184,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     distributor_name = models.CharField(max_length=30, blank=True, null=True)
     is_distributor = models.BooleanField(default=False)
+    is_asm = models.BooleanField(default=True)
+    asm_name = models.CharField(max_length=30, blank=True, null=True)
     city = models.CharField(max_length=30, blank=True, null=True)
     shop_adress = models.CharField(max_length=255, blank=True, null=True)
     otp = models.IntegerField(null=True, blank=True)

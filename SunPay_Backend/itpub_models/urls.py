@@ -3,11 +3,11 @@ from django.urls import path
 from .views import *
 from rest_framework import routers
 router = routers.SimpleRouter()
-router.register(r"users", UserViewset)
+router.register("users", UserViewset)
 
 urlpatterns = [
     path('register_user/', RegisterUser.as_view(), name='register_user'),
-    path('get_users/', GetUser.as_view(), name='register_user'),
+    path('get_users/', GetUsers.as_view(), name='register_user'),
     path('login/', LoginAPIView.as_view(), name='login'),
     path('tpin/', TPINVerification.as_view(), name='tpin'),
     path('add_beneficiary/', AddBenAccount.as_view(), name='add_beneficiary'),
@@ -21,6 +21,9 @@ urlpatterns = [
     path('get_package_details/', GetPackageDetails.as_view(), name='get_package_details'),
     path('login_with_otp/', LoginOTPView.as_view(), name='login_with_otp'),
     path('verify_otp/', OTPVerification.as_view(), name='verify_otp'),
+    path('allbanks/', BankSaved.as_view(), name='allbanks'),
+    path('companybanks/', Companybank.as_view(), name='companybanks'),
+
 ]
 
 urlpatterns += router.urls
