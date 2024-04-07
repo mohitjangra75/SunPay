@@ -411,8 +411,9 @@ class PayRecharge(APIView):
         provider_id = request.data.get("provider_id")
         amount = request.data.get("amount")
         client_id = request.data.get("client_id")
+        billcontext = request.data.get("billcontext")
 
-        if not (number and provider_id and client_id and amount):
+        if not (number and provider_id and client_id and amount and billcontext):
             return Response({"error":"Please fill number client_id and provider_id"})
 
         payload = {
@@ -420,9 +421,10 @@ class PayRecharge(APIView):
             'provider_id' : provider_id,
             'amount' : amount,
             'client_id' : client_id,
-            'user_id' : "2",
+            'user_id' : "9311395921",
             'api_token' :"1vuiyiyiniitnadhsalha$(%23$%(%26@)$@usow89342mdfu",
-            'provider_code' :"NA"
+            'provider_code' :"NA",
+            "bill_context" : billcontext
         }
         response = pay_recharge(payload=payload)
         if response["status"] == True:
@@ -448,16 +450,18 @@ class GetBillDetails(APIView):
         number = request.data.get("number")
         provider_id = request.data.get("provider_id")
         client_id = request.data.get("client_id")
+        retailer_mobile = request.data.get("retailer_mobile")
 
-        if not (number and provider_id and client_id):
+        if not (number and provider_id and client_id and retailer_mobile):
             return Response({"error":"Please fill number client_id and provider_id"})
 
         payload = {
             'api_token' :"1vuiyiyiniitnadhsalha$(%23$%(%26@)$@usow89342mdfu",
             'number' :number,
             'provider_id' : provider_id,
-            'user_id' : "2",
+            'user_id' : "9311395921",
             'client_id' : client_id,
+            "Retailer_MobileNumber" : retailer_mobile
         }
         response = get_bill_details(payload=payload)
         if response["status"] == True:

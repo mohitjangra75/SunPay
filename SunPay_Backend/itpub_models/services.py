@@ -156,7 +156,7 @@ def get_bill_details(payload):
         "Accept": "application/json",
         "Content-Type": "application/json"
     }
-    url = "https://api.levinfintech.com/api/levin/recharge/bbps-recharge-getbill"
+    url = "https://api.levinfintech.com/api/levin/bbps/get-biller-details"
     response = requests.post(url=url,json=payload, headers=headers)
     if response.ok:
         return {"status":True,
