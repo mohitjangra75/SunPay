@@ -134,7 +134,7 @@ const MemberRegistration = () => {
   };
 
   const fetchstate = async (e) =>  {
-    const stateresponse = await axios.get('http://127.0.0.1:8000/api/companybanks/'); 
+    const stateresponse = await axios.get('http://43.205.83.194/api/companybanks/'); 
     const statearr = stateresponse.data;
     console.log('state',statearr)
 
@@ -145,7 +145,7 @@ const MemberRegistration = () => {
 
 const getparentid = async (e) => {
     //Getting parent ID
-    const response = await fetch('http://127.0.0.1:8000/api/get_users/', {
+    const response = await fetch('http://43.205.83.194/api/get_users/', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -169,7 +169,7 @@ const getparentid = async (e) => {
 
   console.log('Formdata submitted 1' , formData)
 
-  const regresponse = await fetch('http://127.0.0.1:8000/api/register_user/', {
+  const regresponse = await fetch('http://43.205.83.194/api/register_user/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

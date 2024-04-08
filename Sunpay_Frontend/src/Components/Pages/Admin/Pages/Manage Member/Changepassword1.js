@@ -9,7 +9,7 @@ const Changepassword1 = (props) => {
     const fetchData = async () => {
       try {
         // Fetch data from your backend API
-        const response = await fetch(`http://127.0.0.1:8000/api/get_users/`);
+        const response = await fetch(`http://43.205.83.194/api/get_users/`);
         if (!response.ok) {
           throw new Error('Failed to fetch data');
         }

@@ -28,7 +28,7 @@ const Electricity = (props) => {
       const fetchData = async () => {
         try {
           // Fetch data from your backend API
-          const response = await fetch(`http://127.0.0.1:8000/api/get_providers/`);
+          const response = await fetch(`http://43.205.83.194/api/get_providers/`);
           if (!response.ok) {
             throw new Error('Failed to fetch data');
           }
@@ -37,7 +37,7 @@ const Electricity = (props) => {
           const filteredOptions = data.filter(option => option.type === 0);
           setproviders(filteredOptions);
           
-          const stateresponse = await fetch(`http://127.0.0.1:8000/api/get_state/`);
+          const stateresponse = await fetch(`http://43.205.83.194/api/get_state/`);
           if (!stateresponse.ok) {
             throw new Error('Failed to fetch data');
           }
@@ -58,7 +58,7 @@ const Electricity = (props) => {
     useEffect(() => { 
       const fetchuser = async () => {
           try {
-            const response = await axios.get(`http://127.0.0.1:8000/api/users/${navdata.id}`)
+            const response = await axios.get(`http://43.205.83.194/api/users/${navdata.id}`)
             setuser(response.data);
           } catch (error) {
             console.error('Error fetching data:', error);
@@ -95,7 +95,7 @@ const Electricity = (props) => {
       }    
       
 
-      // const getbill = await fetch('http://127.0.0.1:8000/api/get_biller_details/', {
+      // const getbill = await fetch('http://43.205.83.194/api/get_biller_details/', {
       //   method: 'POST',
       //   headers: {
       //     'Content-Type': 'application/json',

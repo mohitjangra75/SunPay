@@ -18,7 +18,7 @@ export default function Adminlogin({ setAdmLoggedIn }, { AdmLoggedIn }) {
     setError(null);
     setLoading(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/login/', {
+      const response = await fetch('http://43.205.83.194/api/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,7 +41,7 @@ export default function Adminlogin({ setAdmLoggedIn }, { AdmLoggedIn }) {
   const handletpin = async () => {
     try {
       const tpin = parseInt(pin);
-      const response = await fetch('http://127.0.0.1:8000/api/tpin/', {
+      const response = await fetch('http://43.205.83.194/api/tpin/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

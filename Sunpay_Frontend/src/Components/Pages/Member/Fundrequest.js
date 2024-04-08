@@ -15,7 +15,7 @@ const Fundrequest = (props) => {
   const fetchBank = async () => {
     try {
       
-      const response = await axios.get('http://127.0.0.1:8000/api/companybanks/'); // Assuming '/api/options' is your backend endpoint
+      const response = await axios.get('http://43.205.83.194/api/companybanks/'); // Assuming '/api/options' is your backend endpoint
       setOptions(response.data);       
       
     } catch (error) {
@@ -47,11 +47,11 @@ const Fundrequest = (props) => {
     // Function to handle form submission
     const submitfundrequest = async(e) => {
       e.preventDefault();
-      const userresponse = await axios.get(`http://127.0.0.1:8000/api/users/${props.data.id}`)
+      const userresponse = await axios.get(`http://43.205.83.194/api/users/${props.data.id}`)
       setmobile_number(userresponse.data.mobile)
 
       console.log('Form submitted:', { bank_acc_number, amount, ref_number, payment_date, payment_mode, remark, mobile_number });
-      const response = await fetch('http://127.0.0.1:8000/api/fund_request/', {
+      const response = await fetch('http://43.205.83.194/api/fund_request/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
