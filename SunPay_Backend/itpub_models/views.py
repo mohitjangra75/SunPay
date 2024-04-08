@@ -389,8 +389,23 @@ class FundRequest(APIView):
             opening_balance=opening_balance,
             running_balance=running_balance
         )
-        wallet_obj.update_balance(amount)
-        return Response({"message": "Successfully initiated fund request"})
+        return Response({"message": "Successfully initiated fund request", "transaction_id": tr_obj.id})
+    def put(self, request, *args, **kwargs):
+        transaction_id = request.data.get("transaction_id")
+        if not transaction_id:
+            return Response({"error": "Transaction ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            tr_obj = UserTransactions.objects.get(id=transaction_id)
+        except UserTransactions.DoesNotExist:
+            return Response({"error": "Transaction not found"}, status=status.HTTP_404_NOT_FOUND)
+        tr_obj.transaction_status = TransactionStatus.SUCCESS
+        tr_obj.save()
+        if tr_obj.transaction_status == TransactionStatus.SUCCESS:
+            tr_obj.user.wallet_obj.update_balance(tr_obj.amount)
+        else:
+            tr_obj.delete()
+            raise ValidationError("Transaction failed")
+        return Response({"message": "Transaction status updated successfully"})
 
 class GetBBPSTypes(APIView):
 

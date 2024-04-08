@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, BankDetails, Bank, CompanyBank, BBPSProviders, State, UserWallet
+from .models import User, BankDetails, Bank, CompanyBank, BBPSProviders, State, UserWallet, UserTransactions
 
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -41,3 +41,8 @@ class StateSerializer(serializers.ModelSerializer):
     class Meta:
         model = State
         fields = '__all__'
+
+class UserTransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserTransactions
+        fields = '_all_'
