@@ -17,6 +17,8 @@ import s4 from './Images Homepage/service-4.jpg'
 import s5 from './Images Homepage/service-5.jpg'
 import s6 from './Images Homepage/service-6.jpg'
 import s7 from './Images Homepage/service-7.jpg'
+import s8 from './Images Homepage/bbps.png'
+import recharge from './Images Homepage/recharge.png'
 import { AiTwotoneAppstore } from "react-icons/ai";
 import abimgr from './Images Homepage/aboutsecimg.png'
 
@@ -42,7 +44,7 @@ export default function HomePage() {
                 <span className=' w-128'> 
                 <p className='text-2xl mt-4 mb-4'>AEPS</p>
                   <p className='text-4xl'>Aadhar Enabled Payment System</p>
-                  <p className='w-128a text-lg mt-8'>
+                  <p className='w-128 text-lg mt-8 w-96'>
                 Aadhaar Enabled Payment System (AEPS) is a sort of installment framework that depends on the Unique Identification Number and permits Aadhaar card holders to consistently make money related exchanges through Aadhaar-based confirmation.
                 </p>
                 </span>
@@ -66,17 +68,16 @@ export default function HomePage() {
               <div className='hgfd text-black grid px-4 '>
                 
                 <span className=' w-128'> 
-                <p className='text-2xl mt-4 mb-4'>AEPS</p>
-                  <p className='text-4xl'>Aadhar Enabled Payment System</p>
-                  <p className='w-128a text-lg mt-8'>
-                Aadhaar Enabled Payment System (AEPS) is a sort of installment framework that depends on the Unique Identification Number and permits Aadhaar card holders to consistently make money related exchanges through Aadhaar-based confirmation.
-                </p>
+                <p className='text-2xl mt-4 mb-4'>BBPS</p>
+                  <p className='text-4xl'>Bharat Billpay Payment System</p>
+                  <p className='w-128 text-lg mt-8 w-96'>
+                  Bharat Bill Payment System facilitates the installment of bills and enhances the security and speed of bill pay. The administration is accessible in different installment modes, on the web and through a system of specialists                </p>
                 </span>
                
               </div>
               </div>
             <div className="homimgcont ">
-                  <img src={aeps} alt="" />
+                  <img src={s8} alt="" className='pb-2'/>
             </div>
            </div>
            
@@ -92,17 +93,16 @@ export default function HomePage() {
               <div className='hgfd text-black grid px-4 '>
                 
                 <span className=' w-128'> 
-                <p className='text-2xl mt-4 mb-4'>AEPS</p>
-                  <p className='text-4xl'>Aadhar Enabled Payment System</p>
-                  <p className='w-128a text-lg mt-8'>
-                Aadhaar Enabled Payment System (AEPS) is a sort of installment framework that depends on the Unique Identification Number and permits Aadhaar card holders to consistently make money related exchanges through Aadhaar-based confirmation.
-                </p>
+                <p className='text-2xl mt-4 mb-4'>Recharge</p>
+                  <p className='text-4xl'>Mobile Recharge, Utility Bill <br />Payments, M-ATM!</p>
+                  <p className='w-96 text-lg mt-8'>
+                  SunPay includes virtually everything you need to expand upon your current service offerings or start your own Multi-services business.                </p>
                 </span>
                
               </div>
               </div>
             <div className="homimgcont ">
-                  <img src={aeps} alt="" />
+                  <img src={recharge} alt="" />
             </div>
            </div>
            
@@ -110,7 +110,7 @@ export default function HomePage() {
         </div>
       </SwiperSlide>
 
-      <SwiperSlide>
+      {/* <SwiperSlide>
       <div className='swiperslide4'>
         <div className="wrapcont  w-3/4">
            <div className='itemwrap mt-5 flex w-full  bg-yellow-300 '>
@@ -120,9 +120,7 @@ export default function HomePage() {
                 <span className=' w-128'> 
                 <p className='text-2xl mt-4 mb-4'>AEPS</p>
                   <p className='text-4xl'>Aadhar Enabled Payment System</p>
-                  <p className='w-128a text-lg mt-8'>
-                Aadhaar Enabled Payment System (AEPS) is a sort of installment framework that depends on the Unique Identification Number and permits Aadhaar card holders to consistently make money related exchanges through Aadhaar-based confirmation.
-                </p>
+                  <p className='w-128a text-lg mt-8'> </p>
                 </span>
                
               </div>
@@ -186,7 +184,7 @@ export default function HomePage() {
            
           </div>
         </div>
-      </SwiperSlide>
+      </SwiperSlide> 
 
       <SwiperSlide>
       <div className='swiperslide7'>
@@ -238,7 +236,7 @@ export default function HomePage() {
            
           </div>
         </div>
-      </SwiperSlide>
+      </SwiperSlide> */}
    
     </Swiper>
          
