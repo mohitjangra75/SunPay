@@ -20,12 +20,12 @@ const Addbeneficiary = (props) => {
   const fetchBank = async () => {
     try {
       
-      const userresponse = await axios.get(`http://new.sunpay.co.in/api/users/${props.data.id}`)
+      const userresponse = await axios.get(`https://new.sunpay.co.in/api/users/${props.data.id}`)
       setnumber(userresponse.data.id)
       setpartnerSubId("9311395921")
       setuser_id(userresponse.data.username)
 
-      const response = await axios.get('http://new.sunpay.co.in/api/allbanks/'); // Assuming '/api/options' is your backend endpoint
+      const response = await axios.get('https://new.sunpay.co.in/api/allbanks/'); // Assuming '/api/options' is your backend endpoint
       setOptions(response.data);       
       
     } catch (error) {
@@ -52,7 +52,7 @@ const Addbeneficiary = (props) => {
   const handlesubmit = async (e) => {
     try{
       console.log(mobile_number, bene_name, number, bank_account, bank_name, ifsc, user_id, partnerSubId)
-      const addresponse = await fetch('http://new.sunpay.co.in/api/add_beneficiary/', {
+      const addresponse = await fetch('https://new.sunpay.co.in/api/add_beneficiary/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
