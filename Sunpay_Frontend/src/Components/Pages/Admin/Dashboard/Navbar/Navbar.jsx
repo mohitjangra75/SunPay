@@ -14,7 +14,7 @@ const Navbar = (props) => {
         const fetchData = async () => {
           try {
             // Fetch data from your backend API
-            const response = await fetch(`http://43.205.83.194/api/get_users/${props.data.id}`);
+            const response = await fetch(`http://new.sunpay.co.in/api/get_users/${props.data.id}`);
             if (!response.ok) {
               throw new Error('Failed to fetch data');
             }

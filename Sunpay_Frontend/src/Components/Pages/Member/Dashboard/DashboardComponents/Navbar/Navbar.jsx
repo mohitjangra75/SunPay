@@ -27,7 +27,7 @@ const Navbar = (props) => {
     useEffect(() => { 
         const fetchuser = async () => {
             try {
-              const response = await axios.get(`http://43.205.83.194/api/users/${navdata.id}`)
+              const response = await axios.get(`http://new.sunpay.co.in/api/users/${navdata.id}`)
               setuser(response.data);
               console.log('liveuser called',user) 
             } catch (error) {

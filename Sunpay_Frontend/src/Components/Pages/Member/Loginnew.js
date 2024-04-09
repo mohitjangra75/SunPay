@@ -23,7 +23,7 @@ const Loginnew = () => {
 
   // const handletpin = async () => {
   // //   try {
-  // //     const response = await axios.post('http://43.205.83.194/api/login/', {
+  // //     const response = await axios.post('http://new.sunpay.co.in/api/login/', {
   // //         method: 'POST',
   // //         headers: {
   // //             'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ const Loginnew = () => {
 
   // try {
   //     const tpin =  parseInt(pin);
-  //     const response = await axios.post('http://43.205.83.194/api/tpin/', {
+  //     const response = await axios.post('http://new.sunpay.co.in/api/tpin/', {
   //       login_id,
   //       password,
   //       tpin
@@ -74,7 +74,7 @@ const Loginnew = () => {
   const handleLogin = async () => {
     try {
       const tpin = parseInt(pin);
-      const response = await fetch('http://43.205.83.194/api/tpin/', {
+      const response = await fetch('http://new.sunpay.co.in/api/tpin/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ const Loginnew = () => {
   //     // Fetch data from the backend API
   //     const fetchData = async () => {
   //       try {
-  //         const response = await fetch('http://43.205.83.194/api/tpin/');
+  //         const response = await fetch('http://new.sunpay.co.in/api/tpin/');
   //         const result = await response.json();
   //         setData(result);
   //       } catch (error) {

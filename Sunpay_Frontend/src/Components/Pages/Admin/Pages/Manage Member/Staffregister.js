@@ -123,7 +123,7 @@ const Staffregister = () => {
 
   console.log('Formdata submitted 1' , formData)
 
-  const regresponse = await fetch('http://43.205.83.194/api/register_user/', {
+  const regresponse = await fetch('http://new.sunpay.co.in/api/register_user/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -24,7 +24,7 @@ const Login = ({ setIsLoggedIn }, { IsLoggedIn }) => {
     setError(null);
     setLoading(true);
     try {
-      const response = await fetch('http://43.205.83.194/api/login/', {
+      const response = await fetch('http://new.sunpay.co.in/api/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,7 +47,7 @@ const Login = ({ setIsLoggedIn }, { IsLoggedIn }) => {
   const handletpin = async () => {
     try {
       const tpin = parseInt(pin);
-      const response = await fetch('http://43.205.83.194/api/tpin/', {
+      const response = await fetch('http://new.sunpay.co.in/api/tpin/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
