@@ -27,7 +27,7 @@ const Telephone = (props) =>  {
       const fetchData = async () => {
         try {
           // Fetch data from your backend API
-          const response = await fetch(`http://new.sunpay.co.in/api/get_providers/`);
+          const response = await fetch(`https://new.sunpay.co.in/api/get_providers/`);
           if (!response.ok) {
             throw new Error('Failed to fetch data');
           }
@@ -36,7 +36,7 @@ const Telephone = (props) =>  {
           const filteredOptions = data.filter(option => option.type === 17);
           setproviders(filteredOptions);
           
-          const stateresponse = await fetch(`http://new.sunpay.co.in/api/get_state/`);
+          const stateresponse = await fetch(`https://new.sunpay.co.in/api/get_state/`);
           if (!stateresponse.ok) {
             throw new Error('Failed to fetch data');
           }
@@ -57,7 +57,7 @@ const Telephone = (props) =>  {
     useEffect(() => { 
       const fetchuser = async () => {
           try {
-            const response = await axios.get(`http://new.sunpay.co.in/api/users/${navdata.id}`)
+            const response = await axios.get(`https://new.sunpay.co.in/api/users/${navdata.id}`)
             setuser(response.data);
           } catch (error) {
             console.error('Error fetching data:', error);
@@ -94,7 +94,7 @@ const Telephone = (props) =>  {
       }    
       
 
-      // const getbill = await fetch('http://new.sunpay.co.in/api/get_biller_details/', {
+      // const getbill = await fetch('https://new.sunpay.co.in/api/get_biller_details/', {
       //   method: 'POST',
       //   headers: {
       //     'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ const Telephone = (props) =>  {
       // const billresponse = await getbill.json();
       // console.log(billresponse)
       
-      // const paybill = await fetch('http://new.sunpay.co.in/api/pay_recharge/', {
+      // const paybill = await fetch('https://new.sunpay.co.in/api/pay_recharge/', {
       //   method: 'POST',
       //   headers: {
       //     'Content-Type': 'application/json',

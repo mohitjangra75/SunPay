@@ -17,7 +17,7 @@ function Payout(props) {
 
         try {
           const queryString = `mobile_number=${encodeURIComponent(mobile_number)}`;
-          const response = await fetch(`http://new.sunpay.co.in/api/get_linked_beneficiaries?${queryString}/`);
+          const response = await fetch(`https://new.sunpay.co.in/api/get_linked_beneficiaries?${queryString}/`);
           if (!response.ok) {
             throw new Error('Network response was not ok');
           }

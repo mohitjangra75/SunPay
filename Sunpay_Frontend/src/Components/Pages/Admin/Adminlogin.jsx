@@ -18,7 +18,7 @@ export default function Adminlogin({ setAdmLoggedIn }, { AdmLoggedIn }) {
     setError(null);
     setLoading(true);
     try {
-      const response = await fetch('http://new.sunpay.co.in/api/login/', {
+      const response = await fetch('https://new.sunpay.co.in/api/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,7 +41,7 @@ export default function Adminlogin({ setAdmLoggedIn }, { AdmLoggedIn }) {
   const handletpin = async () => {
     try {
       const tpin = parseInt(pin);
-      const response = await fetch('http://new.sunpay.co.in/api/tpin/', {
+      const response = await fetch('https://new.sunpay.co.in/api/tpin/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
