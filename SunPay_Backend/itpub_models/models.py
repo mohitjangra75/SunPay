@@ -12,9 +12,10 @@ class TransactionStatus(object):
 	FAILURE = 2
 	PENDING = 3
 
-class TransactionType(object):
-	IMPS = 1
-	NEFT = 2
+class TransactionType(object):   
+    IMPS = 1
+    NEFT = 2
+    WALLET = 3
 
 class BillType(object):
     ELECTRICITY = 0
@@ -269,6 +270,16 @@ class BankDetails(models.Model):
 
     def __str__(self):
         return self.beneficiary_name + "-" + self.registered_with.username
+    
+class Customer(models.Model):
+    customer_name = models.CharField(max_length=255, blank=True, null=True)
+    customer_mobile = models.CharField(max_length=10, unique=True, blank=True, null=True)
+    registered_with = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active =  models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.customer_mobile + "-" + self.registered_with.username
 
 class DMTTransactions(models.Model):
     STATUS = (
@@ -413,3 +424,21 @@ class State(models.Model):
 
     def __str__(self):
         return self.state_name
+
+class WalletTransactions(models.Model):
+    STATUS = (
+		(TransactionStatus.PENDING, 'PENDING'),
+		(TransactionStatus.FAILURE, 'FAILURE'),
+		(TransactionStatus.SUCCESS, 'SUCCESS'),
+	)
+    TYPE = (
+		(TransactionType.WALLET, 'WALLET'),
+	)
+    created_at = models.DateTimeField(auto_now_add=True)
+    ref_id = models.CharField(max_length=255, blank=True, null=True)
+    user =  models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
+    bank_acc_number = models.CharField(max_length=255, blank=True, null=True)
+    bene_id = models.IntegerField(blank=True, null=True)
+    transaction_status = models.SmallIntegerField(choices=STATUS, db_index=True,)
+    amount = models.IntegerField()
+    transaction_type = models.SmallIntegerField(choices=TYPE, db_index=True,)

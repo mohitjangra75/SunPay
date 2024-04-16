@@ -43,6 +43,7 @@ import Datacard from '../../Datacard'
 import Loanpayment from '../../Loanpayment'
 import Mcdtollservics from '../../Mcdtollservics'
 import Insurance from '../../Insurance'
+import AddCustomer from '../../Addcustomer';
 
 const MemberRouter = (props, {IsLoggedIn}) => {
   // const location = useLocation();
@@ -107,7 +108,7 @@ const MemberRouter = (props, {IsLoggedIn}) => {
           {category === 'wallet-to-wallet' && <Wallettransfer data={data} />}
           {category === 'moneytransferreceipt' && (<Moneytransferreceipt data={data}/>)}
           {category === 'credithistory' && <Creditcard data={data} />}
-          {category === 'addnewbeneficiary' && (<Addbeneficiary data={data}/>)}
+          {category === 'addcustomer' && (<AddCustomer data={data}/>)}
           {category === 'electricity' && (<Electricity data={data}/>)}
           {category === 'water' && (<Water data={data}/>)}
           {category === 'lic' && (<LIC data={data}/>)}

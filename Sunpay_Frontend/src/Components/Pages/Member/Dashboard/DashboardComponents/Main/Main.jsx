@@ -39,7 +39,7 @@ const Main = () => {
     <div className='maindashboardcont gap-20 w-full py-4 pr-2 pl-2 '>
 
       <div className='md:flex gap-2'>
-        <div className='servicecont text-xl md:pl-10 bg-red-200 p-4 md:w-[2200px] md:flex bg-orange-200'>
+        <div className='servicecont text-xl md:pl-10 bg-red-200 p-4 md:w-[1900px] md:flex bg-orange-200'>
           <div>  
             <div className='flex flex-wrap my-2 gap-12 gap-y-16'>
               <NavLink to='/member/moneytransfer'>

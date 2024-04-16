@@ -25,7 +25,8 @@ urlpatterns = [
     path('companybanks/', Companybank.as_view(), name='companybanks'),
     path('get_providers/', BBPSproviders.as_view(), name='BBPSproviders'),
     path('get_state/', States.as_view(), name='States'),
-
+    path('get_customer/', CheckCustomer.as_view(), name='CheckCustomer'),
+    path('fetch_beneficiary/', fetch_beneficiary.as_view(), name='fetch_beneficiary'),
 ]
 
 urlpatterns += router.urls

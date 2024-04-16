@@ -10,9 +10,7 @@ import Aboutpage from './Components/Pages/Aboutpage';
 import MemberRouter from './Components/Pages/Member/Dashboard/Pages/MemberRouter';
 import AdminDashboardRouter from './Components/Pages/Admin/Dashboard/AdminDashboardRouter';
 import Loginnew from './Components/Pages/Member/Loginnew';
-import NewMemberROuter from './Components/Pages/Member/Dashboard/Pages/NewMemberROuter';
 import PrivateRoute from './Components/Pages/Member/PrivateRoute';
-import Auth from './Components/Pages/Member/Auth';
 import Pagenotfound from './Components/Pages/Pagenotfound';
 import Admprivateroute from './Components/Pages/Admin/Pages/Admprivateroute';
 
@@ -41,7 +39,6 @@ function App() {
               <Route path='/member' element={<PrivateRoute IsLoggedIn={IsLoggedIn}/>} >
                   <Route path=':category' element={<MemberRouter/>}></Route> 
               </Route>
-              <Route path="/dashboard" element={<NewMemberROuter/>}></Route>
               <Route path='/member/trylogin' element={<Loginnew/>}></Route> 
             </Routes>
       </div>     

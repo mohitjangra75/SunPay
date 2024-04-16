@@ -35,6 +35,22 @@ def get_token():
 #     else:
 #         return {"status":False,
 #         "data":"Please verify details"}
+def fetch_beneficiary(payload):
+    token = get_token()
+    headers = {
+        "Token":token,
+        "Authorisedkey":"NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ=",
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+    }
+    url = "https://sit.paysprint.in/service-api/api/v1/service/dmt/beneficiary/registerbeneficiary/fetchbeneficiary"
+    response = requests.post(url=url,json=payload, headers=headers)
+    if response.ok:
+        return {"status":True,
+        "data":response.json()}
+    else:
+        return {"status":False,
+        "data":"Please verify details"}
 
 def add_beneficiary(api_token, mobile_number, bene_name, number, bank_account, bank_name, ifsc, user_id, partnerSubId):
     url = "https://api.levinfintech.com/api/levin/add-beneficiary"

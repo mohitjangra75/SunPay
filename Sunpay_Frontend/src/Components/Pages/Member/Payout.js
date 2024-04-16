@@ -1,13 +1,16 @@
 import React from 'react'
 import { useState, useEffect } from 'react';
 import { NavLink, Navigate, useNavigate } from 'react-router-dom';
+import axios from 'axios'
 import { AiFillDelete } from "react-icons/ai";
 import { AiOutlineCheckSquare } from "react-icons/ai";
 
-function Payout(props) {
+const Payout = (props) => {
   const [isShown, setIsShown] = useState(false);
-  const navigate = useNavigate
+  const navigate = useNavigate();
+ 
   const handleClick = event => {
+    setmobile('');
     setIsShown(current => !current);
   }
   const [error, setError] = useState(null);
@@ -16,26 +19,36 @@ function Payout(props) {
       if(mobile_number){
 
         try {
-          const queryString = `mobile_number=${encodeURIComponent(mobile_number)}`;
-          const response = await fetch(`https://new.sunpay.co.in/api/get_linked_beneficiaries?${queryString}/`);
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
+          const response = await fetch('http://127.0.0.1:8000/api/get_customer/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ mobile_number }),
+          });
           const result = await response.json();
-          console.log('getlinked',result)
-          // Process the data here
-        } catch (error) {
-          // setError(error.message);
-          console.log(error)
-          if (error.message === "Network response was not ok") {
-            console.log("error ")
-            // navigate('/member/addnewbeneficiary'); // Navigate to error page if error message is 'invalid details'
+
+          console.log(result)
+          if (result.message === 'Customer found'){
+            setIsShown(current => !current);
           }
-      }
-    }     
+          else {
+            alert("Customer not found. Register first.")
+            navigate('/member/addcustomer', {
+              state: { number : mobile_number  },
+            });
+          }
+        } catch (error) {
+          console.error('Error to connect:', error);
+        }
+    }  
+    else {
+      alert('Kindly Provide Mobile Number');
+    }   
   }
 
   const handlesearchbyacc = event => {
+    
     setIsShown(current => !current);
   }
 
@@ -45,8 +58,8 @@ function Payout(props) {
   const [dataall, setDatall] = useState();  
   useEffect(() => {
     setDatall(props);
-    console.log('dataall from navbar', dataall);
   }, []);
+
   return (
     <div>
       <div className='moneytransfer p-4'>  
@@ -69,7 +82,7 @@ function Payout(props) {
         </div>
       )}
 
-      {/* {isShown && (
+      {isShown && (
         <div className='bg-slate-300 p-2 border-2 border-red-200'>
             <div className='flex flex-wrap md:ml-6'>
               <input type="submit" value="Back" onClick={handleClick}  className=' text-lg px-2 bg-white border border-black hover:bg-blue-700 hover:text-white hover:cursor-pointer rounded-md'/>
@@ -125,7 +138,7 @@ function Payout(props) {
         </div>
       )
 
-      } */}
+      }
     </div>
   </div>
   )

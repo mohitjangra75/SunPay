@@ -2,9 +2,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
-from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, CompanyBankSerializer, BBPSProviderSerializer, StateSerializer
-from .services import add_beneficiary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp
-from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSTransactions, UserWallet, Package, CompanyBank, BBPSProviders, State
+from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, CompanyBankSerializer, BBPSProviderSerializer, StateSerializer, CustomerSerializer
+from .services import add_beneficiary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_beneficiary
+from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSTransactions, UserWallet, Package, CompanyBank, BBPSProviders, State, Customer
 import uuid
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
@@ -260,6 +260,7 @@ class RegisterRemitter(APIView):
         otp = request.data.get("otp")
         stateresp = request.data.get("stateresp")
         mobile_number = request.data.get("mobile_number")
+        dob = request.data.get("dob")
         if not mobile_number:
             return Response({"error": "Please add mobile_number in query params"}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -270,7 +271,7 @@ class RegisterRemitter(APIView):
             "address": adress,
             "otp": otp,
             "pincode": pin_code,
-            "dob" : "1995-01-01",
+            "dob" : dob,
             "gst_state" : "17",
             "bank3_flag" : "no",
             "stateresp":stateresp}
@@ -573,4 +574,93 @@ class GetPackageDetails(APIView):
         except:
             return Response({"error":"Please try again later"})
 
+
+class GetUsers(APIView):
+    def get(self, request, id=None): 
+        if id is not None:
+            try:
+                user = User.objects.get(id=id)
+                serializer = UserSerializer(user)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except User.DoesNotExist:
+                return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            users = User.objects.all()
+            serializer = UserSerializer(users, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+class CheckCustomer(APIView):
+    def post(self, request):
+        # Assuming you are sending the mobile number in the request POST data
+        mobile_number = request.data.get('mobile_number')
+        
+        if mobile_number:
+            try:
+                customer = Customer.objects.get(customer_mobile=mobile_number)
+                print(customer)
+                payload = {"mobile": mobile_number,"bank3_flag": "NO"}
+                response = query_remitter(payload=payload)
+                print(response)
+                if response["status"]==True:
+                    payload = {"mobile": mobile_number}
+                return Response(response)
+                # serializer = CustomerSerializer(customer)
+                # return Response({"message": "Customer found", "data":serializer.data }, status=status.HTTP_200_OK)             
+            except Customer.DoesNotExist:
+                return JsonResponse({'Message': 'Customer not found registering.'}, status=404)
+        else:
+            return Response({'error': 'Mobile number not provided'}, status=400)
+        
+class fetch_beneficiary(APIView):
+    def post(self,request):
+        # Assuming you are sending the mobile number in the request POST data
+        mobile_number = request.data.get('mobile_number')
+        if mobile_number:
+            payload = {"mobile": mobile_number}
+            response = fetch_beneficiary(payload)
+            if response["status"]==True:
+                return Response(response)
+            else:
+                return Response({'error':'Unable to fetch bank details'})
+
             
+# class Wallettowallet(APIView):
+
+#     def post(self, request, *args, **kwargs):
+
+#         amount = request.data.get("amount")
+#         bene_id =request.data.get("bene_id")
+#         amount =request.data.get("amount")
+#         mobile = request.data.get("mobile")
+#         mpin = request.data.get("mpin")
+#         user_id = request.data.get("user_id")
+
+#         if not amount and not bene_id  and not mobile and not mpin :
+#             return Response({"error": "Please provide required fields"}, status=status.HTTP_400_BAD_REQUEST)
+#         try:
+#             user=User.objects.get(id=user_id)
+#         except:
+#             return Response({"error": "Invalid mobile number"}, status=status.HTTP_400_BAD_REQUEST)
+#         wallet_obj = user.userwallet_set.first()
+#         if not (amount)<wallet_obj.available_balance:
+#             return Response({"error": "Insufficient Balance"}, status=status.HTTP_400_BAD_REQUEST)
+#         if not user.mpin == mpin:
+#             return Response({"error": "Invalid mpin"}, status=status.HTTP_400_BAD_REQUEST)
+
+        
+#         bene_user = UserWallet.objects.get(user_id=bene_id)
+#         if(bene_user):
+#             bene_user.available_balance = bene_user.available_balance + (amount) 
+#             bene_user.save()
+
+#             wallet_obj.refresh_from_db()
+#             wallet_obj.available_balance = wallet_obj.available_balance + (amount)
+#             wallet_obj.save()
+
+#             ref_id = str(uuid.uuid4()).replace('-', 'D')[1:21]
+
+#             if(ref_id):
+#                 return Response({"message": "Amount transferred successfully"}, status=status.HTTP_201_CREATED)
+#         else:
+#             return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
+
