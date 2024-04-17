@@ -35,7 +35,7 @@ def get_token():
 #     else:
 #         return {"status":False,
 #         "data":"Please verify details"}
-def fetch_beneficiary(payload):
+def fetch_paysprintbeneficiary(payload):
     token = get_token()
     headers = {
         "Token":token,

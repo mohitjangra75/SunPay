@@ -272,7 +272,8 @@ class BankDetails(models.Model):
         return self.beneficiary_name + "-" + self.registered_with.username
     
 class Customer(models.Model):
-    customer_name = models.CharField(max_length=255, blank=True, null=True)
+    customer_firstname = models.CharField(max_length=255, blank=True, null=True)
+    customer_lastname = models.CharField(max_length=255, blank=True, null=True)
     customer_mobile = models.CharField(max_length=10, unique=True, blank=True, null=True)
     registered_with = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -1,5 +1,8 @@
 import React from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useEffect } from 'react';
+import axios from 'axios';
 import recharge from '../Data/imgs/recharge.png'
 import moneyt from '../Data/imgs/moneytransfer.png'
 import aeps from '../Data/imgs/fingerprint.png'
@@ -34,7 +37,26 @@ import hotel from '../Data/imgs/hotel.png'
 import flight from '../Data/imgs/plane.png'
 import wallet from '../Data/imgs/wallettowallet.png'
 
-const Main = () => {
+const Main = (props) => {
+
+  const navigate = useNavigate();
+  const navdata = props.data;
+  const [user, setuser] = useState([]);
+
+  const location = useLocation();
+  useEffect(() => { 
+    const fetchuser = async () => {
+        try {
+          const response = await axios.get(`http://127.0.0.1:8000/api/users/${navdata.id}`)
+          setuser(response.data);
+          console.log('liveuser dashboard',user) 
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      };
+      fetchuser();
+  }, [location]); 
+
   return (
     <div className='maindashboardcont gap-20 w-full py-4 pr-2 pl-2 '>
 
@@ -83,6 +105,8 @@ const Main = () => {
                   <h1 className='text-lg text-center mt-2 font-semibold'>UPI</h1>
                 </div>
               </NavLink>  */}
+
+              
 
               <NavLink to='/member/electricity'>
               <div className='service bg-white border-[2px]  w-24 h-24 border-slate-950 rounded-lg hover:bg-blue-500 hover:text-white'>

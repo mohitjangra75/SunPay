@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, CompanyBankSerializer, BBPSProviderSerializer, StateSerializer, CustomerSerializer
-from .services import add_beneficiary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_beneficiary
+from .services import add_beneficiary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_paysprintbeneficiary
 from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSTransactions, UserWallet, Package, CompanyBank, BBPSProviders, State, Customer
 import uuid
 from django.http import JsonResponse
@@ -251,35 +251,35 @@ class GetBeneficiaryLinked(APIView):
             return Response({"error": "Please register first to send money"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class RegisterRemitter(APIView):
-    def post(self, request, *args, **kwargs):
-        first_name = request.data.get("first_name")
-        last_name = request.data.get("last_name")
-        adress = request.data.get("adress")
-        pin_code = request.data.get("pin_code")
-        otp = request.data.get("otp")
-        stateresp = request.data.get("stateresp")
-        mobile_number = request.data.get("mobile_number")
-        dob = request.data.get("dob")
-        if not mobile_number:
-            return Response({"error": "Please add mobile_number in query params"}, status=status.HTTP_400_BAD_REQUEST)
+# class RegisterRemitter(APIView):
+#     def post(self, request, *args, **kwargs):
+#         first_name = request.data.get("first_name")
+#         last_name = request.data.get("last_name")
+#         adress = request.data.get("adress")
+#         pin_code = request.data.get("pin_code")
+#         otp = request.data.get("otp")
+#         stateresp = request.data.get("stateresp")
+#         mobile_number = request.data.get("mobile_number")
+#         dob = request.data.get("dob")
+#         if not mobile_number:
+#             return Response({"error": "Please add mobile_number in query params"}, status=status.HTTP_400_BAD_REQUEST)
         
-        payload = {
-            "mobile": mobile_number,
-            "firstname": first_name,
-            "lastname": last_name,
-            "address": adress,
-            "otp": otp,
-            "pincode": pin_code,
-            "dob" : dob,
-            "gst_state" : "17",
-            "bank3_flag" : "no",
-            "stateresp":stateresp}
-        response = register_remitter(payload=payload)
-        if response["status"]==True:
-            return Response({"data":response["data"],})
-        else:
-            return Response({"error": "Please register first to send money"}, status=status.HTTP_400_BAD_REQUEST)
+#         payload = {
+#             "mobile": mobile_number,
+#             "firstname": first_name,
+#             "lastname": last_name,
+#             "address": adress,
+#             "otp": otp,
+#             "pincode": pin_code,
+#             "dob" : dob,
+#             "gst_state" : "17",
+#             "bank3_flag" : "no",
+#             "stateresp":stateresp}
+#         response = register_remitter(payload=payload)
+#         if response["status"]==True:
+#             return Response({"data":response["data"],})
+#         else:
+#             return Response({"error": "Please register first to send money"}, status=status.HTTP_400_BAD_REQUEST)
         
 class SendMoneyDMT(APIView):
 
@@ -603,26 +603,69 @@ class CheckCustomer(APIView):
                 print(response)
                 if response["status"]==True:
                     payload = {"mobile": mobile_number}
-                return Response(response)
-                # serializer = CustomerSerializer(customer)
-                # return Response({"message": "Customer found", "data":serializer.data }, status=status.HTTP_200_OK)             
+                    serializer = CustomerSerializer(customer)
+                    return Response({"message": "Customer found", "data":serializer.data, "Response": response }, status=status.HTTP_200_OK)  
+                          
             except Customer.DoesNotExist:
                 return JsonResponse({'Message': 'Customer not found registering.'}, status=404)
         else:
             return Response({'error': 'Mobile number not provided'}, status=400)
+
+class RegisterRemitter(APIView):
+    def post(self, request):
+        first_name = request.data.get("first_name")
+        last_name = request.data.get("last_name")
+        adress = request.data.get("adress")
+        pin_code = request.data.get("pin_code")
+        otp = request.data.get("otp")
+        stateresp = request.data.get("stateresp")
+        mobile_number = request.data.get("mobile_number")
+        dob = request.data.get("dob")
+        registered_with = request.data.get("registered_with")
         
+        # if not mobile_number:
+        #     return Response({"error": "Please add mobile_number in query params"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        payload = {
+            "mobile": mobile_number,
+            "firstname": first_name,
+            "lastname": last_name,
+            "address": adress,
+            "otp": otp,
+            "pincode": pin_code,
+            "dob" : dob,
+            "gst_state" : "17",
+            "bank3_flag" : "no",
+            "stateresp":stateresp}
+        response = register_remitter(payload=payload)
+        
+        if response["status"]==True:
+            if response["status_id"] == 25:
+                customer_details =  Customer.objects.create(
+                    customer_firstname = first_name,
+                    customer_lastname = last_name,
+                    customer_mobile = mobile_number,
+                    registered_with=registered_with,
+                    is_active = True
+                )
+                return Response({"message": "Customer registered successfully"}, status=status.HTTP_201_CREATED)
+            else:
+                return Response({"error": "Failed to add customer"}, status=status.HTTP_400_BAD_REQUEST)
+
+     
 class fetch_beneficiary(APIView):
     def post(self,request):
         # Assuming you are sending the mobile number in the request POST data
         mobile_number = request.data.get('mobile_number')
         if mobile_number:
             payload = {"mobile": mobile_number}
-            response = fetch_beneficiary(payload)
+            response = fetch_paysprintbeneficiary(payload)
             if response["status"]==True:
                 return Response(response)
             else:
                 return Response({'error':'Unable to fetch bank details'})
-
+        else:
+            return Response({'Message': 'Kindly provide mobile number'})
             
 # class Wallettowallet(APIView):
 
