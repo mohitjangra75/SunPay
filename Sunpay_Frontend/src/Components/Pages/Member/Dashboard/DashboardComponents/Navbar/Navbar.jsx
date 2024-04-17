@@ -55,11 +55,11 @@ const Navbar = (props) => {
             </div>
 
             <div className='md:pl-12 md:flex md:gap-8'>
-                <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">Welcome! <br/>{navdata.name}</div>
+                <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">Welcome! <br/>{user.name}</div>
                 <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">Wallet Balance <br/>{user.available_balance}</div>
                 <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">AEPS Wallet <br/>{user.available_balance}</div>
-                <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">ASM <br/>{navdata.asm_name}</div>
-                <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">DIST. <br/>{navdata.distributor_name}</div>
+                <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">ASM <br/>{user.asm_name}</div>
+                <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">DIST. <br/>{user.distributor_name}</div>
             </div>
 
             <div className='flex gap-8 float-right ml-16'>

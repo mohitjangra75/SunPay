@@ -86,8 +86,7 @@ class PaymentMode(object):
 
 class FundRequest(models.Model):
     # user jiske through ye request lgi h
-    user_id = models.CharField(max_length=255, blank=True, null=True)
-    username = models.CharField(max_length=255, blank=True, null=True)
+    user = models.CharField(max_length=255, blank=True, null=True)
     amount = models.FloatField(blank=True, null=True)
     bank_reference = models.CharField(max_length=255, blank=True, null=True, unique=True)
     payment_mode=  ((PaymentMode.IMPS, 'IMPS'),

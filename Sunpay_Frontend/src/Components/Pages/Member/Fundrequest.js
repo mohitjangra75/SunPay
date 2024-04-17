@@ -50,13 +50,13 @@ const Fundrequest = (props) => {
       const userresponse = await axios.get(`http://127.0.0.1:8000/api/users/${props.data.id}`)
       setmobile_number(userresponse.data.mobile)
 
-      console.log('Form submitted:', { bank_acc_number, amount, ref_number, payment_date, payment_mode, remark, mobile_number });
+      console.log('Form submitted:', { bank_acc_number, amount, bank_ref_number, payment_date, payment_mode, remark, mobile_number });
       const response = await fetch('http://127.0.0.1:8000/api/fund_request/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(bank_acc_number, amount, ref_number, payment_date, payment_mode, remark, mobile_number),
+      body: JSON.stringify(bank_acc_number, amount, bank_ref_number, payment_date, payment_mode, remark, mobile_number),
     });
     const backresp = await response.json();
     console.log(backresp);
@@ -72,7 +72,7 @@ const Fundrequest = (props) => {
       if(
         bank_acc_number && 
         amount && 
-        ref_number && 
+        bank_ref_number && 
         payment_mode &&
         payment_date &&
         remark
@@ -91,7 +91,7 @@ const Fundrequest = (props) => {
 
   const [bank_acc_number, setbank] = useState('');
   const [amount, setamount] = useState(0);
-  const [ref_number, setrefer] = useState('');
+  const [bank_ref_number, setrefer] = useState('');
   const [payment_mode, setmode] = useState('');
   const [payment_date, setdate] = useState('');
   const [remark, setremarks] = useState('');
@@ -210,7 +210,7 @@ const Fundrequest = (props) => {
 
                       <tr className='flex border py-2 border-black justify-start text-2xl '>
                         <div className='w-1/2 mx-6 font-bold'>Bank Reference Number :</div>
-                        <div className='w-1/2 mx-6 font-light'>{ref_number}</div>
+                        <div className='w-1/2 mx-6 font-light'>{bank_ref_number}</div>
                       </tr>
 
                       {/* <tr className='flex border py-2 border-black justify-start text-2xl '>

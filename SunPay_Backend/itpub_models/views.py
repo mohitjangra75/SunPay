@@ -2,9 +2,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
-from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, CompanyBankSerializer, BBPSProviderSerializer, StateSerializer, CustomerSerializer
+from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, CompanyBankSerializer, BBPSProviderSerializer, StateSerializer, CustomerSerializer, UserTransactionSerializer
 from .services import add_beneficiary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_paysprintbeneficiary
-from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSTransactions, UserWallet, Package, CompanyBank, BBPSProviders, State, Customer
+from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSTransactions, UserWallet, Package, CompanyBank, BBPSProviders, State, Customer, FundRequest
 import uuid
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
@@ -365,11 +365,11 @@ class FundRequest(APIView):
         payment_mode = request.data.get("payment_mode")
         payment_date = request.data.get("payment_date")
         remark = request.data.get("remark")
-        mobile_number = request.data.get("mobile_number")
-        if not all([amount, bank_acc_number, payment_mode, payment_date , mobile_number]):
+        username = request.data.get("username")
+        if not all([amount, bank_acc_number, payment_mode, payment_date , username]):
             return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            user = User.objects.get(mobile=mobile_number)
+            user = User.objects.get(username=username)
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
         try:
@@ -391,6 +391,7 @@ class FundRequest(APIView):
             running_balance=running_balance
         )
         return Response({"message": "Successfully initiated fund request", "transaction_id": tr_obj.id})
+    
     def put(self, request, *args, **kwargs):
         transaction_id = request.data.get("transaction_id")
         if not transaction_id:
@@ -407,6 +408,19 @@ class FundRequest(APIView):
             tr_obj.delete()
             raise ValidationError("Transaction failed")
         return Response({"message": "Transaction status updated successfully"})
+    
+    def get(self, request, id=None): 
+        if id is not None:
+            try:
+                transaction = UserTransactions.objects.get(id=id)
+                serializer = UserTransactionSerializer(transaction)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except User.DoesNotExist:
+                return Response({"message": "No transactions found"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            transactions = UserTransactions.objects.all()
+            serializer = UserTransactionSerializer(transactions, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 class GetBBPSTypes(APIView):
 
@@ -551,8 +565,8 @@ class UserViewset(
         )
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "User updated successfully", "user": serializer.data}, status=status.HTTP_201_CREATED)
+        return Response({"message": "Unable to update user", "Error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)

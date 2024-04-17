@@ -1,9 +1,28 @@
 import React, { useEffect } from 'react';
 import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import axios from 'axios'
+import { NavLink, useLocation } from 'react-router-dom';
 import userprofile from './Dashboard/DashboardComponents/Data/imgs/userprofile.png';
 
 const Memberprofile = (props) => {
+
+  const localdata = props.data;
+  const [user, setuser] = useState([]);
+
+  const location = useLocation();
+  useEffect(() => { 
+    const fetchuser = async () => {
+        try {
+          const response = await axios.get(`http://127.0.0.1:8000/api/users/${localdata.id}`)
+          setuser(response.data);
+          console.log('liveuser dashboard',user) 
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      };
+      fetchuser();
+  }, [location]); 
+  
   const [openTab, setOpenTab] = useState(1);
 
   const [dataall, setDatall] = useState();  
@@ -23,7 +42,7 @@ const Memberprofile = (props) => {
           />
         </div>
         <div className='text-center mt-2'>
-          <h1 className='text-3xl font-black'>{props.data.name}</h1>
+          <h1 className='text-3xl font-black'>{user.name}</h1>
           <h1 className='text-xl'>Role</h1>
         </div>
       </div>
@@ -75,7 +94,7 @@ const Memberprofile = (props) => {
                       Name
                     </td>
                     <td scope='col' className='pl-12 py-3 '>
-                      {props.data.name}
+                      {user.name}
                     </td>
                   </tr>
                   <tr className='bg-gray-200 border dark:bg-gray-800 dark:border-gray-700 '>
@@ -86,7 +105,7 @@ const Memberprofile = (props) => {
                       Address
                     </td>
                     <td scope='col' className='pl-12  py-3 ml-4'>
-                      {props.data.address}
+                      {user.address}
                     </td>
                   </tr>
                   <tr className='bg-white border dark:bg-gray-800 dark:border-gray-700 '>
@@ -97,7 +116,7 @@ const Memberprofile = (props) => {
                       Mobile No.
                     </td>
                     <td scope='col' className='pl-12 py-3 ml-4'>
-                    {props.data.mobile}
+                    {user.mobile}
                     </td>
                   </tr>
                   <tr className='bg-gray-200 border dark:bg-gray-800 dark:border-gray-700 '>
@@ -108,7 +127,7 @@ const Memberprofile = (props) => {
                       ShopName
                     </td>
                     <td scope='col' className='pl-12  py-3 ml-4'>
-                      {props.data.shop_name}
+                      {user.shop_name}
                     </td>
                   </tr>
                   <tr className='bg-white border dark:bg-gray-800 dark:border-gray-700 '>
@@ -119,7 +138,7 @@ const Memberprofile = (props) => {
                       Email ID
                     </td>
                     <td scope='col' className='pl-12  py-3 ml-4'>
-                      {props.data.email}
+                      {user.email}
                     </td>
                   </tr>
                   <tr className='bg-gray-200 border dark:bg-gray-800 dark:border-gray-700 '>
@@ -130,7 +149,7 @@ const Memberprofile = (props) => {
                       Aadhaar
                     </td>
                     <td scope='col' className='pl-12  py-3 ml-4'>
-                      {props.data.aadhar}
+                      {user.aadhar}
                     </td>
                   </tr>
                   <tr className='bg-white border dark:bg-gray-800 dark:border-gray-700 '>
@@ -141,7 +160,7 @@ const Memberprofile = (props) => {
                       PAN Card
                     </td>
                     <td scope='col' className='pl-12  py-3 ml-4'>
-                      {props.data.pan}
+                      {user.pan}
                     </td>
                   </tr>
                 </tbody>
