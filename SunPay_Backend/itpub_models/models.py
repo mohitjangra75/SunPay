@@ -442,3 +442,20 @@ class WalletTransactions(models.Model):
     transaction_status = models.SmallIntegerField(choices=STATUS, db_index=True,)
     amount = models.IntegerField()
     transaction_type = models.SmallIntegerField(choices=TYPE, db_index=True,)
+
+
+
+from django.dispatch import receiver
+from django.db.models.signals import pre_save
+
+@receiver(pre_save, sender=UserTransactions)
+def update_wallet_balance(sender, instance, **kwargs):
+    if instance.pk:
+        try:
+            old_instance = UserTransactions.objects.get(pk=instance.pk)
+        except UserTransactions.DoesNotExist:
+            return
+        if old_instance.transaction_status == TransactionStatus.PENDING and instance.transaction_status == TransactionStatus.SUCCESS:
+            userwallet = UserWallet.objects.get(user_id=old_instance.user_id)
+            userwallet.available_balance =  userwallet.available_balance + instance.amount
+            userwallet.save()
