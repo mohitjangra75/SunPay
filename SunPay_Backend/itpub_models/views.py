@@ -392,35 +392,35 @@ class FundRequest(APIView):
         )
         return Response({"message": "Successfully initiated fund request", "transaction_id": tr_obj.id})
     
-    def put(self, request, *args, **kwargs):
-        transaction_id = request.data.get("transaction_id")
-        if not transaction_id:
-            return Response({"error": "Transaction ID is required"}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            tr_obj = UserTransactions.objects.get(id=transaction_id)
-        except UserTransactions.DoesNotExist:
-            return Response({"error": "Transaction not found"}, status=status.HTTP_404_NOT_FOUND)
-        tr_obj.transaction_status = TransactionStatus.SUCCESS
-        tr_obj.save()
-        if tr_obj.transaction_status == TransactionStatus.SUCCESS:
-            tr_obj.user.wallet_obj.update_balance(tr_obj.amount)
-        else:
-            tr_obj.delete()
-            raise ValidationError("Transaction failed")
-        return Response({"message": "Transaction status updated successfully"})
+    # def put(self, request, *args, **kwargs):
+    #     transaction_id = request.data.get("transaction_id")
+    #     if not transaction_id:
+    #         return Response({"error": "Transaction ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+    #     try:
+    #         tr_obj = UserTransactions.objects.get(id=transaction_id)
+    #     except UserTransactions.DoesNotExist:
+    #         return Response({"error": "Transaction not found"}, status=status.HTTP_404_NOT_FOUND)
+    #     tr_obj.transaction_status = TransactionStatus.SUCCESS
+    #     tr_obj.save()
+    #     if tr_obj.transaction_status == TransactionStatus.SUCCESS:
+    #         tr_obj.user.wallet_obj.update_balance(tr_obj.amount)
+    #     else:
+    #         tr_obj.delete()
+    #         raise ValidationError("Transaction failed")
+    #     return Response({"message": "Transaction status updated successfully"})
     
-    def get(self, request, id=None): 
-        if id is not None:
-            try:
-                transaction = UserTransactions.objects.get(id=id)
-                serializer = UserTransactionSerializer(transaction)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            except User.DoesNotExist:
-                return Response({"message": "No transactions found"}, status=status.HTTP_404_NOT_FOUND)
-        else:
-            transactions = UserTransactions.objects.all()
-            serializer = UserTransactionSerializer(transactions, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+    # def get(self, request, id=None): 
+    #     if id is not None:
+    #         try:
+    #             transaction = UserTransactions.objects.get(id=id)
+    #             serializer = UserTransactionSerializer(transaction)
+    #             return Response(serializer.data, status=status.HTTP_200_OK)
+    #         except User.DoesNotExist:
+    #             return Response({"message": "No transactions found"}, status=status.HTTP_404_NOT_FOUND)
+    #     else:
+    #         transactions = UserTransactions.objects.all()
+    #         serializer = UserTransactionSerializer(transactions, many=True)
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class GetBBPSTypes(APIView):
 
@@ -680,6 +680,32 @@ class fetch_beneficiary(APIView):
                 return Response({'error':'Unable to fetch bank details'})
         else:
             return Response({'Message': 'Kindly provide mobile number'})
+            
+class UpdateFundRequest(APIView):
+
+    def post(self, request, *args, **kwargs):
+        tr_id = request.data.get('transaction_id')
+        if tr_id:
+            tr = UserTransactions.objects.get(id=tr_id)
+            tr.transaction_status=TransactionStatus.SUCCESS
+            tr.save()
+            return Response({'details':"updated succesfully"})
+        else:
+            return Response({'Message': 'Error occured'})
+
+class GetFundRequest(APIView):
+
+    def get(self, request, *args, **kwargs):
+        user_id = request.query_params.get('user_id', None) 
+        is_admin = request.query_params.get('is_admin', False) 
+        if is_admin:
+            user_transactions = UserTransactions.objects.all()
+            data = UserTransactionSerializer(user_transactions,many=True).data
+            return Response(data)
+        if user_id:
+            user_transactions = UserTransactions.objects.filter(user_id=user_id)
+            data = UserTransactionSerializer(user_transactions,many=True).data
+            return Response(data)
             
 # class Wallettowallet(APIView):
 
