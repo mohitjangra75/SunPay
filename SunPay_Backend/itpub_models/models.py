@@ -1,5 +1,6 @@
 from django.db import models
-
+from django.dispatch import receiver
+from django.db.models.signals import pre_save, post_save
 
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -217,6 +218,9 @@ class User(AbstractBaseUser, PermissionsMixin):
                 username_suffix = existing_count + 101
                 self.username = 'EMP{}'.format(username_suffix)
         super().save(*args, **kwargs)
+        if self.userwallet:
+            self.userwallet.available_balance = self.available_balance
+            self.userwallet.save()
 
     def pic_url(self):
         if self.pic:
@@ -253,6 +257,14 @@ class User(AbstractBaseUser, PermissionsMixin):
             return self.pancardpic.url
         else:
             return "Image Not Uploaded"
+        
+@receiver(post_save, sender=User)
+def create_or_update_user_wallet(sender, instance, created, **kwargs):
+    if created:
+        UserWallet.objects.create(user=instance, available_balance=instance.available_balance)
+    else:
+        instance.userwallet.available_balance = instance.available_balance
+        instance.userwallet.save()
 
 
 class BankDetails(models.Model):
@@ -442,11 +454,6 @@ class WalletTransactions(models.Model):
     transaction_status = models.SmallIntegerField(choices=STATUS, db_index=True,)
     amount = models.IntegerField()
     transaction_type = models.SmallIntegerField(choices=TYPE, db_index=True,)
-
-
-
-from django.dispatch import receiver
-from django.db.models.signals import pre_save
 
 @receiver(pre_save, sender=UserTransactions)
 def update_wallet_balance(sender, instance, **kwargs):
