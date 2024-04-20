@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react'
+import React, { useEffect} from 'react'
 import { useState } from 'react';
 import { Transition } from '@headlessui/react';
+import axios from 'axios'
 
 
 const today = new Date();
@@ -195,7 +196,6 @@ const FundRequest = (props) => {
   const [dataall, setDatall] = useState();  
   useEffect(() => {
     setDatall(props.data);
-    console.log('dataall', dataall);
   }, []);
     console.log('Data from fundrequest', dataall)
 
@@ -213,6 +213,22 @@ const openModal = () => {
 const closeModal = () => {
   setIsModalOpen(false);
 };
+
+const getfundrequest = async (e) => {
+  e.preventDefault();
+  const funreqresponse = await axios.get(`http://127.0.0.1:8000/api/get_fund_request/?is_admin=${true}`);
+  const allrequest = funreqresponse.data
+  setallfundrequest(allrequest)
+  console.log('Allfundrequest',allfundrequest)
+  console.log('user',allfundrequest.user)
+  setshowrow(current => !current)
+
+
+
+}
+
+const [showrow, setshowrow] = useState()
+const [allfundrequest,setallfundrequest] = useState();
 
   return (
     <div className='p-4'>
@@ -235,6 +251,11 @@ const closeModal = () => {
                 <input id="dateRequired" type="date" onChange={handleChange} name="dateRequired" defaultValue={defaultValue} className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'/>
                 {/* <input type="date" onChange={handleChange} ref={dateInputRef} className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'/> */}
               </div>
+
+              <div className="col-md-3">
+              <input id="dateRequired" type="submit" name="dateRequired" defaultValue='Submit' onClick={getfundrequest} className='mt-6 bg-blue-600 text-white border border-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'/>
+              </div>
+
               </div>
           </div>
 
@@ -255,7 +276,7 @@ const closeModal = () => {
                       <tr className='border border-black'>
                         <th scope="col" className="px-6 py-3 border border-black">SNO</th>
                         <th scope="col" className="px-6 py-3 border border-black">Action</th>
-                        <th scope="col" className="px-6 py-3 border border-black">RequestID</th>
+                        {/* <th scope="col" className="px-6 py-3 border border-black">RequestID</th> */}
                         <th scope="col" className="px-6 py-3 border border-black">MemberID</th>
                         <th scope="col" className="px-6 py-3 border border-black">Shopname, <br />ID, <br />Mobile-No.</th>
                         <th scope="col" className="px-6 py-3 border border-black">Payment Date</th>
@@ -266,7 +287,7 @@ const closeModal = () => {
                         <th scope="col" className="px-6 py-3 border border-black">Transaction Id</th>
                         <th scope="col" className="px-6 py-3 border border-black">Remark</th>
                         <th scope="col" className="px-6 py-3 border border-black">Add Date</th>
-                        <th scope="col" className="px-6 py-3 border border-black">Approve Date</th>
+                        <th scope="col" className="px-6 py-3 border border-black">Update Date</th>
                         <th scope="col" className="px-6 py-3 border border-black">Bond</th>
                         <th scope="col" className="px-6 py-3 border border-black">Company Remarks</th>
                         <th scope="col" className="px-6 py-3 border border-black">Slip</th>
@@ -274,8 +295,39 @@ const closeModal = () => {
                       </tr>
                     </thead>
                   
-                    <tbody>
-                      <tr className="bg-white border border-black dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                  {
+                    showrow && (
+<tbody>
+                    {allfundrequest.map((item, index) => (
+                        <tr key={item.id} className='bg-white'>
+                          
+                          <td scope="col" className="px-6 py-3 border border-black">{index+1}</td>
+                          <td scope="col" className="px-6 py-3 border border-black"></td>
+                          <td scope="col" className="px-6 py-3 border border-black">{item.user}</td>
+                          <td scope="col" className="px-6 py-3 border border-black">shop</td>
+                          <td scope="col" className="px-4 py-3 border border-black">{item.payment_date}</td>
+                          <td scope="col" className="px-6 py-3 border border-black">{item.payment_mode}</td>
+                          <td scope="col" className="px-6 py-3 border border-black">{item.bank_name}</td>
+                          <td scope="col" className="px-6 py-3 border border-black">{item.amount}</td>
+                          <td scope="col" className="px-6 py-3 border border-black">{item.bank_ref_number}</td>
+                          <td scope="col" className="px-6 py-3 border border-black">{item.id}</td>
+                          <td scope="col" className="px-6 py-3 border border-black">{item.remark}</td>
+                          <td scope="col" className="pl-2 py-3 border border-black">{item.add_date}</td>
+                          <td scope="col" className="pl-2 py-3 border border-black">{item.update_date}</td>
+                          <td scope="col" className="px-6 py-3 border border-black">
+                            <button onClick={openModal} className="px-4 py-2 bg-blue-500 text-white rounded-lg">Bond</button>
+                            {isModalOpen && (
+                                <Modal isOpen={isModalOpen} onClose={closeModal} />
+                            )}
+                        </td>
+                        <td scope="col" className="px-6 py-3 border border-black"></td>
+                          <td scope="col" className="px-6 py-3 border border-black">SLIP</td>
+                          <td scope="col" className="px-6 py-3 border border-black">{item.transaction_status}</td>
+
+
+                        </tr>
+                      ))}
+                      {/* <tr className="bg-white border border-black dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                         <td scope="col" className="px-6 py-3 border border-black">SNO</td>
                         <td scope="col" className="px-6 py-3 border border-black">Action</td>
                         <td scope="col" className="px-6 py-3 border border-black">RequestID</td>
@@ -290,12 +342,7 @@ const closeModal = () => {
                         <td scope="col" className="px-6 py-3 border border-black">Remark</td>
                         <td scope="col" className="px-6 py-3 border border-black">Add Date</td>
                         <td scope="col" className="px-6 py-3 border border-black">Approve Date</td>
-                        <td scope="col" className="px-6 py-3 border border-black">
-                            <button onClick={openModal} className="px-4 py-2 bg-blue-500 text-white rounded-lg">Bond</button>
-                            {isModalOpen && (
-                                <Modal isOpen={isModalOpen} onClose={closeModal} />
-                            )}
-                        </td>
+                       
                         <td scope="col" className="px-6 py-3 border border-black">Company Remarks</td>
                         <td scope="col" className="px-6 py-3 border border-black">                          
                           <button type="submit" className='border-2 border-zinc-500 bg-blue-500 text-white px-2 p-1 text-lg'>Slip</button>
@@ -303,13 +350,16 @@ const closeModal = () => {
                         <td scope="col" className="px-6 py-3 border border-black">
                           <button type="submit" className='border-2 border-zinc-500 bg-green-500 text-white px-2 p-1 text-lg'>Success</button>
                         </td>
-                      </tr>
+                      </tr> */}
                       <tr>
                         <td>
                           
                         </td>
                       </tr>
                     </tbody>
+                    )
+                  }
+                    
                  </table>
             </div>
           </div>

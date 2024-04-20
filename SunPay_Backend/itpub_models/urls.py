@@ -29,6 +29,9 @@ urlpatterns = [
     path('fetch_beneficiary/', fetch_beneficiary.as_view(), name='fetch_beneficiary'),
     path('update_fund_request/', UpdateFundRequest.as_view(), name='update_fund_request'),
     path('get_fund_request/', GetFundRequest.as_view(), name='get_fund_request'),
+    path('anshpe/', AnshPayout.as_view(), name='anshpe'),
+    path('zpayverify/', zpayverification.as_view(), name='zpayverify'),
+
 ]
 
 urlpatterns += router.urls

@@ -118,11 +118,6 @@ const MemberSettings = (props) => {
       catch (error) {
         console.error('Something went wrong:', error);
       }
-     
-        
-    
-    
-
   }
 
   const changetpin = async (e) => {

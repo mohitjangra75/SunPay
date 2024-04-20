@@ -200,7 +200,8 @@ def ansh_payout(payload):
 def zpay_verification(payload):
     headers = {
         "Accept": "application/json",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization" : "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
     }
     url = "https://api.zwitch.io/v1/verifications/bank-account"
     response = requests.post(url, json=payload, headers=headers)
@@ -221,7 +222,9 @@ def zpay_transfer(payload):
     }
     headers = {
         "accept": "application/json",
-        "content-type": "application/json"
+        "content-type": "application/json",
+        "Authorization" : "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
+
     }
     
     url = "https://api.zwitch.io/v1/transfers"

@@ -191,6 +191,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     city = models.CharField(max_length=30, blank=True, null=True)
     shop_adress = models.CharField(max_length=255, blank=True, null=True)
     otp = models.IntegerField(null=True, blank=True)
+    surcharge = models.FloatField(null=True, blank=True)
     
     USERNAME_FIELD = 'username'
     objects = UserManager()
@@ -322,11 +323,14 @@ class UserTransactions(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     bank_ref_number = models.CharField(max_length=255, blank=True, null=True)
     user =  models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
+    bank_name = models.CharField(max_length=255, blank=True, null=True)
     bank_acc_number = models.CharField(max_length=255, blank=True, null=True)
     remark = models.CharField(max_length=255, blank=True, null=True)
     payment_date = models.DateField(blank=True,null=True)
     transaction_status = models.SmallIntegerField(choices=STATUS, db_index=True,)
     payment_mode = models.CharField(max_length=255, blank=True, null=True)
+    add_date = models.DateField(blank=True,null=True)
+    update_date = models.DateField(blank=True,null=True)
     amount = models.FloatField()
     opening_balance = models.FloatField()
     running_balance = models.FloatField()

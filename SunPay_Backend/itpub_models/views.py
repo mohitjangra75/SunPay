@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, CompanyBankSerializer, BBPSProviderSerializer, StateSerializer, CustomerSerializer, UserTransactionSerializer
-from .services import add_beneficiary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_paysprintbeneficiary
+from .services import add_beneficiary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_paysprintbeneficiary, zpay_verification
 from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSTransactions, UserWallet, Package, CompanyBank, BBPSProviders, State, Customer, FundRequest
 import uuid
 from django.http import JsonResponse
@@ -342,14 +342,14 @@ class SendMoneyDMT(APIView):
         
             if user.parent_id:
                 wallet_obj.refresh_from_db()
-                wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * 0.5 -  (surcharge*0.5)*0.18)
+                wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * 0.5 -  (surcharge*0.5)*0.05)
                 wallet_obj.save()
                 parent_user = UserWallet.objects.get(user_id=user.parent_id)
-                parent_user.available_balance = parent_user.available_balance + (surcharge * 0.2 - (surcharge * 0.2)*0.18) 
+                parent_user.available_balance = parent_user.available_balance + (surcharge * 0.2 - (surcharge * 0.2)*0.05) 
                 parent_user.save()
             else:
                 wallet_obj.refresh_from_db()
-                wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * 0.7 -  (surcharge*0.7)*0.18)
+                wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * 0.7 -  (surcharge*0.7)*0.05)
                 wallet_obj.save()
 
 
@@ -360,13 +360,16 @@ class SendMoneyDMT(APIView):
 class FundRequest(APIView):
     def post(self, request, *args, **kwargs):
         amount = request.data.get("amount")
+        bank_name = request.data.get("bank_name")
         bank_acc_number = request.data.get("bank_acc_number")
-        bank_ref_number = request.data.get("bank_ref_number")
+        ref_number = request.data.get("ref_number")
         payment_mode = request.data.get("payment_mode")
         payment_date = request.data.get("payment_date")
         remark = request.data.get("remark")
         username = request.data.get("username")
-        if not all([amount, bank_acc_number, payment_mode, payment_date , username]):
+        add_date = request.data.get("add_date")
+        print('amount',amount)
+        if not all([amount, ref_number, bank_acc_number, payment_mode, payment_date , remark, bank_name,add_date ,username]):
             return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             user = User.objects.get(username=username)
@@ -376,16 +379,19 @@ class FundRequest(APIView):
             wallet_obj = UserWallet.objects.get(user=user)
         except UserWallet.DoesNotExist:
             return Response({"error": "Wallet not found for the user"}, status=status.HTTP_404_NOT_FOUND)
+        
         opening_balance = wallet_obj.available_balance if wallet_obj else 0.0
         running_balance = opening_balance + amount
         tr_obj = UserTransactions.objects.create(
             user=user,
-            bank_ref_number=bank_ref_number,
+            bank_name = bank_name,
+            bank_ref_number=ref_number,
             bank_acc_number=bank_acc_number,
             remark=remark,
             payment_date=payment_date,
             transaction_status=TransactionStatus.PENDING,
             payment_mode=payment_mode,
+            add_date = add_date,
             amount=amount,
             opening_balance=opening_balance,
             running_balance=running_balance
@@ -522,7 +528,27 @@ class AnshPayout(APIView):
         else:
             return Response({"error":"Please try again later"})
 
+class zpayverification(APIView):
+    def post(self, request, *args, **kwargs):
 
+        bank_account_number= request.data.get("bank_account_number")
+        bank_ifsc_code = request.data.get("bank_ifsc_code")
+        merchant_reference_id = request.data.get("merchant_reference_id")
+
+        if not (bank_account_number and bank_ifsc_code and merchant_reference_id):
+            return Response({"error":"Please fill details"})
+        
+        payload = {
+            "bank_account_number": bank_account_number,
+            "bank_ifsc_code": bank_ifsc_code,
+            "merchant_reference_id": merchant_reference_id,
+            "force_penny_drop": False
+        }
+        response = zpay_verification(payload=payload)
+        if response["status"] == True:
+            return Response(response)
+        else:
+            return Response({"error":"Please try again later"}, response)
 
 class UserViewset(
     mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
@@ -685,6 +711,7 @@ class UpdateFundRequest(APIView):
 
     def post(self, request, *args, **kwargs):
         tr_id = request.data.get('transaction_id')
+        print(tr_id)
         if tr_id:
             tr = UserTransactions.objects.get(id=tr_id)
             tr.transaction_status=TransactionStatus.SUCCESS

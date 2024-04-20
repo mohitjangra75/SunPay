@@ -63,9 +63,11 @@ const AdminDashboardRouter = () => {
       }
     };
 
+    
     fetchData(); // Fetch data when component mounts
   }, []);
  
+
   return (
     <div className='bg-slate-50'>
 
