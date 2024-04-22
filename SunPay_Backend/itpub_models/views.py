@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, CompanyBankSerializer, BBPSProviderSerializer, StateSerializer, CustomerSerializer, UserTransactionSerializer
-from .services import add_beneficiary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_paysprintbeneficiary, zpay_verification
+from .services import add_beneficiary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_paysprintbeneficiary, zpay_verification, zpay_bankadd
 from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSTransactions, UserWallet, Package, CompanyBank, BBPSProviders, State, Customer, FundRequest
 import uuid
 from django.http import JsonResponse
@@ -11,6 +11,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 from rest_framework import viewsets, status, mixins
 from django.db import transaction
+import requests
 
 class RegisterUser(APIView):
     def post(self, request, *args, **kwargs):
@@ -528,28 +529,6 @@ class AnshPayout(APIView):
         else:
             return Response({"error":"Please try again later"})
 
-class zpayverification(APIView):
-    def post(self, request, *args, **kwargs):
-
-        bank_account_number= request.data.get("bank_account_number")
-        bank_ifsc_code = request.data.get("bank_ifsc_code")
-        merchant_reference_id = request.data.get("merchant_reference_id")
-
-        if not (bank_account_number and bank_ifsc_code and merchant_reference_id):
-            return Response({"error":"Please fill details"})
-        
-        payload = {
-            "bank_account_number": bank_account_number,
-            "bank_ifsc_code": bank_ifsc_code,
-            "merchant_reference_id": merchant_reference_id,
-            "force_penny_drop": False
-        }
-        response = zpay_verification(payload=payload)
-        if response["status"] == True:
-            return Response(response)
-        else:
-            return Response({"error":"Please try again later"}, response)
-
 class UserViewset(
     mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
 ):
@@ -759,6 +738,72 @@ class GetFundRequest(APIView):
             user_transactions = UserTransactions.objects.filter(user_id=user_id)
             data = UserTransactionSerializer(user_transactions,many=True).data
             return Response(data)
+
+
+class zpayaddbankbeneficiary(APIView):
+    def post(self, request, *args, **kwargs):
+
+        name_of_account_holder = request.data.get("name_of_account_holder")
+        email = request.data.get("email")
+        phone = request.data.get("phone")
+        bank_account_number = request.data.get("bank_account_number")
+        bank_ifsc_code = request.data.get("bank_ifsc_code")
+
+        if not (bank_account_number and bank_ifsc_code and name_of_account_holder and email and phone):
+            return Response({"error":"Please fill details"})
+        
+        payload = {
+            "bank_account_number": bank_account_number,
+            "bank_ifsc_code": bank_ifsc_code,
+            "name_of_account_holder": name_of_account_holder,
+            "email": email,
+            "phone": phone
+        }
+        response = zpay_bankadd(payload=payload)
+        if response["status"] == True:
+            return Response(response)
+        else:
+            return Response({"error":"Please try again later"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class zpaygetbeneficiary(APIView):
+    def get(self, request, *args, **kwargs):
+        headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization" : "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
+        }
+        url = "https://api.zwitch.io/v1/accounts/va_iGTXTqO47awKr9OdhaF0km2Qe/beneficiaries?results_per_page=100"
+
+        response = requests.get(url, headers=headers)
+        if response.ok:
+            return Response(response.json())
+        else:
+            print(response.json())
+            return {"status":False,
+            "data":"Please verify details"}
+        
+
+class zpayverification(APIView):
+    def post(self, request, *args, **kwargs):
+
+        bank_account_number= request.data.get("bank_account_number")
+        bank_ifsc_code = request.data.get("bank_ifsc_code")
+        merchant_reference_id = request.data.get("merchant_reference_id")
+
+        if not (bank_account_number and bank_ifsc_code and merchant_reference_id):
+            return Response({"error":"Please fill details"})
+        
+        payload = {
+            "bank_account_number": bank_account_number,
+            "bank_ifsc_code": bank_ifsc_code,
+            "merchant_reference_id": merchant_reference_id,
+            "force_penny_drop": False
+        }
+        response = zpay_verification(payload=payload)
+        if response["status"] == True:
+            return Response(response)
+        else:
+            return Response({"error":"Please try again later"}, response)
             
 # class Wallettowallet(APIView):
 

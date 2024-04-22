@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, BankDetails, Bank, CompanyBank, BBPSProviders, State, UserWallet, UserTransactions, Customer, WalletTransactions, FundRequest
+from .models import User, BankDetails, Bank, CompanyBank, BBPSProviders, State, UserWallet, UserTransactions, Customer, WalletTransactions
 
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:

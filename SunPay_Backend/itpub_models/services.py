@@ -240,6 +240,24 @@ def zpay_transfer(payload):
         return {"status":False,
         "data":"Please verify details"} 
     
+def zpay_bankadd(payload):
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization" : "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
+    }
+    url = "https://api.zwitch.io/v1/accounts/va_iGTXTqO47awKr9OdhaF0km2Qe/beneficiaries"
+    response = requests.post(url, json=payload, headers=headers)
+    if response.ok:
+        return {"status":True,
+        "data":response.json()}
+    else:
+        print(response.json())
+        return {"status":False,
+        "data":"Please verify details"}
+
+
+    
 def generate_otp(length=6):
     digits = "0123456789"
     otp = ''.join(random.choice(digits) for _ in range(length))

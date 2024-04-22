@@ -192,7 +192,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     city = models.CharField(max_length=30, blank=True, null=True)
     shop_adress = models.CharField(max_length=255, blank=True, null=True)
     otp = models.IntegerField(null=True, blank=True)
-    surcharge = models.FloatField(null=True, blank=True)
+    # surcharge = models.FloatField(null=True, blank=True)
     
     USERNAME_FIELD = 'username'
     objects = UserManager()
@@ -459,12 +459,9 @@ class WalletTransactions(models.Model):
     amount = models.IntegerField()
     transaction_type = models.SmallIntegerField(choices=TYPE, db_index=True,)
 
-<<<<<<< HEAD
 from django.dispatch import receiver
 from django.db.models.signals import pre_save
 
-=======
->>>>>>> 9f8018004d7e7b62ab00d0219a25103f0e6659be
 @receiver(pre_save, sender=UserTransactions)
 def update_wallet_balance(sender, instance, **kwargs):
     if instance.pk:
@@ -475,8 +472,4 @@ def update_wallet_balance(sender, instance, **kwargs):
         if old_instance.transaction_status == TransactionStatus.PENDING and instance.transaction_status == TransactionStatus.SUCCESS:
             userwallet = UserWallet.objects.get(user_id=old_instance.user_id)
             userwallet.available_balance =  userwallet.available_balance + instance.amount
-<<<<<<< HEAD
             userwallet.save()
-=======
-            userwallet.save()
->>>>>>> 9f8018004d7e7b62ab00d0219a25103f0e6659be
