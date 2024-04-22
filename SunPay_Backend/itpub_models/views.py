@@ -706,6 +706,32 @@ class fetch_beneficiary(APIView):
                 return Response({'error':'Unable to fetch bank details'})
         else:
             return Response({'Message': 'Kindly provide mobile number'})
+
+class UpdateFundRequest(APIView):
+
+    def post(self, request, *args, **kwargs):
+        tr_id = request.data.get('transaction_id')
+        if tr_id:
+            tr = UserTransactions.objects.get(id=tr_id)
+            tr.transaction_status=TransactionStatus.SUCCESS
+            tr.save()
+            return Response({'details':"updated succesfully"})
+        else:
+            return Response({'Message': 'Error occured'})
+
+class GetFundRequest(APIView):
+
+    def get(self, request, *args, **kwargs):
+        user_id = request.query_params.get('user_id', None) 
+        is_admin = request.query_params.get('is_admin', False) 
+        if is_admin:
+            user_transactions = UserTransactions.objects.all()
+            data = UserTransactionSerializer(user_transactions,many=True).data
+            return Response(data)
+        if user_id:
+            user_transactions = UserTransactions.objects.filter(user_id=user_id)
+            data = UserTransactionSerializer(user_transactions,many=True).data
+            return Response(data)
             
 class UpdateFundRequest(APIView):
 

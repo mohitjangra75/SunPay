@@ -1,5 +1,6 @@
 from django.db import models
-
+from django.dispatch import receiver
+from django.db.models.signals import pre_save, post_save
 
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -218,6 +219,9 @@ class User(AbstractBaseUser, PermissionsMixin):
                 username_suffix = existing_count + 101
                 self.username = 'EMP{}'.format(username_suffix)
         super().save(*args, **kwargs)
+        if self.userwallet:
+            self.userwallet.available_balance = self.available_balance
+            self.userwallet.save()
 
     def pic_url(self):
         if self.pic:
@@ -254,6 +258,14 @@ class User(AbstractBaseUser, PermissionsMixin):
             return self.pancardpic.url
         else:
             return "Image Not Uploaded"
+        
+@receiver(post_save, sender=User)
+def create_or_update_user_wallet(sender, instance, created, **kwargs):
+    if created:
+        UserWallet.objects.create(user=instance, available_balance=instance.available_balance)
+    else:
+        instance.userwallet.available_balance = instance.available_balance
+        instance.userwallet.save()
 
 
 class BankDetails(models.Model):
@@ -447,9 +459,12 @@ class WalletTransactions(models.Model):
     amount = models.IntegerField()
     transaction_type = models.SmallIntegerField(choices=TYPE, db_index=True,)
 
+<<<<<<< HEAD
 from django.dispatch import receiver
 from django.db.models.signals import pre_save
 
+=======
+>>>>>>> 9f8018004d7e7b62ab00d0219a25103f0e6659be
 @receiver(pre_save, sender=UserTransactions)
 def update_wallet_balance(sender, instance, **kwargs):
     if instance.pk:
@@ -460,4 +475,8 @@ def update_wallet_balance(sender, instance, **kwargs):
         if old_instance.transaction_status == TransactionStatus.PENDING and instance.transaction_status == TransactionStatus.SUCCESS:
             userwallet = UserWallet.objects.get(user_id=old_instance.user_id)
             userwallet.available_balance =  userwallet.available_balance + instance.amount
+<<<<<<< HEAD
             userwallet.save()
+=======
+            userwallet.save()
+>>>>>>> 9f8018004d7e7b62ab00d0219a25103f0e6659be
