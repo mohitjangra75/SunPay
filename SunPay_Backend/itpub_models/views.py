@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, CompanyBankSerializer, BBPSProviderSerializer, StateSerializer, CustomerSerializer, UserTransactionSerializer
-from .services import add_beneficiary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_paysprintbeneficiary, zpay_verification, zpay_bankadd
+from .services import add_beneficiary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_paysprintbeneficiary, zpay_verification, zpay_bankadd, zpay_transfer
 from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSTransactions, UserWallet, Package, CompanyBank, BBPSProviders, State, Customer, FundRequest
 import uuid
 from django.http import JsonResponse
@@ -757,10 +757,13 @@ class zpayaddbankbeneficiary(APIView):
             "bank_ifsc_code": bank_ifsc_code,
             "name_of_account_holder": name_of_account_holder,
             "email": email,
-            "phone": phone
+            "phone": phone,
+            "type" : "account_number",
+            "key_1": "DD",
+            "key_2": "XOF"
         }
         response = zpay_bankadd(payload=payload)
-        if response["status"] == True:
+        if( response["status"] == True):
             return Response(response)
         else:
             return Response({"error":"Please try again later"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -782,6 +785,23 @@ class zpaygetbeneficiary(APIView):
             return {"status":False,
             "data":"Please verify details"}
         
+class zpaygetbeneficiarybyid(APIView):
+    def get(self, request, *args, **kwargs):
+        beneficiary_id = kwargs.get('beneficiary_id')
+        headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization" : "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
+        }
+        url = "https://api.zwitch.io/v1/accounts/beneficiaries/{beneficiary_id}"
+
+        response = requests.get(url, headers=headers)
+        if response.ok:
+            return Response(response.json())
+        else:
+            print(response.json())
+            return {"status":False,
+            "data":"Please verify details"}
 
 class zpayverification(APIView):
     def post(self, request, *args, **kwargs):
@@ -800,6 +820,34 @@ class zpayverification(APIView):
             "force_penny_drop": False
         }
         response = zpay_verification(payload=payload)
+        if response["status"] == True:
+            return Response(response)
+        else:
+            return Response({"error":"Please try again later"}, response)
+        
+
+class zpaybanktansfer(APIView):
+    def post(self, request, *args, **kwargs):
+
+        beneficiary_id = request.data.get("beneficiary_id")
+        amount = request.data.get("amount")
+        merchant_reference_id = request.data.get("merchant_reference_id")
+        payment_remark = request.data.get("payment_remark")
+        payment_mode = request.data.get("payment_mode")
+        if not (beneficiary_id and amount and merchant_reference_id and payment_remark):
+            return Response({"error":"Please fill details"})
+        
+        payload = {
+            "type":"account_number",
+            "debit_account_id" : "va_iGTXTqO47awKr9OdhaF0km2Qe",
+            "beneficiary_id": beneficiary_id,
+            "amount": amount,
+            "currency_code" : "inr",
+            "payment_mode" : payment_mode,
+            "merchant_reference_id": merchant_reference_id,
+            "payment_remark": payment_remark,
+        }
+        response = zpay_transfer(payload=payload)
         if response["status"] == True:
             return Response(response)
         else:

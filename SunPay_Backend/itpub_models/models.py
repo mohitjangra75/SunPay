@@ -473,3 +473,16 @@ def update_wallet_balance(sender, instance, **kwargs):
             userwallet = UserWallet.objects.get(user_id=old_instance.user_id)
             userwallet.available_balance =  userwallet.available_balance + instance.amount
             userwallet.save()
+
+class Zpaybeneficiary(models.Model):
+    STATUS = (
+		(TransactionStatus.PENDING, 'PENDING'),
+		(TransactionStatus.FAILURE, 'FAILURE'),
+		(TransactionStatus.SUCCESS, 'SUCCESS'),
+	)
+    created_at = models.DateTimeField(auto_now_add=True, primary_key=True,)
+    id = models.CharField(max_length=255, blank=True, null=True)
+    user =  models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
+    bank_acc_number = models.CharField(max_length=255, blank=True, null=True)
+    bank_ifsc = models.IntegerField(blank=True, null=True)
+   
