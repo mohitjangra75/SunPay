@@ -33,8 +33,11 @@ urlpatterns = [
     path('zpayverify/', zpayverification.as_view(), name='zpayverify'),
     path('zpaygetbank/', zpaygetbeneficiary.as_view(), name='zpaylinkedbanks'),
     path('zpayaddbank/', zpayaddbankbeneficiary.as_view(), name='zpayaddbanks'),
+    path('zpayaddupi/', zpayaddvpabeneficiary.as_view(), name='zpayaddupis'),
     path('zpaytransfer/', zpaybanktansfer.as_view(), name='zpaytransferbank'),
     path('zpaygetbeneficiarybyid/', zpaygetbeneficiarybyid.as_view(), name='zpaybenebyid'),
+    path('zpayupitransfer/', zpayupitansfer.as_view(), name='zpaytransferupi'),
+
 ]
 
 urlpatterns += router.urls

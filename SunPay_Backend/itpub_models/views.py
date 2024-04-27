@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, CompanyBankSerializer, BBPSProviderSerializer, StateSerializer, CustomerSerializer, UserTransactionSerializer
-from .services import add_beneficiary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_paysprintbeneficiary, zpay_verification, zpay_bankadd, zpay_transfer
+from .services import add_beneficiary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_paysprintbeneficiary, zpay_verification, zpay_bankadd, zpay_transfer, zpay_upiadd
 from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSTransactions, UserWallet, Package, CompanyBank, BBPSProviders, State, Customer, FundRequest
 import uuid
 from django.http import JsonResponse
@@ -768,6 +768,31 @@ class zpayaddbankbeneficiary(APIView):
         else:
             return Response({"error":"Please try again later"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+class zpayaddvpabeneficiary(APIView):
+    def post(self, request, *args, **kwargs):
+
+        name_of_account_holder = request.data.get("name_of_account_holder")
+        email = request.data.get("email")
+        phone = request.data.get("phone")
+        vpa = request.data.get("vpa")
+        account_id = request.data.get("account_id")
+
+        if not (vpa and name_of_account_holder and email and phone and account_id):
+            return Response({"error":"Please fill details"})
+        
+        payload = {
+            "type" : "vpa",
+            "vpa": vpa,
+            "name_of_account_holder": name_of_account_holder,
+            "email": email,
+            "phone": phone,
+        }
+        response = zpay_upiadd(payload=payload)
+        if response["status"] == True:
+            return Response(response)
+        else:
+            return Response({"error":"Please try again later"}, response)
+        
 class zpaygetbeneficiary(APIView):
     def get(self, request, *args, **kwargs):
         headers = {
@@ -787,7 +812,8 @@ class zpaygetbeneficiary(APIView):
         
 class zpaygetbeneficiarybyid(APIView):
     def get(self, request, *args, **kwargs):
-        beneficiary_id = kwargs.get('beneficiary_id')
+
+        param1 = request.query_params.get('')
         headers = {
         "Accept": "application/json",
         "Content-Type": "application/json",
@@ -800,8 +826,8 @@ class zpaygetbeneficiarybyid(APIView):
             return Response(response.json())
         else:
             print(response.json())
-            return {"status":False,
-            "data":"Please verify details"}
+            return ({"status":False,
+            "data":"Please verify details"})
 
 class zpayverification(APIView):
     def post(self, request, *args, **kwargs):
@@ -852,7 +878,32 @@ class zpaybanktansfer(APIView):
             return Response(response)
         else:
             return Response({"error":"Please try again later"}, response)
-            
+
+class zpayupitansfer(APIView):
+    def post(self, request, *args, **kwargs):
+
+        beneficiary_id = request.data.get("beneficiary_id")
+        amount = request.data.get("amount")
+        merchant_reference_id = request.data.get("merchant_reference_id")
+        payment_remark = request.data.get("payment_remark")
+        if not (beneficiary_id and amount and merchant_reference_id and payment_remark):
+            return Response({"error":"Please fill details"})
+        
+        payload = {
+            "type":"vpa",
+            "debit_account_id" : "va_iGTXTqO47awKr9OdhaF0km2Qe",
+            "beneficiary_id": beneficiary_id,
+            "amount": amount,
+            "currency_code" : "inr",
+            "merchant_reference_id": merchant_reference_id,
+            "payment_remark": payment_remark,
+        }
+        response = zpay_transfer(payload=payload)
+        if response["status"] == True:
+            return Response(response)
+        else:
+            return Response({"error":"Please try again later"}, response)
+             
 # class Wallettowallet(APIView):
 
 #     def post(self, request, *args, **kwargs):

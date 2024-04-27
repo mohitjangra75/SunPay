@@ -255,7 +255,24 @@ def zpay_bankadd(payload):
         return {"status":False,
         "message":"Please verify details",
         "data":response.json()}
-    
+
+def zpay_upiadd(payload):
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization" : "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
+    }
+    url = "https://api.zwitch.io/v1/accounts/va_iGTXTqO47awKr9OdhaF0km2Qe/beneficiaries"
+    response = requests.post(url, json=payload, headers=headers)
+    if response.ok:
+        return {"status":True,
+        "data":response.json()}
+    else:
+        print(response.json())
+        return {"status":False,
+        "message":"Please verify details",
+        "data":response.json()}    
+
 def zpay_transfer(payload):
     headers = {
         "Accept": "application/json",
