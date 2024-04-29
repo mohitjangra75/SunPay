@@ -219,9 +219,6 @@ class User(AbstractBaseUser, PermissionsMixin):
                 username_suffix = existing_count + 101
                 self.username = 'EMP{}'.format(username_suffix)
         super().save(*args, **kwargs)
-        if self.userwallet:
-            self.userwallet.available_balance = self.available_balance
-            self.userwallet.save()
 
     def pic_url(self):
         if self.pic:
@@ -258,15 +255,36 @@ class User(AbstractBaseUser, PermissionsMixin):
             return self.pancardpic.url
         else:
             return "Image Not Uploaded"
-        
+
+class UserWallet(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    available_balance = models.IntegerField(blank=True, null=True)
+
+    def __str__(self):
+        return self.user.username
+    
 @receiver(post_save, sender=User)
 def create_or_update_user_wallet(sender, instance, created, **kwargs):
     if created:
-        UserWallet.objects.create(user=instance, available_balance=instance.available_balance)
+        UserWallet.objects.create(user=instance, available_balance=instance.available_balance or 0)
     else:
-        instance.userwallet.available_balance = instance.available_balance
-        instance.userwallet.save()
+        if hasattr(instance, 'userwallet'):
+            instance.userwallet.available_balance = instance.available_balance or 0
+            instance.userwallet.save()
+        else:
+            UserWallet.objects.create(user=instance, available_balance=instance.available_balance or 0)
 
+@receiver(pre_save, sender=UserWallet)
+def update_user_balance(sender, instance, **kwargs):
+    try:
+        old_instance = UserWallet.objects.get(pk=instance.pk)
+        if old_instance.available_balance != instance.available_balance:
+            user = instance.user
+            if user.available_balance != instance.available_balance:
+                user.available_balance = instance.available_balance
+                user.save()
+    except UserWallet.DoesNotExist:
+        pass
 
 class BankDetails(models.Model):
     upi_id = models.CharField(max_length=255, blank=True, null=True)
@@ -313,17 +331,6 @@ class DMTTransactions(models.Model):
     order_id =  models.IntegerField(blank=True, null=True)
     charge = models.IntegerField(blank=True, null=True)
     transaction_type = models.SmallIntegerField(choices=TYPE, db_index=True,)
-
-class UserWallet(models.Model):
-    user = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
-    available_balance = models.IntegerField(blank=True, null=True)
-
-    def __str__(self):
-        return self.user.username
-    
-    def update_balance(self, amount):
-        self.available_balance += amount
-        self.save()
 
 class UserTransactions(models.Model):
     STATUS = (
