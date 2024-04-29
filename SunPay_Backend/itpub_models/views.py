@@ -153,7 +153,7 @@ class OTPVerification(APIView):
 
 class AddBenAccount(APIView):
     def post(self, request, *args, **kwargs):
-        upi_id = request.data.get("upi_id")
+        # upi_id = request.data.get("upi_id")
         beneficiary_name = request.data.get("beneficiary_name")
         bank_name = request.data.get("bank_name")
         account_number = request.data.get("account_number")
@@ -161,15 +161,16 @@ class AddBenAccount(APIView):
         mobile_number = request.data.get("mobile_number")
         bene_id = request.data.get("bene_id")
 
-        if not all([beneficiary_name, bank_name, account_number, ifsc_code, mobile_number]):
-            return Response({"error": "Please provide all required fields"}, status=status.HTTP_400_BAD_REQUEST)
+        # if not all([beneficiary_name, bank_name, account_number, ifsc_code, mobile_number]):
+        #     return Response({"error": "Please provide all required fields"}, status=status.HTTP_400_BAD_REQUEST)
         
-        try:
-            user = User.objects.get(mobile=mobile_number)
-            print(user.email)
-        except User.DoesNotExist:
-            return Response({"error": "User does not exist for the provided mobile number"}, status=status.HTTP_400_BAD_REQUEST)
+        # try:
+        #     
+        # except User.DoesNotExist:
+        #     return Response({"error": "User does not exist for the provided mobile number"}, status=status.HTTP_400_BAD_REQUEST)
 
+        user = User.objects.get(mobile=mobile_number)
+        print(user.email)
         response = add_beneficiary(
             api_token='1vuiyiyiniitnadhsalha$(%23$%(%26@)$@usow89342mdfu',
             mobile_number=mobile_number,

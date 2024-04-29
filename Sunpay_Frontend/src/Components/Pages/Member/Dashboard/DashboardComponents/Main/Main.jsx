@@ -63,8 +63,18 @@ const Main = (props) => {
       <div className='md:flex gap-2'>
         <div className='servicecont text-xl md:pl-10 bg-red-200 p-4 md:w-[1900px] md:flex bg-orange-200'>
           <div>  
-            {/* {if(localdata.roleid==1) && } */}
+             
             <div className='flex flex-wrap my-2 gap-12 gap-y-16'>
+
+            <NavLink to='/member/wallet-to-wallet'>
+              <div className='service bg-white border-[2px]  w-24 h-24 border-slate-950 rounded-lg hover:bg-blue-500 hover:text-white'>
+                <img src={wallet} alt="" className='w-full h-full'/>
+                <h1 className='text-lg text-center mt-2 font-semibold'>Wallet to Wallet</h1>
+              </div>
+              </NavLink>
+
+            {(localdata.roleid==2) && (
+              <div>
               <NavLink to='/member/moneytransfer'>
                 <div className='service bg-white border-[2px]  w-24 h-24 border-slate-950 rounded-lg hover:bg-blue-500 hover:text-white'>
                   <img src={moneyt} alt="" className='w-full h-full'/>
@@ -78,36 +88,6 @@ const Main = (props) => {
                   <h1 className='text-lg text-center mt-2 font-semibold'>Payout</h1>
                 </div>
               </NavLink> 
-
-              <NavLink to='/member/wallet-to-wallet'>
-              <div className='service bg-white border-[2px]  w-24 h-24 border-slate-950 rounded-lg hover:bg-blue-500 hover:text-white'>
-                <img src={wallet} alt="" className='w-full h-full'/>
-                <h1 className='text-lg text-center mt-2 font-semibold'>Wallet to Wallet</h1>
-              </div>
-              </NavLink>
-
-{/*               <NavLink to='/member/money-transfer'>
-                <div className='service bg-white border-[2px]  w-24 h-24 border-slate-950 rounded-lg hover:bg-blue-500 hover:text-white'>
-                  <img src={aeps} alt="" className='w-full h-full'/>
-                  <h1 className='text-lg text-center mt-2 font-semibold'>AEPS</h1>
-                </div>
-              </NavLink>
-
-              <NavLink to='/member/aeps'>
-                <div className='service bg-white border-[2px]  w-24 h-24 border-slate-950 rounded-lg hover:bg-blue-500 hover:text-white'>
-                  <img src={aadharp} alt="" className='w-full h-full'/>
-                  <h1 className='text-lg text-center mt-2 font-semibold'>Aadhar</h1>
-                </div>
-              </NavLink>
-
-              <NavLink to='/member/upi-transfer'>
-                <div className='service bg-white border-[2px]  w-24 h-24 border-slate-950 rounded-lg hover:bg-blue-500 hover:text-white'>
-                  <img src={upi} alt="" className='w-full h-full'/>
-                  <h1 className='text-lg text-center mt-2 font-semibold'>UPI</h1>
-                </div>
-              </NavLink>  */}
-
-              
 
               <NavLink to='/member/electricity'>
               <div className='service bg-white border-[2px]  w-24 h-24 border-slate-950 rounded-lg hover:bg-blue-500 hover:text-white'>
@@ -299,6 +279,36 @@ const Main = (props) => {
                 <h1 className='text-lg text-center mt-2 font-semibold'>Loan</h1>
               </div>
               </NavLink> */}
+              </div>
+            
+            )}
+
+             
+
+{/*               <NavLink to='/member/money-transfer'>
+                <div className='service bg-white border-[2px]  w-24 h-24 border-slate-950 rounded-lg hover:bg-blue-500 hover:text-white'>
+                  <img src={aeps} alt="" className='w-full h-full'/>
+                  <h1 className='text-lg text-center mt-2 font-semibold'>AEPS</h1>
+                </div>
+              </NavLink>
+
+              <NavLink to='/member/aeps'>
+                <div className='service bg-white border-[2px]  w-24 h-24 border-slate-950 rounded-lg hover:bg-blue-500 hover:text-white'>
+                  <img src={aadharp} alt="" className='w-full h-full'/>
+                  <h1 className='text-lg text-center mt-2 font-semibold'>Aadhar</h1>
+                </div>
+              </NavLink>
+
+              <NavLink to='/member/upi-transfer'>
+                <div className='service bg-white border-[2px]  w-24 h-24 border-slate-950 rounded-lg hover:bg-blue-500 hover:text-white'>
+                  <img src={upi} alt="" className='w-full h-full'/>
+                  <h1 className='text-lg text-center mt-2 font-semibold'>UPI</h1>
+                </div>
+              </NavLink>  */}
+
+              
+
+             
             </div> 
           </div>
         </div>

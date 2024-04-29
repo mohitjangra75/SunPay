@@ -122,8 +122,10 @@ def query_remitter(payload):
         "Accept": "application/json",
         "Content-Type": "application/json"
     }
+    t = r"C:\Users\hp\Downloads\_.paysprint.in.crt"
     url = "https://api.paysprint.in/api/v1/service/dmt/remitter/queryremitter"
-    response = requests.post(url=url,json=payload, headers=headers)
+    response = requests.post(url=url,json=payload, verify=t, headers=headers)
+    print(response,'test resp')
     if response.ok:
         return {"status":True,
         "data":response.json()}
