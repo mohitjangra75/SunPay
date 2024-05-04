@@ -6,6 +6,8 @@ import requests
 import random
 import csv
 from .models import BBPSProviders, State, BillType
+import ssl
+from requests.adapters import HTTPAdapter
 
 PARTNERID = "UFR008081"  # Replace with your actual PARTNERID
 
@@ -115,23 +117,28 @@ def fund_transfer(payload):
         "data":"Please verify details"}
 
 def query_remitter(payload):
-    token = get_token()
+    url = "https://sit.paysprint.in/service-api/api/v1/service/dmt/remitter/queryremitter"
+    token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0aW1lc3RhbXAiOjE2NDk2Nzk1MTksInBhcnRuZXJJZCI6InBzMDAxIiwicmVxaWQiOiI0NXl1eWpoZ2Z2Y2QifQ.nk0kp4EDyVzS6hc9hhN14XYhg4aD3LlMy-cg4POmiAI"
+    authorised_key = "MzNkYzllOGJmZGVhNWRkZTc1YTgzM2Y5ZDFlY2EyZTQ="
     headers = {
-        "Token":token,
-        "Authorisedkey":"NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ=",
-        "Accept": "application/json",
-        "Content-Type": "application/json"
+        "Token": token,
+        "Authorisedkey": authorised_key,
+        "Content-Type": "application/json",
+        "accept": "application/json"
     }
-    t = r"C:\Users\hp\Downloads\_.paysprint.in.crt"
-    url = "https://api.paysprint.in/api/v1/service/dmt/remitter/queryremitter"
-    response = requests.post(url=url,json=payload, verify=t, headers=headers)
-    print(response,'test resp')
+    print("URL:", url, "Headers:", headers)
+    response = requests.post(url=url, json=payload, headers=headers)
     if response.ok:
-        return {"status":True,
-        "data":response.json()}
+        return {
+            "status": True,
+            "data": response.json()
+        }
     else:
-        return {"status":False,
-        "data":"Please verify details"} 
+        return {
+            "status": False,
+            "data": "Please verify details"
+        }
+
 
 def register_remitter(payload):
     token = get_token()

@@ -611,25 +611,27 @@ class GetUsers(APIView):
 
 class CheckCustomer(APIView):
     def post(self, request):
-        # Assuming you are sending the mobile number in the request POST data
         mobile_number = request.data.get('mobile_number')
-        
-        if mobile_number:
-            try:
-                customer = Customer.objects.get(customer_mobile=mobile_number)
-                print(customer)
-                payload = {"mobile": mobile_number,"bank3_flag": "NO"}
-                response = query_remitter(payload=payload)
-                print(response)
-                if response["status"]==True:
-                    payload = {"mobile": mobile_number}
-                    serializer = CustomerSerializer(customer)
-                    return Response({"message": "Customer found", "data":serializer.data, "Response": response }, status=status.HTTP_200_OK)  
-                          
-            except Customer.DoesNotExist:
-                return JsonResponse({'Message': 'Customer not found registering.'}, status=404)
-        else:
-            return Response({'error': 'Mobile number not provided'}, status=400)
+        if not mobile_number:
+            return Response({'error': 'Mobile number not provided'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            customer = Customer.objects.get(customer_mobile=mobile_number)
+            print(customer)
+            payload = {"mobile": mobile_number, "bank3_flag": "NO"}
+            response = query_remitter(payload=payload)
+            print(response)
+            if response.get("status"):
+                serializer = CustomerSerializer(customer)
+                return Response({
+                    "message": "Customer found",
+                    "data": serializer.data,
+                    "Response": response
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({'message': 'Please verify details'}, status=status.HTTP_400_BAD_REQUEST)
+        except Customer.DoesNotExist:
+            return Response({'Message': 'Customer not found, registering.'}, status=status.HTTP_404_NOT_FOUND)
+
 
 class RegisterRemitter(APIView):
     def post(self, request):
