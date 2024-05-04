@@ -28,6 +28,10 @@ DEBUG = True
 CORS_ORIGIN_ALLOW_ALL = True
 
 ALLOWED_HOSTS = ["*"]
+CORS_ORIGIN_WHITELIST = [
+    "https://new.sunpay.co.in","127.0.0.1",]
+CSRF_TRUSTED_ORIGINS = [
+    "https://new.sunpay.co.in",]
 
 
 # Application definition
