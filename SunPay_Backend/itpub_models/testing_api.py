@@ -1,37 +1,37 @@
 import requests
 import json
 
-url = 'http://localhost:8000/api/register_user/'
-headers = {
-    'Content-Type': 'application/json',
-}
-user_data = {
-    "role_id": 1,
-    "title_id": 1,
-    "name": "Gourav",
-    "email": "gouravdhalwal29@gmail.com",
-    "mobile": "9717960980",
-    "gender_id": 1,
-    "password": "admin",
-    "address": "Gurugram",
-    "package_id": "1",
-    "parent_id": "6",
-    "pin_code": "122506",
-    "shop_name": "Sunpay",
-    "state_id": 1,
-    "is_tpin_enabled": "True",
-    "tpin": 1234,
-    "is_active": "True",
-    "distributor_name": "ABC",
-    "is_distributor": "True",
-    "shop_adress": "Gurgaon"
-}
-response = requests.post(url, json=user_data, headers=headers)
-if response.status_code == 201:
-    print("User created successfully!")
-    print("User ID:", response.json().get('user_id'))
-else:
-    print("Error:", response.text)
+# url = 'http://localhost:8000/api/register_user/'
+# headers = {
+#     'Content-Type': 'application/json',
+# }
+# user_data = {
+#     "role_id": 1,
+#     "title_id": 1,
+#     "name": "Gourav",
+#     "email": "gouravdhalwal29@gmail.com",
+#     "mobile": "9717960980",
+#     "gender_id": 1,
+#     "password": "admin",
+#     "address": "Gurugram",
+#     "package_id": "1",
+#     "parent_id": "6",
+#     "pin_code": "122506",
+#     "shop_name": "Sunpay",
+#     "state_id": 1,
+#     "is_tpin_enabled": "True",
+#     "tpin": 1234,
+#     "is_active": "True",
+#     "distributor_name": "ABC",
+#     "is_distributor": "True",
+#     "shop_adress": "Gurgaon"
+# }
+# response = requests.post(url, json=user_data, headers=headers)
+# if response.status_code == 201:
+#     print("User created successfully!")
+#     print("User ID:", response.json().get('user_id'))
+# else:
+#     print("Error:", response.text)
 
 
 # url = 'http://127.0.0.1:8000/api/tpin/'
@@ -117,3 +117,13 @@ else:
 
 # if __name__ == "__main__":
 #     initiate_fund_request()
+
+url = "http://new.sunpay.co.in/api/get_customer/"
+mobile_number = "9306123897"
+payload = {
+    "mobile_number": mobile_number,
+    "bank3_flag": "NO"
+}
+response = requests.post(url, json=payload)
+print("URL:", url, "Payload:", payload)
+print(response.json())

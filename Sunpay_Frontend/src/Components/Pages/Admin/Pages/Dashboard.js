@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import axios from 'axios'
 
 const today = new Date();
 const date = today.setDate(today.getDate()); 
@@ -14,6 +15,52 @@ const handleChange = (e) => {
   setDate(e.target.value);
 };
 
+
+  // Function to fetch data from local storage or any other source
+
+  const getdata = async (e) => {
+
+    const funreqresponse = await axios.get(`http://127.0.0.1:8000/api/get_fund_request/?is_admin=${true}`);
+    const allrequest = funreqresponse.data.length
+    setallfundrequest(allrequest)
+  
+    const alluser= await axios.get(`http://127.0.0.1:8000/api/get_users/`);
+    const all = [alluser.data]
+    console.log(all)
+
+    const dist = all.map(array => array.filter(item => item.role_id = 1));
+    setallret(dist.length)
+    console.log('ret',noretailers)
+    
+    const retailers = all.map(array => array.filter(item => item.role_id = 2));
+    setalladm(retailers.length)
+    console.log('dist',nodist)
+
+    const adm = all.map(array => array.filter(item => item.role_id = 3));
+    setalladm(adm.length)
+    console.log('admins',noadm)
+
+    const emp = all.map(array => array.filter(item => item.role_id = 4));
+    setalladm(emp.length)
+    console.log('employees',noemp)
+
+  
+  }
+
+
+  getdata();
+
+  
+ 
+
+
+const[nofundrequest, setallfundrequest] = useState();
+const[noretailers, setallret] = useState();
+const[nodist, setalldist] = useState();
+const[noemp, setallemp] = useState();
+const[noadm, setalladm] = useState();
+
+
   return (
     <div className='p-4 '>
       <div className="dashboard p-4 ">
@@ -23,14 +70,14 @@ const handleChange = (e) => {
           <Link>
             <div className='p-2 text-2xl md:w-40 font-black bg-white rounded-lg hover:underline'>
               <h1 className='text-red-700'>Admin</h1>
-              <h1 className='mt-0'>72 </h1>
+              <h1 className='mt-0'>1</h1>
             </div>
           </Link>
 
           <Link>
             <div className='p-2 text-2xl md:w-40 font-black bg-white rounded-lg hover:underline'>
               <h1 className='text-red-700'>Retailer </h1>
-              <h1 className='mt-0'>72 </h1>
+              <h1 className='mt-0'>noretailers</h1>
             </div>
           </Link>
 
@@ -64,7 +111,7 @@ const handleChange = (e) => {
             <Link to='/admin/fund-request'>
               <div className='p-2 text-2xl md:w-40 font-black bg-white rounded-lg hover:underline'>
                 <h1 className='text-red-700'>Fund Request</h1>
-                <h1 className='mt-0'>72 </h1>
+                <h1 className='mt-0'>{nofundrequest}</h1>
               </div>
             </Link>
 

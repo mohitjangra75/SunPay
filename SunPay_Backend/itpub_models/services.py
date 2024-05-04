@@ -6,6 +6,8 @@ import requests
 import random
 import csv
 from .models import BBPSProviders, State, BillType
+import ssl
+from requests.adapters import HTTPAdapter
 
 PARTNERID = "UFR008081"  # Replace with your actual PARTNERID
 
@@ -115,21 +117,28 @@ def fund_transfer(payload):
         "data":"Please verify details"}
 
 def query_remitter(payload):
-    token = get_token()
+    url = "https://sit.paysprint.in/service-api/api/v1/service/dmt/remitter/queryremitter"
+    token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0aW1lc3RhbXAiOjE2NDk2Nzk1MTksInBhcnRuZXJJZCI6InBzMDAxIiwicmVxaWQiOiI0NXl1eWpoZ2Z2Y2QifQ.nk0kp4EDyVzS6hc9hhN14XYhg4aD3LlMy-cg4POmiAI"
+    authorised_key = "MzNkYzllOGJmZGVhNWRkZTc1YTgzM2Y5ZDFlY2EyZTQ="
     headers = {
-        "Token":token,
-        "Authorisedkey":"NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ=",
-        "Accept": "application/json",
-        "Content-Type": "application/json"
+        "Token": token,
+        "Authorisedkey": authorised_key,
+        "Content-Type": "application/json",
+        "accept": "application/json"
     }
-    url = "https://api.paysprint.in/api/v1/service/dmt/remitter/queryremitter"
-    response = requests.post(url=url,json=payload, headers=headers)
+    print("URL:", url, "Headers:", headers)
+    response = requests.post(url=url, json=payload, headers=headers)
     if response.ok:
-        return {"status":True,
-        "data":response.json()}
+        return {
+            "status": True,
+            "data": response.json()
+        }
     else:
-        return {"status":False,
-        "data":"Please verify details"} 
+        return {
+            "status": False,
+            "data": "Please verify details"
+        }
+
 
 def register_remitter(payload):
     token = get_token()
@@ -200,7 +209,8 @@ def ansh_payout(payload):
 def zpay_verification(payload):
     headers = {
         "Accept": "application/json",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization" : "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
     }
     url = "https://api.zwitch.io/v1/verifications/bank-account"
     response = requests.post(url, json=payload, headers=headers)
@@ -221,7 +231,9 @@ def zpay_transfer(payload):
     }
     headers = {
         "accept": "application/json",
-        "content-type": "application/json"
+        "content-type": "application/json",
+        "Authorization" : "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
+
     }
     
     url = "https://api.zwitch.io/v1/transfers"
@@ -233,9 +245,61 @@ def zpay_transfer(payload):
         return {"status":True,
         "data":response.json()}
     else:
-        print(response.json())
         return {"status":False,
         "data":"Please verify details"} 
+    
+def zpay_bankadd(payload):
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization" : "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
+    }
+    url = "https://api.zwitch.io/v1/accounts/va_iGTXTqO47awKr9OdhaF0km2Qe/beneficiaries"
+    response = requests.post(url, json=payload, headers=headers)
+    if response.ok:
+        return {"status":True,
+        "data":response.json()}
+    else:
+        print(response.json())
+        return {"status":False,
+        "message":"Please verify details",
+        "data":response.json()}
+
+def zpay_upiadd(payload):
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization" : "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
+    }
+    url = "https://api.zwitch.io/v1/accounts/va_iGTXTqO47awKr9OdhaF0km2Qe/beneficiaries"
+    response = requests.post(url, json=payload, headers=headers)
+    if response.ok:
+        return {"status":True,
+        "data":response.json()}
+    else:
+        print(response.json())
+        return {"status":False,
+        "message":"Please verify details",
+        "data":response.json()}    
+
+def zpay_transfer(payload):
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization" : "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
+    }
+    url = "https://api.zwitch.io/v1/transfers"
+    response = requests.post(url, json=payload, headers=headers)
+    if response.ok:
+        return {"status":True,
+        "data":response.json()}
+    else:
+        print(response.json())
+        return {"status":False,
+        "message":"Please verify details",
+        "data":response.json()}
+
+
     
 def generate_otp(length=6):
     digits = "0123456789"

@@ -138,3 +138,9 @@ AUTH_USER_MODEL = "itpub_models.User"
 MEDIA_URL = '/media/'
 
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# # Redirect HTTP to HTTPS
+# SECURE_SSL_REDIRECT = True
+
+# # Set header used by proxy server to indicate HTTPS
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

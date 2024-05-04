@@ -157,6 +157,7 @@ const getparentid = async (e) => {
 
     // Using find() method to search for the object with id matching searchValue
     const foundObject = all_id.find(item => item.username === searchValue);
+    console.log(foundObject)
     const parentid = foundObject.id
     formData.parent_id = parentid;
 }
@@ -166,7 +167,7 @@ const getparentid = async (e) => {
     // You can perform form submission logic here
     e.preventDefault();
     getparentid();
-
+    console.log(formData.parent_id)
   console.log('Formdata submitted 1' , formData)
 
   const regresponse = await fetch('http://127.0.0.1:8000/api/register_user/', {

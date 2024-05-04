@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, CompanyBankSerializer, BBPSProviderSerializer, StateSerializer, CustomerSerializer, UserTransactionSerializer
-from .services import add_beneficiary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_paysprintbeneficiary
+from .services import add_beneficiary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_paysprintbeneficiary, zpay_verification, zpay_bankadd, zpay_transfer, zpay_upiadd
 from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSTransactions, UserWallet, Package, CompanyBank, BBPSProviders, State, Customer, FundRequest
 import uuid
 from django.http import JsonResponse
@@ -11,6 +11,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 from rest_framework import viewsets, status, mixins
 from django.db import transaction
+import requests
 
 class RegisterUser(APIView):
     def post(self, request, *args, **kwargs):
@@ -152,7 +153,7 @@ class OTPVerification(APIView):
 
 class AddBenAccount(APIView):
     def post(self, request, *args, **kwargs):
-        upi_id = request.data.get("upi_id")
+        # upi_id = request.data.get("upi_id")
         beneficiary_name = request.data.get("beneficiary_name")
         bank_name = request.data.get("bank_name")
         account_number = request.data.get("account_number")
@@ -160,15 +161,16 @@ class AddBenAccount(APIView):
         mobile_number = request.data.get("mobile_number")
         bene_id = request.data.get("bene_id")
 
-        if not all([beneficiary_name, bank_name, account_number, ifsc_code, mobile_number]):
-            return Response({"error": "Please provide all required fields"}, status=status.HTTP_400_BAD_REQUEST)
+        # if not all([beneficiary_name, bank_name, account_number, ifsc_code, mobile_number]):
+        #     return Response({"error": "Please provide all required fields"}, status=status.HTTP_400_BAD_REQUEST)
         
-        try:
-            user = User.objects.get(mobile=mobile_number)
-            print(user.email)
-        except User.DoesNotExist:
-            return Response({"error": "User does not exist for the provided mobile number"}, status=status.HTTP_400_BAD_REQUEST)
+        # try:
+        #     
+        # except User.DoesNotExist:
+        #     return Response({"error": "User does not exist for the provided mobile number"}, status=status.HTTP_400_BAD_REQUEST)
 
+        user = User.objects.get(mobile=mobile_number)
+        print(user.email)
         response = add_beneficiary(
             api_token='1vuiyiyiniitnadhsalha$(%23$%(%26@)$@usow89342mdfu',
             mobile_number=mobile_number,
@@ -342,14 +344,14 @@ class SendMoneyDMT(APIView):
         
             if user.parent_id:
                 wallet_obj.refresh_from_db()
-                wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * 0.5 -  (surcharge*0.5)*0.18)
+                wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * 0.5 -  (surcharge*0.5)*0.05)
                 wallet_obj.save()
                 parent_user = UserWallet.objects.get(user_id=user.parent_id)
-                parent_user.available_balance = parent_user.available_balance + (surcharge * 0.2 - (surcharge * 0.2)*0.18) 
+                parent_user.available_balance = parent_user.available_balance + (surcharge * 0.2 - (surcharge * 0.2)*0.05) 
                 parent_user.save()
             else:
                 wallet_obj.refresh_from_db()
-                wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * 0.7 -  (surcharge*0.7)*0.18)
+                wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * 0.7 -  (surcharge*0.7)*0.05)
                 wallet_obj.save()
 
 
@@ -360,13 +362,16 @@ class SendMoneyDMT(APIView):
 class FundRequest(APIView):
     def post(self, request, *args, **kwargs):
         amount = request.data.get("amount")
+        bank_name = request.data.get("bank_name")
         bank_acc_number = request.data.get("bank_acc_number")
-        bank_ref_number = request.data.get("bank_ref_number")
+        ref_number = request.data.get("ref_number")
         payment_mode = request.data.get("payment_mode")
         payment_date = request.data.get("payment_date")
         remark = request.data.get("remark")
         username = request.data.get("username")
-        if not all([amount, bank_acc_number, payment_mode, payment_date , username]):
+        add_date = request.data.get("add_date")
+        print('amount',amount)
+        if not all([amount, ref_number, bank_acc_number, payment_mode, payment_date , remark, bank_name,add_date ,username]):
             return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             user = User.objects.get(username=username)
@@ -376,51 +381,54 @@ class FundRequest(APIView):
             wallet_obj = UserWallet.objects.get(user=user)
         except UserWallet.DoesNotExist:
             return Response({"error": "Wallet not found for the user"}, status=status.HTTP_404_NOT_FOUND)
+        
         opening_balance = wallet_obj.available_balance if wallet_obj else 0.0
         running_balance = opening_balance + amount
         tr_obj = UserTransactions.objects.create(
             user=user,
-            bank_ref_number=bank_ref_number,
+            bank_name = bank_name,
+            bank_ref_number=ref_number,
             bank_acc_number=bank_acc_number,
             remark=remark,
             payment_date=payment_date,
             transaction_status=TransactionStatus.PENDING,
             payment_mode=payment_mode,
+            add_date = add_date,
             amount=amount,
             opening_balance=opening_balance,
             running_balance=running_balance
         )
         return Response({"message": "Successfully initiated fund request", "transaction_id": tr_obj.id})
     
-    def put(self, request, *args, **kwargs):
-        transaction_id = request.data.get("transaction_id")
-        if not transaction_id:
-            return Response({"error": "Transaction ID is required"}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            tr_obj = UserTransactions.objects.get(id=transaction_id)
-        except UserTransactions.DoesNotExist:
-            return Response({"error": "Transaction not found"}, status=status.HTTP_404_NOT_FOUND)
-        tr_obj.transaction_status = TransactionStatus.SUCCESS
-        tr_obj.save()
-        if tr_obj.transaction_status == TransactionStatus.SUCCESS:
-            tr_obj.user.wallet_obj.update_balance(tr_obj.amount)
-        else:
-            tr_obj.delete()
-            raise ValidationError("Transaction failed")
-        return Response({"message": "Transaction status updated successfully"})
+    # def put(self, request, *args, **kwargs):
+    #     transaction_id = request.data.get("transaction_id")
+    #     if not transaction_id:
+    #         return Response({"error": "Transaction ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+    #     try:
+    #         tr_obj = UserTransactions.objects.get(id=transaction_id)
+    #     except UserTransactions.DoesNotExist:
+    #         return Response({"error": "Transaction not found"}, status=status.HTTP_404_NOT_FOUND)
+    #     tr_obj.transaction_status = TransactionStatus.SUCCESS
+    #     tr_obj.save()
+    #     if tr_obj.transaction_status == TransactionStatus.SUCCESS:
+    #         tr_obj.user.wallet_obj.update_balance(tr_obj.amount)
+    #     else:
+    #         tr_obj.delete()
+    #         raise ValidationError("Transaction failed")
+    #     return Response({"message": "Transaction status updated successfully"})
     
-    def get(self, request, id=None): 
-        if id is not None:
-            try:
-                transaction = UserTransactions.objects.get(id=id)
-                serializer = UserTransactionSerializer(transaction)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            except User.DoesNotExist:
-                return Response({"message": "No transactions found"}, status=status.HTTP_404_NOT_FOUND)
-        else:
-            transactions = UserTransactions.objects.all()
-            serializer = UserTransactionSerializer(transactions, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+    # def get(self, request, id=None): 
+    #     if id is not None:
+    #         try:
+    #             transaction = UserTransactions.objects.get(id=id)
+    #             serializer = UserTransactionSerializer(transaction)
+    #             return Response(serializer.data, status=status.HTTP_200_OK)
+    #         except User.DoesNotExist:
+    #             return Response({"message": "No transactions found"}, status=status.HTTP_404_NOT_FOUND)
+    #     else:
+    #         transactions = UserTransactions.objects.all()
+    #         serializer = UserTransactionSerializer(transactions, many=True)
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class GetBBPSTypes(APIView):
 
@@ -522,8 +530,6 @@ class AnshPayout(APIView):
         else:
             return Response({"error":"Please try again later"})
 
-
-
 class UserViewset(
     mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
 ):
@@ -605,25 +611,27 @@ class GetUsers(APIView):
 
 class CheckCustomer(APIView):
     def post(self, request):
-        # Assuming you are sending the mobile number in the request POST data
         mobile_number = request.data.get('mobile_number')
-        
-        if mobile_number:
-            try:
-                customer = Customer.objects.get(customer_mobile=mobile_number)
-                print(customer)
-                payload = {"mobile": mobile_number,"bank3_flag": "NO"}
-                response = query_remitter(payload=payload)
-                print(response)
-                if response["status"]==True:
-                    payload = {"mobile": mobile_number}
-                    serializer = CustomerSerializer(customer)
-                    return Response({"message": "Customer found", "data":serializer.data, "Response": response }, status=status.HTTP_200_OK)  
-                          
-            except Customer.DoesNotExist:
-                return JsonResponse({'Message': 'Customer not found registering.'}, status=404)
-        else:
-            return Response({'error': 'Mobile number not provided'}, status=400)
+        if not mobile_number:
+            return Response({'error': 'Mobile number not provided'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            customer = Customer.objects.get(customer_mobile=mobile_number)
+            print(customer)
+            payload = {"mobile": mobile_number, "bank3_flag": "NO"}
+            response = query_remitter(payload=payload)
+            print(response)
+            if response.get("status"):
+                serializer = CustomerSerializer(customer)
+                return Response({
+                    "message": "Customer found",
+                    "data": serializer.data,
+                    "Response": response
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({'message': 'Please verify details'}, status=status.HTTP_400_BAD_REQUEST)
+        except Customer.DoesNotExist:
+            return Response({'Message': 'Customer not found, registering.'}, status=status.HTTP_404_NOT_FOUND)
+
 
 class RegisterRemitter(APIView):
     def post(self, request):
@@ -707,6 +715,198 @@ class GetFundRequest(APIView):
             data = UserTransactionSerializer(user_transactions,many=True).data
             return Response(data)
             
+class UpdateFundRequest(APIView):
+
+    def post(self, request, *args, **kwargs):
+        tr_id = request.data.get('transaction_id')
+        print(tr_id)
+        if tr_id:
+            tr = UserTransactions.objects.get(id=tr_id)
+            tr.transaction_status=TransactionStatus.SUCCESS
+            tr.save()
+            return Response({'details':"updated succesfully"})
+        else:
+            return Response({'Message': 'Error occured'})
+
+class GetFundRequest(APIView):
+
+    def get(self, request, *args, **kwargs):
+        user_id = request.query_params.get('user_id', None) 
+        is_admin = request.query_params.get('is_admin', False) 
+        if is_admin:
+            user_transactions = UserTransactions.objects.all()
+            data = UserTransactionSerializer(user_transactions,many=True).data
+            return Response(data)
+        if user_id:
+            user_transactions = UserTransactions.objects.filter(user_id=user_id)
+            data = UserTransactionSerializer(user_transactions,many=True).data
+            return Response(data)
+
+
+class zpayaddbankbeneficiary(APIView):
+    def post(self, request, *args, **kwargs):
+
+        name_of_account_holder = request.data.get("name_of_account_holder")
+        email = request.data.get("email")
+        phone = request.data.get("phone")
+        bank_account_number = request.data.get("bank_account_number")
+        bank_ifsc_code = request.data.get("bank_ifsc_code")
+
+        if not (bank_account_number and bank_ifsc_code and name_of_account_holder and email and phone):
+            return Response({"error":"Please fill details"})
+        
+        payload = {
+            "bank_account_number": bank_account_number,
+            "bank_ifsc_code": bank_ifsc_code,
+            "name_of_account_holder": name_of_account_holder,
+            "email": email,
+            "phone": phone,
+            "type" : "account_number",
+            "key_1": "DD",
+            "key_2": "XOF"
+        }
+        response = zpay_bankadd(payload=payload)
+        if( response["status"] == True):
+            return Response(response)
+        else:
+            return Response({"error":"Please try again later"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class zpayaddvpabeneficiary(APIView):
+    def post(self, request, *args, **kwargs):
+
+        name_of_account_holder = request.data.get("name_of_account_holder")
+        email = request.data.get("email")
+        phone = request.data.get("phone")
+        vpa = request.data.get("vpa")
+        account_id = request.data.get("account_id")
+
+        if not (vpa and name_of_account_holder and email and phone and account_id):
+            return Response({"error":"Please fill details"})
+        
+        payload = {
+            "type" : "vpa",
+            "vpa": vpa,
+            "name_of_account_holder": name_of_account_holder,
+            "email": email,
+            "phone": phone,
+        }
+        response = zpay_upiadd(payload=payload)
+        if response["status"] == True:
+            return Response(response)
+        else:
+            return Response({"error":"Please try again later"}, response)
+        
+class zpaygetbeneficiary(APIView):
+    def get(self, request, *args, **kwargs):
+        headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization" : "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
+        }
+        url = "https://api.zwitch.io/v1/accounts/va_iGTXTqO47awKr9OdhaF0km2Qe/beneficiaries?results_per_page=100"
+
+        response = requests.get(url, headers=headers)
+        if response.ok:
+            return Response(response.json())
+        else:
+            print(response.json())
+            return {"status":False,
+            "data":"Please verify details"}
+        
+class zpaygetbeneficiarybyid(APIView):
+    def get(self, request, *args, **kwargs):
+
+        param1 = request.query_params.get('')
+        headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization" : "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
+        }
+        url = "https://api.zwitch.io/v1/accounts/beneficiaries/{beneficiary_id}"
+
+        response = requests.get(url, headers=headers)
+        if response.ok:
+            return Response(response.json())
+        else:
+            print(response.json())
+            return ({"status":False,
+            "data":"Please verify details"})
+
+class zpayverification(APIView):
+    def post(self, request, *args, **kwargs):
+
+        bank_account_number= request.data.get("bank_account_number")
+        bank_ifsc_code = request.data.get("bank_ifsc_code")
+        merchant_reference_id = request.data.get("merchant_reference_id")
+
+        if not (bank_account_number and bank_ifsc_code and merchant_reference_id):
+            return Response({"error":"Please fill details"})
+        
+        payload = {
+            "bank_account_number": bank_account_number,
+            "bank_ifsc_code": bank_ifsc_code,
+            "merchant_reference_id": merchant_reference_id,
+            "force_penny_drop": False
+        }
+        response = zpay_verification(payload=payload)
+        if response["status"] == True:
+            return Response(response)
+        else:
+            return Response({"error":"Please try again later"}, response)
+        
+
+class zpaybanktansfer(APIView):
+    def post(self, request, *args, **kwargs):
+
+        beneficiary_id = request.data.get("beneficiary_id")
+        amount = request.data.get("amount")
+        merchant_reference_id = request.data.get("merchant_reference_id")
+        payment_remark = request.data.get("payment_remark")
+        payment_mode = request.data.get("payment_mode")
+        if not (beneficiary_id and amount and merchant_reference_id and payment_remark):
+            return Response({"error":"Please fill details"})
+        
+        payload = {
+            "type":"account_number",
+            "debit_account_id" : "va_iGTXTqO47awKr9OdhaF0km2Qe",
+            "beneficiary_id": beneficiary_id,
+            "amount": amount,
+            "currency_code" : "inr",
+            "payment_mode" : payment_mode,
+            "merchant_reference_id": merchant_reference_id,
+            "payment_remark": payment_remark,
+        }
+        response = zpay_transfer(payload=payload)
+        if response["status"] == True:
+            return Response(response)
+        else:
+            return Response({"error":"Please try again later"}, response)
+
+class zpayupitansfer(APIView):
+    def post(self, request, *args, **kwargs):
+
+        beneficiary_id = request.data.get("beneficiary_id")
+        amount = request.data.get("amount")
+        merchant_reference_id = request.data.get("merchant_reference_id")
+        payment_remark = request.data.get("payment_remark")
+        if not (beneficiary_id and amount and merchant_reference_id and payment_remark):
+            return Response({"error":"Please fill details"})
+        
+        payload = {
+            "type":"vpa",
+            "debit_account_id" : "va_iGTXTqO47awKr9OdhaF0km2Qe",
+            "beneficiary_id": beneficiary_id,
+            "amount": amount,
+            "currency_code" : "inr",
+            "merchant_reference_id": merchant_reference_id,
+            "payment_remark": payment_remark,
+        }
+        response = zpay_transfer(payload=payload)
+        if response["status"] == True:
+            return Response(response)
+        else:
+            return Response({"error":"Please try again later"}, response)
+             
 # class Wallettowallet(APIView):
 
 #     def post(self, request, *args, **kwargs):
