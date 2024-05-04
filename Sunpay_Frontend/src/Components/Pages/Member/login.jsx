@@ -7,7 +7,7 @@ import { useState } from 'react';
 import navlogo from '../../Navbar/NavImages/logo.png';
 import usernavimg from '../../Navbar/NavImages/user.png';
 import sunptext from './Loginpage Img/Sunpaytextlogin.png';
-import logimg from './Loginpage Img/loginimg.png';
+import logimg from './Loginpage Img/Money_Transfer.png';
 
 const Login = ({ setIsLoggedIn }, { IsLoggedIn }) => {
   const [login_id, setlogin_id] = useState('');

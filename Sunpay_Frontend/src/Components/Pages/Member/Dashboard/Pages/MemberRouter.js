@@ -15,7 +15,6 @@ import DMTreport from '../../DMTreport';
 import Rechargeutilityreport from '../../Rechargeutilityreport';
 import Moneytransfer from '../../Moneytransfer';
 import Addbeneficiary from '../../Addbeneficiary';
-import poster from '../DashboardComponents/Data/imgs/poster.png';
 import Confirmmoneytransfer from '../../Confirmmoneytransfer';
 import Moneytransferreceipt from '../../Moneytransferreceipt';
 import Memberprofile from '../../Memberprofile';
@@ -135,17 +134,7 @@ const MemberRouter = (props, {IsLoggedIn}) => {
         </div>
       </div>
 
-      {/* Latest Notification */}
-      <div className='mt-4  text-center px-2 text-xl text-white bg-yellow-600'>
-        Latest Notification
-      </div>
-
-      {/* Posters */}
-      <div className='poster p-8 border-2 m-2 border-gray-400 mt-8'>
-        <div className='border-2'>
-          <img src={poster} className='w-full' alt='' />
-        </div>
-      </div>
+      
     </div>
   );
 };

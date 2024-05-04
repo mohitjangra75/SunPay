@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import navlogo from '../../Navbar/NavImages/logo.png';
 import usernavimg from '../../Navbar/NavImages/user.png';
 import sunptext from './Loginpage Img/Sunpaytextlogin.png';
-import logimg from './Loginpage Img/loginimg.png';
+import logimg from './Loginpage Img/Money_Transfer.png';
 import MemberRouter from './Dashboard/Pages/MemberRouter';
 import { useParams } from 'react-router-dom';
 

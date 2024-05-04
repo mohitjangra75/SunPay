@@ -59,7 +59,12 @@ const Navbar = (props) => {
                 <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">Wallet Balance <br/>{user.available_balance}</div>
                 <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">AEPS Wallet <br/>{user.available_balance}</div>
                 <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">ASM <br/>{user.asm_name}</div>
-                {(user.roleid==2) && (   <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">DIST. <br/>{user.distributor_name}</div>)}
+                {user.role_id === 1 ? (
+
+                <div className=" text-xl right-0 text-center border-black rounded-lg border-2 px-4 font-semibold leading-8 hover:bg-blue-500 hover:text-white">DIST. <br/>{user.distributor_name}</div>                    ) : (
+                        <div></div>
+                )}
+
             </div>
 
             <div className='flex gap-8 float-right ml-16'>
