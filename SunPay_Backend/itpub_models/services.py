@@ -39,20 +39,25 @@ def get_token():
 #         "data":"Please verify details"}
 def fetch_paysprintbeneficiary(payload):
     token = get_token()
-    headers = {
-        "Token":token,
-        "Authorisedkey":"NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ=",
-        "Accept": "application/json",
-        "Content-Type": "application/json"
-    }
+    AuthKey = "NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ="
     url = "https://sit.paysprint.in/service-api/api/v1/service/dmt/beneficiary/registerbeneficiary/fetchbeneficiary"
+    headers = {
+        "Token": token,
+        "Content-Type": "application/json",
+        "accept": "application/json"
+    }
     response = requests.post(url=url,json=payload, headers=headers)
     if response.ok:
-        return {"status":True,
-        "data":response.json()}
+        return {
+            "status": True,
+            "data": response.json()
+        }
     else:
-        return {"status":False,
-        "data":"Please verify details"}
+        return {
+            "status": False,
+            "data": "Please verify details",
+            "response" : response.json()
+        }
 
 def add_beneficiary(api_token, mobile_number, bene_name, number, bank_account, bank_name, ifsc, user_id, partnerSubId):
     url = "https://api.levinfintech.com/api/levin/add-beneficiary"
@@ -117,17 +122,18 @@ def fund_transfer(payload):
         "data":"Please verify details"}
 
 def query_remitter(payload):
+    token = get_token()
+    AuthKey = "NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ="
     url = "https://sit.paysprint.in/service-api/api/v1/service/dmt/remitter/queryremitter"
-    token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0aW1lc3RhbXAiOjE2NDk2Nzk1MTksInBhcnRuZXJJZCI6InBzMDAxIiwicmVxaWQiOiI0NXl1eWpoZ2Z2Y2QifQ.nk0kp4EDyVzS6hc9hhN14XYhg4aD3LlMy-cg4POmiAI"
-    authorised_key = "MzNkYzllOGJmZGVhNWRkZTc1YTgzM2Y5ZDFlY2EyZTQ="
     headers = {
         "Token": token,
-        "Authorisedkey": authorised_key,
+        "Authorisedkey": AuthKey,
         "Content-Type": "application/json",
         "accept": "application/json"
     }
     print("URL:", url, "Headers:", headers)
     response = requests.post(url=url, json=payload, headers=headers)
+    print(response.text)
     if response.ok:
         return {
             "status": True,
@@ -136,8 +142,10 @@ def query_remitter(payload):
     else:
         return {
             "status": False,
-            "data": "Please verify details"
+            "data": "Please verify details",
+            "resp" : response.json()
         }
+
 
 
 def register_remitter(payload):
@@ -299,9 +307,43 @@ def zpay_transfer(payload):
         "message":"Please verify details",
         "data":response.json()}
 
-
+def zpaygetallbeneficiary():
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization" : "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
+        }
     
-def generate_otp(length=6):
+    url = "https://api.zwitch.io/v1/accounts/va_iGTXTqO47awKr9OdhaF0km2Qe/beneficiaries?results_per_page=100"
+
+    response = requests.get(url, headers=headers)
+    if response.ok:
+        return {"status":True,
+        "data":response.json()}
+    else:
+        print(response.json())
+        return {"status":False,
+        "data":"Please verify details"}
+
+def zpaybeneficiarybyid(param1):
+   
+    headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization" : "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
+            }
+    url = "https://api.zwitch.io/v1/accounts/beneficiaries/{param1}"
+
+    response = requests.get(url, headers=headers)
+    if response.ok:
+        return {"status":True, "data":response.json()
+        }
+    else:
+        print(response.json())
+        return ({"status":False,
+        "data":"Please verify details"})
+
+def generate_otp(length=4):
     digits = "0123456789"
     otp = ''.join(random.choice(digits) for _ in range(length))
     return otp

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Adminlogin({ setAdmLoggedIn }, { AdmLoggedIn }) {
+  
   const [login_id, setlogin_id] = useState('');
   const [password, setPassword] = useState('');
   const [pin, settpin] = useState('');
@@ -14,11 +15,12 @@ export default function Adminlogin({ setAdmLoggedIn }, { AdmLoggedIn }) {
   const [error, setError] = useState(null);
   const [isLoggedin, setIsLoggedin] = useState(false);
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+
     setError(null);
     setLoading(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/login/', {
+      const response = await fetch('https://new.sunpay.co.in/api/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,10 +40,11 @@ export default function Adminlogin({ setAdmLoggedIn }, { AdmLoggedIn }) {
     }
   };
 
+
   const handletpin = async () => {
     try {
       const tpin = parseInt(pin);
-      const response = await fetch('http://127.0.0.1:8000/api/tpin/', {
+      const response = await fetch('https://new.sunpay.co.in/api/tpin/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

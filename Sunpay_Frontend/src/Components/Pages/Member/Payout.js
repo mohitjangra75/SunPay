@@ -19,7 +19,7 @@ const Payout = (props) => {
       if(mobile_number){
 
         try {
-          const response = await fetch('http://127.0.0.1:8000/api/get_customer/', {
+          const response = await fetch('https://new.sunpay.co.in/api/get_customer/', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

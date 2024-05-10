@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
+import './NewsTicker.css';
 import Navbar from '../DashboardComponents/Navbar/Navbar';
 import Sidebar from '../DashboardComponents/Sidebar/Sidebar';
 import Main from '../DashboardComponents/Main/Main';
@@ -43,6 +44,7 @@ import Loanpayment from '../../Loanpayment'
 import Mcdtollservics from '../../Mcdtollservics'
 import Insurance from '../../Insurance'
 import AddCustomer from '../../Addcustomer';
+import Retailerregister from '../../Retailerregister';
 
 const MemberRouter = (props, {IsLoggedIn}) => {
   // const location = useLocation();
@@ -79,12 +81,14 @@ const MemberRouter = (props, {IsLoggedIn}) => {
       <div className=''>
         <Navbar data={data}/>
       </div>
-      <div className='bg-red-600 max-w-[2300px] text-2xl md:mt-[90px] text-center text-black '>
-        News HeadLine
-      </div>
-      <div className='bg-red-600 max-w-[2300px] border-2 border-black text-center text-black '>
-        Small News HeadLine
-      </div>
+     <div className='flex w-full gap-1 overflow-visible bg-black'>
+        <div className='bg-red-600 w-1/2 text-2xl md:mt-[90px] text-center text-black '>
+            News HeadLine
+          </div>
+          <div className='bg-red-600 w-1/2 text-2xl md:mt-[90px] text-center text-black news-ticker '>
+            <p className='animate-scroll-left-to-right news-ticker-content'> Small News HeadLine</p>
+          </div>
+     </div>
       <div className='main h-screen w-full gap-2 flex flex-1'>
         <aside className='sticky top-0'>
           <Sidebar data={data}/>
@@ -92,6 +96,7 @@ const MemberRouter = (props, {IsLoggedIn}) => {
 
         <div className={`main w-full overflow-scroll scrollbar-hide z-10`}>
           {category === 'dashboard' && <Main data={data}/>}
+          {category === 'createretailer' && (<Retailerregister data={data}/>)}
           {category === 'profile' && <Memberprofile data={data} />}
           {category === 'fund-request' && <Fundrequest data={data} />}
           {category === 'reports' && <Reports data={data} />}

@@ -23,12 +23,12 @@ const AddCustomer = (props) => {
     
     try {
       
-      const userresponse = await axios.get(`http://127.0.0.1:8000/api/users/${props.data.id}`)
+      const userresponse = await axios.get(`https://new.sunpay.co.in/api/users/${props.data.id}`)
       setaddress(userresponse.data.address)
       setpincode(userresponse.data.pin_code)
       setdob(userresponse.data.dob)
 
-      const response = await axios.get('http://127.0.0.1:8000/api/get_banks/'); // Assuming '/api/options' is your backend endpoint
+      const response = await axios.get('https://new.sunpay.co.in/api/get_banks/'); // Assuming '/api/options' is your backend endpoint
       setOptions(response.data);  
       
     } catch (error) {
@@ -52,7 +52,7 @@ const AddCustomer = (props) => {
   const handlesubmit = async (e) => {
     try{
       console.log(mobile_number, first_name, last_name, address, pincode, dob)
-      const addresponse = await fetch('http://127.0.0.1:8000/api/register_remitter/', {
+      const addresponse = await fetch('https://new.sunpay.co.in/api/register_remitter/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

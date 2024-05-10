@@ -61,6 +61,10 @@ const MemberSettings = (props) => {
  
   const closeModal = () => {
     setIsModalOpen(false);
+    setoldpassword('');
+    setnewpassword('');
+    setoldtpin('');
+    setnewtpin('');
   };
 
   const localdata = props.data;
@@ -70,7 +74,7 @@ const MemberSettings = (props) => {
   useEffect(() => { 
     const fetchuser = async () => {
         try {
-          const response = await axios.get(`http://127.0.0.1:8000/api/users/${localdata.id}`)
+          const response = await axios.get(`https://new.sunpay.co.in/api/users/${localdata.id}`)
           setuser(response.data);
           console.log('liveuser dashboard',user) 
         } catch (error) {
@@ -96,7 +100,7 @@ const MemberSettings = (props) => {
           alert("Old and New Password are same")
         }
         else {
-          const patchresponse = await fetch(`http://127.0.0.1:8000/api/users/${user.id}/`, {
+          const patchresponse = await fetch(`https://new.sunpay.co.in/api/users/${user.id}/`, {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
@@ -106,8 +110,12 @@ const MemberSettings = (props) => {
   
           const addresult = await patchresponse.json();
           console.log('resultadd',addresult)
-          const response = await axios.get(`http://127.0.0.1:8000/api/users/${localdata.id}`)
+          const response = await axios.get(`https://new.sunpay.co.in/api/users/${localdata.id}`)
           setuser(response.data);
+          if(addresult.message=="User updated successfully")
+            {
+              setIsModalOpen(true);
+            }
         }     
       }
       else {
@@ -130,7 +138,7 @@ const MemberSettings = (props) => {
           alert("Old and New TPIN are same")
         }
         else {
-          const patchresponse = await fetch(`http://127.0.0.1:8000/api/users/${user.id}/`, {
+          const patchresponse = await fetch(`https://new.sunpay.co.in/api/users/${user.id}/`, {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
@@ -140,9 +148,10 @@ const MemberSettings = (props) => {
   
           const addresult = await patchresponse.json();
           console.log('resultadd',addresult)
-          const response = await axios.get(`http://127.0.0.1:8000/api/users/${localdata.id}`)
+          const response = await axios.get(`https://new.sunpay.co.in/api/users/${localdata.id}`)
           setuser(response.data);
-          if(response.message==="User updated successfully"){
+          if(addresult.message=="User updated successfully")
+          {
             setIsModalOpen(true);
           }
         }  

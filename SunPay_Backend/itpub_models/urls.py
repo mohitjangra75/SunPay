@@ -37,7 +37,6 @@ urlpatterns = [
     path('zpaytransfer/', zpaybanktansfer.as_view(), name='zpaytransferbank'),
     path('zpaygetbeneficiarybyid/', zpaygetbeneficiarybyid.as_view(), name='zpaybenebyid'),
     path('zpayupitransfer/', zpayupitansfer.as_view(), name='zpaytransferupi'),
-
 ]
 
 urlpatterns += router.urls

@@ -15,36 +15,29 @@ const handleChange = (e) => {
   setDate(e.target.value);
 };
 
-
   // Function to fetch data from local storage or any other source
 
   const getdata = async (e) => {
 
-    const funreqresponse = await axios.get(`http://127.0.0.1:8000/api/get_fund_request/?is_admin=${true}`);
+    const funreqresponse = await axios.get(`https://new.sunpay.co.in/api/get_fund_request/?is_admin=${true}`);
     const allrequest = funreqresponse.data.length
+ 
     setallfundrequest(allrequest)
   
-    const alluser= await axios.get(`http://127.0.0.1:8000/api/get_users/`);
+    const alluser= await axios.get(`https://new.sunpay.co.in/api/get_users/`);
     const all = [alluser.data]
-    console.log(all)
 
-    const dist = all.map(array => array.filter(item => item.role_id = 1));
-    setallret(dist.length)
-    console.log('ret',noretailers)
+    const dist = all.map(array => array.filter(item => item.role_id == 1));
+    setalldist(dist.length)
     
-    const retailers = all.map(array => array.filter(item => item.role_id = 2));
-    setalladm(retailers.length)
-    console.log('dist',nodist)
+    const retailers = all.map(array => array.filter(item => item.role_id == 2));
+    setallret(retailers.length)
 
-    const adm = all.map(array => array.filter(item => item.role_id = 3));
+    const adm = all.map(array => array.filter(item => item.role_id == 3));
     setalladm(adm.length)
-    console.log('admins',noadm)
 
-    const emp = all.map(array => array.filter(item => item.role_id = 4));
-    setalladm(emp.length)
-    console.log('employees',noemp)
-
-  
+    const emp = all.map(array => array.filter(item => item.role_id == 4));
+    setallemp(emp.length)
   }
 
 
@@ -70,35 +63,35 @@ const[noadm, setalladm] = useState();
           <Link>
             <div className='p-2 text-2xl md:w-40 font-black bg-white rounded-lg hover:underline'>
               <h1 className='text-red-700'>Admin</h1>
-              <h1 className='mt-0'>1</h1>
+              <h1 className='mt-0'>{noadm}</h1>
             </div>
           </Link>
 
           <Link>
             <div className='p-2 text-2xl md:w-40 font-black bg-white rounded-lg hover:underline'>
               <h1 className='text-red-700'>Retailer </h1>
-              <h1 className='mt-0'>noretailers</h1>
+              <h1 className='mt-0'>{noretailers}</h1>
             </div>
           </Link>
 
           <Link>
             <div className='p-2 text-2xl md:w-40 font-black bg-white rounded-lg hover:underline'>
               <h1 className='text-red-700'>Distributor</h1>
-              <h1 className='mt-0'>72 </h1>
+              <h1 className='mt-0'>{nodist} </h1>
             </div>
           </Link>
 
           <Link>
             <div className='p-2 text-2xl md:w-40 font-black bg-white rounded-lg hover:underline'>
               <h1 className='text-red-700'>Employee</h1>
-              <h1 className='mt-0'>72 </h1>
+              <h1 className='mt-0'>{noemp}</h1>
             </div>
           </Link>
         </div>
 
         {/* Pending Count */}
         <div className='mt-8 p-4 bg-slate-400 rounded-lg'>
-          <h1 className='text-3xl underline text-white font-black'>Pending Count</h1>
+          <h1 className='text-3xl underline text-white font-black'>Total Count</h1>
           <br />
           <div className='flex text-center flex-wrap gap-16'>
             <Link to='/admin/dmtreport'>
@@ -138,16 +131,16 @@ const[noadm, setalladm] = useState();
           </div>
         </div>
 
-        {/* Day Report */}
-        <div className='mt-8 p-4 bg-slate-400 rounded-lg'>
+  {/*        Day Report
+      <div className='mt-8 p-4 bg-slate-400 rounded-lg'>
           <h1 className='text-3xl underline text-white font-black'>Daywise report</h1>
           <br />
 
-          {/* Payment Date */}
-            <div className="col-md-3">
+          {/* Payment Date 
+             <div className="col-md-3">
               <label htmlFor="Payment date" className='text-white '>Select Date</label>
               <input id="dateRequired" type="date" onChange={handleChange} name="dateRequired" defaultValue={defaultValue} className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'/>
-              {/* <input type="date" onChange={handleChange} ref={dateInputRef} className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'/> */}
+              {/* <input type="date" onChange={handleChange} ref={dateInputRef} className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'/> 
             </div>
 
           <div className='flex text-center mt-4 flex-wrap gap-16'>
@@ -194,7 +187,7 @@ const[noadm, setalladm] = useState();
             </Link>
 
           </div>
-        </div>
+        </div> */}
 
       </div>
     </div>

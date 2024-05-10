@@ -48,7 +48,7 @@ const Main = (props) => {
   useEffect(() => { 
     const fetchuser = async () => {
         try {
-          const response = await axios.get(`http://127.0.0.1:8000/api/users/${localdata.id}`)
+          const response = await axios.get(`https://new.sunpay.co.in/api/users/${localdata.id}`)
           setuser(response.data);
           console.log('liveuser dashboard',user) 
         } catch (error) {
@@ -59,7 +59,7 @@ const Main = (props) => {
   }, [location]); 
 
   return (
-    <div className='maindashboardcont gap-20 w-full py-4 pr-2 pl-2 '>
+    <div className='maindashboardcont gap-20 w-full '>
 
       <div className='md:flex gap-2'>
         <div className='servicecont text-xl md:pl-10 bg-red-200 p-4 md:w-[1900px] md:flex bg-orange-200'>

@@ -12,7 +12,7 @@ const RightSidebar = (props) => {
     useEffect(() => { 
       const fetchuser = async () => {
           try {
-            const response = await axios.get(`http://127.0.0.1:8000/api/users/${localdata.id}`)
+            const response = await axios.get(`https://new.sunpay.co.in/api/users/${localdata.id}`)
             setuser(response.data);
             console.log('liveuser dashboard',user) 
           } catch (error) {

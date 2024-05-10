@@ -62,7 +62,6 @@ const defaultValue = new Date(date).toISOString().split('T')[0]
 const Fundrequest = (props) => {  
 
   const [isModalOpen, setIsModalOpen] = useState(false);
- 
   const closeModal = () => {
     setIsModalOpen(false);
   };
@@ -72,7 +71,7 @@ const Fundrequest = (props) => {
   const fetchBank = async () => {
     try {
       
-      const response = await axios.get('http://127.0.0.1:8000/api/companybanks/'); // Assuming '/api/options' is your backend endpoint
+      const response = await axios.get('https://new.sunpay.co.in/api/companybanks/'); // Assuming '/api/options' is your backend endpoint
       setOptions(response.data);       
       
     } catch (error) {
@@ -81,10 +80,9 @@ const Fundrequest = (props) => {
   };
 
   useEffect(() => {
-    
+
     fetchBank(); // Fetch data when the component mounts
   }, []);
-
 
   const divprint = useRef();
   const handliprint = useReactToPrint({
@@ -95,37 +93,40 @@ const Fundrequest = (props) => {
   useEffect(() => {
     setDatall(props.data);
   }, []);
+  
 
   const [Date, setDate] = useState();
   const [show, setshow] = useState(false)
   const [showrow, setshowrow] = useState(false)
-  
-  const Timestamp = today
+
+
 
     const submitfundrequest = async (e) => {
       try {
+
+       
+
         e.preventDefault();
-    
-        const amount = parseFloat(amoun); // Assuming `amoun` is defined elsewhere
-        const add_date = defaultValue; // Assuming `defaultValue` is defined elsewhere
-    
-        const userresponse = await axios.get(`http://127.0.0.1:8000/api/users/${props.data.id}`);
+        const add_date = defaultValue
+        const amount = parseFloat(amoun); 
+        const userresponse = await axios.get(`https://new.sunpay.co.in/api/users/${props.data.id}`);
         const username = userresponse.data.username;
     
         const requestBody = {
           amount,
+          bank_name,
           bank_acc_number,
           ref_number,
           payment_mode,
           payment_date,
           remark,
           username,
-          add_date 
+          add_date,
         };
     
         console.log('Form submitted:', requestBody);
     
-        const response = await fetch('http://127.0.0.1:8000/api/fund_request/', {
+        const response = await fetch('https://new.sunpay.co.in/api/fund_request/', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -150,7 +151,7 @@ const Fundrequest = (props) => {
     
     const getfundrequest = async (e) => {
       e.preventDefault();
-      const funreqresponse = await axios.get(`http://127.0.0.1:8000/api/get_fund_request/?user_id=${props.data.id}`);
+      const funreqresponse = await axios.get(`https://new.sunpay.co.in/api/get_fund_request/?user_id=${props.data.id}`);
       const allrequest = funreqresponse.data
       setallfundrequest(allrequest)
       console.log(allfundrequest)
@@ -163,6 +164,9 @@ const Fundrequest = (props) => {
     // }
   
     const savefundrequest = (e) => {
+      const filteredArray = options.find(item => item.account_no === bank_acc_number);
+      setbank_name(filteredArray.bank_name)
+
       e.preventDefault();
       if(
         bank_acc_number && 
@@ -170,7 +174,8 @@ const Fundrequest = (props) => {
         ref_number && 
         payment_mode &&
         payment_date &&
-        remark 
+        remark &&
+        bank_name
       ){
         setshow(current => !current)
       }
@@ -191,6 +196,7 @@ const Fundrequest = (props) => {
   const [payment_date, setdate] = useState('');
   const [remark, setremarks] = useState('');
   const [allfundrequest, setallfundrequest] = useState();
+  const [bank_name, setbank_name] = useState();
 
   return (
     <div className='Fundrequest p-4'>
@@ -208,7 +214,7 @@ const Fundrequest = (props) => {
                 <select id="banks" required onChange={(e) => setbank(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                   <option selected>Bank List</option>
                   {options.map(option => (
-                    <option key={option.bank_code} value={option.account_no}>
+                    <option key={option.bank_name} value={option.account_no}>
                           {option.bank_name}  {option.account_no}
                     </option>
                   ))}

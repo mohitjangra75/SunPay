@@ -27,7 +27,7 @@ const Navbar = (props) => {
     useEffect(() => { 
         const fetchuser = async () => {
             try {
-              const response = await axios.get(`http://127.0.0.1:8000/api/users/${navdata.id}`)
+              const response = await axios.get(`https://new.sunpay.co.in/api/users/${navdata.id}`)
               setuser(response.data);
               console.log('liveuser called',user) 
             } catch (error) {
@@ -113,13 +113,19 @@ const Navbar = (props) => {
                             </Button>
                             )}
                         </Menu.Item>
-                        <Menu.Item>
-                            {({ active }) => (
-                            <NavLink to='/member/addnewbeneficiary' className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>
-                                Add customer
-                            </NavLink>
-                            )}
-                        </Menu.Item>
+                        {user.role_id === 2 ? (
+                            <div>
+                                 <Menu.Item>
+                                        {({ active }) => (
+                                        <NavLink to='/member/createretailer' className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>
+                                            Add customer
+                                        </NavLink>
+                                        )}
+                                 </Menu.Item>
+                            </div>                    
+                        ) : (
+                                    <div></div>
+                        )}
                         </Menu.Items>
                     </Transition>
                     </Menu>
