@@ -9,7 +9,7 @@ from .models import BBPSProviders, State, BillType
 import ssl
 from requests.adapters import HTTPAdapter
 
-PARTNERID = "UFR008081"  # Replace with your actual PARTNERID
+PARTNERID = "PS004266"  # Replace with your actual PARTNERID
 
 def generate_jwt_request():
     timestamp = int(datetime.now().strftime("%Y%m%d%H%M%S%f"))
@@ -18,7 +18,7 @@ def generate_jwt_request():
 
 def get_token():
     jwt_request = generate_jwt_request()
-    token = jwt.encode(jwt_request, "MmVmNDQ1ZmNmM2QyMGUyOTA2Y2U0YWFlNTE3ODAxYTE=", algorithm="HS256")
+    token = jwt.encode(jwt_request, "UFMwMDQyNjY4OTQ2MDU2M2EzYmQ5MjY5MDJlNThkZWE0NjdlM2QxNDE2ODg3MjY4Mjc=", algorithm="HS256")
     return token
 
 # def add_beneficary(payload):
@@ -124,7 +124,7 @@ def fund_transfer(payload):
 def query_remitter(payload):
     token = get_token()
     AuthKey = "NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ="
-    url = "https://sit.paysprint.in/service-api/api/v1/service/dmt/remitter/queryremitter"
+    url = "https://api.paysprint.in/service-api/api/v1/service/dmt/remitter/queryremitter"
     headers = {
         "Token": token,
         "Authorisedkey": AuthKey,
