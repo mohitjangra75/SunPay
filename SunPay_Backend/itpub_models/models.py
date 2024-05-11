@@ -264,16 +264,16 @@ class UserWallet(models.Model):
     def __str__(self):
         return self.user.username
     
-@receiver(post_save, sender=User)
-def create_or_update_user_wallet(sender, instance, created, **kwargs):
-    if created:
-        UserWallet.objects.create(user=instance, available_balance=instance.available_balance or 0)
-    else:
-        if hasattr(instance, 'userwallet'):
-            instance.userwallet.available_balance = instance.available_balance or 0
-            instance.userwallet.save()
-        else:
-            UserWallet.objects.create(user=instance, available_balance=instance.available_balance or 0)
+# @receiver(post_save, sender=User)
+# def create_or_update_user_wallet(sender, instance, created, **kwargs):
+#     if created:
+#         try:
+#             user_wallet = UserWallet.objects.get(user=instance)
+#             user_wallet.available_balance = instance.available_balance or 0
+#             user_wallet.save()
+#         except UserWallet.DoesNotExist:
+#             UserWallet.objects.create(user=instance, available_balance=instance.available_balance or 0)
+
 
 @receiver(pre_save, sender=UserWallet)
 def update_user_balance(sender, instance, **kwargs):
