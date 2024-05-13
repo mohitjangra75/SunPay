@@ -287,21 +287,6 @@ def update_user_balance(sender, instance, **kwargs):
     except UserWallet.DoesNotExist:
         pass
 
-class BankDetails(models.Model):
-    upi_id = models.CharField(max_length=255, blank=True, null=True)
-    beneficiary_name = models.CharField(max_length=255, blank=True, null=True)
-    bank_name = models.CharField(max_length=255, blank=True, null=True)
-    account_number = models.CharField(max_length=255, blank=True, null=True)
-    ifsc_code = models.CharField(max_length=50, blank=True, null=True)
-    mobile_number = models.CharField(max_length=10, unique=True, blank=True, null=True)
-    registered_with = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
-    bene_id = models.IntegerField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    is_active =  models.BooleanField(default=True)
-
-    def __str__(self):
-        return self.beneficiary_name + "-" + self.registered_with.username
-    
 class Customer(models.Model):
     customer_firstname = models.CharField(max_length=255, blank=True, null=True)
     customer_lastname = models.CharField(max_length=255, blank=True, null=True)
@@ -312,6 +297,22 @@ class Customer(models.Model):
 
     def __str__(self):
         return self.customer_mobile + "-" + self.registered_with.username
+
+class BankDetails(models.Model):
+    upi_id = models.CharField(max_length=255, blank=True, null=True)
+    beneficiary_name = models.CharField(max_length=255, blank=True, null=True)
+    bank_name = models.CharField(max_length=255, blank=True, null=True)
+    account_number = models.CharField(max_length=255, blank=True, null=True)
+    ifsc_code = models.CharField(max_length=50, blank=True, null=True)
+    mobile_number = models.CharField(max_length=10,blank=True, null=True)
+    registered_with = models.ForeignKey(Customer, on_delete=models.PROTECT, blank=True, null=True)
+    bene_id = models.IntegerField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active =  models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.beneficiary_name
+    
 
 class DMTTransactions(models.Model):
     STATUS = (

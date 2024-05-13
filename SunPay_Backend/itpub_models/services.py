@@ -21,29 +21,48 @@ def get_token():
     token = jwt.encode(jwt_request, "UFMwMDQyNjY4OTQ2MDU2M2EzYmQ5MjY5MDJlNThkZWE0NjdlM2QxNDE2ODg3MjY4Mjc=", algorithm="HS256")
     return token
 
-# def add_beneficary(payload):
-#     token = get_token()
-#     headers = {
-#         "Token":token,
-#         "Authorisedkey":"NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ=",
-#         "Accept": "application/json",
-#         "Content-Type": "application/json"
-#     }
-#     url = "https://api.paysprint.in/api/v1/service/dmt/beneficiary/registerbeneficiary"
-#     response = requests.post(url=url,json=payload, headers=headers)
-#     if response.ok:
-#         return {"status":True,
-#         "data":response.json()}
-#     else:
-#         return {"status":False,
-#         "data":"Please verify details"}
+def add_beneficary(payload):
+    token = get_token()
+    headers = {
+        "Token":token,
+        "Authorisedkey":"NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ=",
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+    }
+    url = "https://api.paysprint.in/api/v1/service/dmt/beneficiary/registerbeneficiary"
+    response = requests.post(url=url,json=payload, headers=headers)
+    if response.ok:
+        return {"status":True,
+        "data":response.json()}
+    else:
+        return {"status":False,
+        "data":"Please verify details"}
+
+
+def penny_drop(payload):
+    token = get_token()
+    headers = {
+        "Token":token,
+        "Authorisedkey":"NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ=",
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+    }
+    url = "https://api.paysprint.in/api/v1/service/dmt/beneficiary/registerbeneficiary/benenameverify"
+    response = requests.post(url=url,json=payload, headers=headers)
+    if response.ok:
+        return {"status":True,
+        "data":response.json()}
+    else:
+        return {"status":False,
+        "data":"Please verify details"}
+
 def fetch_paysprintbeneficiary(payload):
     token = get_token()
-    AuthKey = "NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ="
-    url = "https://sit.paysprint.in/service-api/api/v1/service/dmt/beneficiary/registerbeneficiary/fetchbeneficiary"
+    url="https://api.paysprint.in/api/v1/service/dmt/beneficiary/registerbeneficiary/fetchbeneficiary"
     headers = {
         "Token": token,
         "Content-Type": "application/json",
+        "Authorisedkey":"NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ=",
         "accept": "application/json"
     }
     response = requests.post(url=url,json=payload, headers=headers)
@@ -124,7 +143,7 @@ def fund_transfer(payload):
 def query_remitter(payload):
     token = get_token()
     AuthKey = "NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ="
-    url = "https://api.paysprint.in/service-api/api/v1/service/dmt/remitter/queryremitter"
+    url = "https://api.paysprint.in/api/v1/service/dmt/remitter/queryremitter"
     headers = {
         "Token": token,
         "Authorisedkey": AuthKey,
