@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, CompanyBankSerializer, BBPSProviderSerializer, StateSerializer, CustomerSerializer, UserTransactionSerializer
-from .services import penny_drop,add_beneficary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_paysprintbeneficiary, zpay_verification, zpay_bankadd, zpay_transfer, zpay_upiadd, zpaygetallbeneficiary, zpaybeneficiarybyid
+from .services import penny_drop,add_beneficary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_paysprintbeneficiary, zpay_verification, zpay_bankadd, zpay_transfer, zpay_upiadd, zpaygetallbeneficiary, zpaybeneficiarybyid, bank_verification
 from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSTransactions, UserWallet, Package, CompanyBank, BBPSProviders, State, Customer, FundRequest
 import uuid
 from django.http import JsonResponse
@@ -211,6 +211,27 @@ class PennyDrop(APIView):
             return Response({"message": "Penny drop done successfully", "response":response}, status=status.HTTP_201_CREATED)
         else:
             return Response({"error": "Failed to penny drop"}, status=status.HTTP_400_BAD_REQUEST)
+
+class Bankverify(APIView):
+    def post(self, request, *args, **kwargs):
+        refid = request.data.get("refid")
+        account_number = request.data.get("account_number")
+        ifsc = request.data.get("ifsc")
+        ifsc_details = request.data.get("ifsc_details")
+
+        payload = {"refid":refid,
+              	"account_number":account_number,      	
+                "ifsc":ifsc,
+                "ifsc_details":ifsc_details      	
+                }
+
+        response = bank_verification(payload)
+        print("paysprint response", response)
+
+        if response.get('status'):
+            return Response({"message": "Bank verification successfully", "response":response}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"error": "Failed to verify Bank"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class DelBenAccount(APIView):

@@ -113,6 +113,7 @@ const MemberRouter = (props, {IsLoggedIn}) => {
           {category === 'moneytransferreceipt' && (<Moneytransferreceipt data={data}/>)}
           {category === 'credithistory' && <Creditcard data={data} />}
           {category === 'addcustomer' && (<AddCustomer data={data}/>)}
+          {category === 'addnewbeneficiary' && (<Addbeneficiary data={data}/>)}
           {category === 'electricity' && (<Electricity data={data}/>)}
           {category === 'water' && (<Water data={data}/>)}
           {category === 'lic' && (<LIC data={data}/>)}

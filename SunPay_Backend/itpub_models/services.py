@@ -55,6 +55,23 @@ def penny_drop(payload):
     else:
         return {"status":False,
         "data":"Please verify details"}
+    
+def bank_verification(payload):
+    token = get_token()
+    headers = {
+        "Token":token,
+        "Authorisedkey":"NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ=",
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+    }
+    url = "https://api.paysprint.in/api/v1/service/verification/bank/verify"
+    response = requests.post(url=url,json=payload, headers=headers)
+    if response.ok:
+        return {"status":True,
+        "data":response.json()}
+    else:
+        return {"status":False,
+        "data":"Please verify details"}
 
 def fetch_paysprintbeneficiary(payload):
     token = get_token()

@@ -15,37 +15,55 @@ const Moneytransfer = (props) => {
   }
   const [error, setError] = useState(null);
 
-  const handlesearchbymob = async(e) => {
-      if(mobile_number){
-
+  const handlesearchbymob = async (e) => {
+    if (mobile_number) {
         try {
-          const response = await fetch('https://new.sunpay.co.in/api/get_customer/', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ mobile_number }),
-          });
-          const result = await response.json();
-
-          console.log(result)
-          if (result.message === 'Customer found'){
-            setIsShown(current => !current);
-          }
-          else {
-            alert("Customer not found. Register first.")
-            navigate('/member/addcustomer', {
-              state: { number : mobile_number  },
+            const response = await fetch('https://new.sunpay.co.in/api/get_customer/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ mobile_number }),
             });
-          }
+            const result = await response.json(); // Parse JSON response
+            const resultmessage = result.message; // Extract message from parsed JSON data
+
+            if (resultmessage === 'Customer found') {
+                try {
+                    const detbene = await fetch('https://new.sunpay.co.in/api/fetch_beneficiary/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ mobile_number }),
+                    });
+                    const benfetresp = await detbene.json();
+                    const custbank = benfetresp.Response;
+                    setallfetbank(custbank)
+
+                    if (custbank){
+                      setIsShown(current => !current);
+                    }
+
+                    // if (benfetresp.message === 'Customer found') {
+                    //     setIsShown(current => !current);
+                    // } else {
+                    //     alert("Customer not found. Register first.", benfetresp.message);
+                    // }
+                } catch (error) {
+                }
+            } else {
+                alert("Customer not found. Register first.");
+                navigate('/member/addcustomer', {
+                    state: { number: mobile_number },
+                });
+            }
         } catch (error) {
-          console.error('Error to connect:', error);
         }
-    }  
-    else {
-      alert('Kindly Provide Mobile Number');
-    }   
-  }
+    } else {
+        alert('Kindly Provide Mobile Number');
+    }
+}
 
   const handlesearchbyacc = event => {
     
@@ -54,7 +72,8 @@ const Moneytransfer = (props) => {
 
   const [mobile_number,setmobile] = useState('')
   const [account,setaccount] = useState('')
-
+  const [allfetbank, setallfetbank] =  useState()
+  const [amount, setamount] =  useState()
   const [dataall, setDatall] = useState();  
   useEffect(() => {
     setDatall(props);
@@ -79,7 +98,11 @@ const Moneytransfer = (props) => {
             <input type="text" name="remarks" placeholder='Enter Account Number' onChange={(e) => setaccount(e.target.value)} className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 hover:cursor-pointer dark:focus:border-blue-500'/>
             <input type="submit" value="Submit" onClick={handlesearchbyacc}  className='p-2 bg-white border border-black hover:bg-blue-700 hover:text-white rounded-lg'/>
            </div>
+
+          
         </div>
+
+        
       )}
 
       {isShown && (
@@ -100,7 +123,7 @@ const Moneytransfer = (props) => {
             <div className='beneficiarylist '>
               <h1 className='bg-green-800 mt-6 text-white text-2xl md:pl-4 p-1'>Beneficiary List</h1>
               <div className =" relative overflow-x-auto shadow-md border-black ">
-                 <table className="w-full text-sm text-left rtl:text-right border border-black text-gray-500 dark:text-gray-400 border-collapse ">
+                 {/* <table className="w-full text-sm text-left rtl:text-right border border-black text-gray-500 dark:text-gray-400 border-collapse ">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                       <tr className='border text-center border-black'>
                         <th scope="col" className="px-6 py-3 font-black border border-black">SNO</th>
@@ -115,8 +138,8 @@ const Moneytransfer = (props) => {
                     </thead>
                   
                     <tbody>
-                      <tr className="bg-white border text-center border-black dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">                        
-                        <td scope="col" className="px-6 py-3  border border-black">1</td>
+                      {/* <tr className="bg-white border text-center border-black dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">                        
+                        <td scope="col" className="px-6 py-3  border border-black"></td>
                         <td scope="col" className="px-6 py-3  border border-black">Gourav</td>
                         <td scope="col" className="px-6 py-3  border border-black">Union</td>
                         <td scope="col" className="px-6 py-3  border border-black">2300020213</td>
@@ -124,9 +147,42 @@ const Moneytransfer = (props) => {
                         <td scope="col" className="px-6 py-3  border border-black">5000</td>
                         <td scope="col" className="px-6 py-3  border border-black"> <NavLink to='/member/confirmdmt'><button type="submit" className='border bg-blue-700 text-white border-white px-1'>IMPS</button><button type="submit" className='border ml-2 bg-blue-700 text-white border-white px-1'>NEFT</button></NavLink></td>
                         <td scope="col" className="px-6 py-3  border border-black"><div className='flex gap-2 text-2xl'><AiFillDelete className='hover:cursor-pointer'/> <AiOutlineCheckSquare className='hover:cursor-pointer'/></div></td>
-                      </tr>
+                      </tr> 
+                          
                     </tbody>
-                 </table>
+                 </table>*/}
+                  <table className="w-full text-sm text-left rtl:text-right border border-black text-gray-500 dark:text-gray-400 border-collapse ">
+                  <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                      <tr className='border text-center border-black'>
+                          <th className='px-6 py-3  border border-black'>SNO</th>
+                          <th className='px-6 py-3  border border-black'>Beneficiary Name</th>
+                          <th className='px-6 py-3  border border-black'>Bank</th>
+                          <th className='px-6 py-3  border border-black'>Account No.</th>
+                          <th className='px-6 py-3  border border-black'>IFSC</th>
+                          <th className='px-6 py-3  border border-black'>Amount</th>
+                          <th className='px-6 py-3  border border-black'>Mode</th>
+                          <th className='px-6 py-3  border border-black'>Action</th>
+                      </tr>
+                    </thead>
+
+                      <tbody>
+                        {allfetbank.map((item, index) => (
+                          <tr key={index} className="bg-white border text-center border-black dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                            <td scope="col" className="px-6 py-3  border border-black">{index+1}</td>
+                            <td scope="col" className="px-6 py-3  border border-black">{item.name}</td>
+                            <td scope="col" className="px-6 py-3  border border-black">{item.bankname}</td>
+                            <td scope="col" className="px-6 py-3  border border-black">{item.accno}</td>
+                            <td scope="col" className="px-6 py-3  border border-black">{item.ifsc}</td>
+                            <td scope="col" className="px-6 py-3  border border-black">            
+                                <input type="number" placeholder='Amount' onChange={(e) => setamount(e.target.value)} className=' border border-gray-300 text-gray-900 text-sm rounded-lg p-2 hover:cursor-pointer dark:focus:border-blue-500'/>
+                            </td>
+                            <td scope="col" className="px-6 py-3  border border-black"> <NavLink to='/member/confirmdmt'><button type="submit" className='border bg-blue-700 text-white border-white px-1'>IMPS</button><button type="submit" className='border ml-2 bg-blue-700 text-white border-white px-1'>NEFT</button></NavLink></td>
+                            <td scope="col" className="px-6 py-3  border border-black"><div className='flex gap-2 text-2xl'><AiFillDelete className='hover:cursor-pointer'/> <AiOutlineCheckSquare className='hover:cursor-pointer'/></div></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                  </table>
+                
                 </div>
             </div>
 

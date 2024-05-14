@@ -38,6 +38,8 @@ urlpatterns = [
     path('zpaygetbeneficiarybyid/', zpaygetbeneficiarybyid.as_view(), name='zpaybenebyid'),
     path('zpayupitransfer/', zpayupitansfer.as_view(), name='zpaytransferupi'),
     path('penny-drop/', PennyDrop.as_view(), name='penny-drop'),
+    path('bank-verify/', Bankverify.as_view(), name='bank-verify'),
+
 ]
 
 urlpatterns += router.urls
