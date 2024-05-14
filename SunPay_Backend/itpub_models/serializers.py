@@ -58,4 +58,4 @@ class WalletTransactionSerializer(serializers.ModelSerializer):
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
-        fields = fields = ['customer_mobile', 'registered_with', 'is_active']
+        fields = ['customer_mobile', 'registered_with', 'is_active']

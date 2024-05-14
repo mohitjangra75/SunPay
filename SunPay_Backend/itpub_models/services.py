@@ -169,7 +169,7 @@ def query_remitter(payload):
     }
     print("URL:", url, "Headers:", headers)
     response = requests.post(url=url, json=payload, headers=headers)
-    print(response.text)
+    print(response.status_code)
     if response.ok:
         return {
             "status": True,

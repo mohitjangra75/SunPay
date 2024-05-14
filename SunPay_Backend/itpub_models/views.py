@@ -643,6 +643,7 @@ class CheckCustomer(APIView):
         mobile_number = request.data.get('mobile_number')
         if not mobile_number:
             return Response({'error': 'Mobile number not provided'}, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
             customer = Customer.objects.filter(customer_mobile=mobile_number)
             if customer.exists():
@@ -651,12 +652,30 @@ class CheckCustomer(APIView):
                     "message": "Customer found",
                     "data": serializer.data,
                 }, status=status.HTTP_200_OK)
-            payload = {"mobile": mobile_number, "bank3_flag": "NO"}
-            response = query_remitter(payload=payload)
-            return Response({
-                    "message": "Customer found",
-                    "response": response,
-                }, status=status.HTTP_200_OK)
+            else:
+                payload = {"mobile": mobile_number, "bank3_flag": "NO"}
+                response = query_remitter(payload=payload)
+                print("Response from query_remitter:", response)
+                if response['data'] == "Please verify details":
+                    remitter_data = response['data']['data']
+                    new_customer = Customer.objects.create(
+                        customer_firstname=remitter_data['fname'],
+                        customer_lastname=remitter_data['lname'],
+                        customer_mobile=remitter_data['mobile'],
+                        registered_with=mobile_number,
+                        is_active=True
+                    )
+                    serializer = CustomerSerializer(new_customer)
+                    return Response({
+                        "message": "Customer created from paysprint",
+                        "data": serializer.data,
+                    }, status=status.HTTP_200_OK)
+                else:
+                    return Response({
+                        "message": "Customer not found. Paysprint also doesn't have the customer.",
+                        "response": response,
+                    }, status=status.HTTP_404_NOT_FOUND)
+                
         except Exception as e:
             return Response({'Message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
