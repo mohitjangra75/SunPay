@@ -534,7 +534,7 @@ class GetBillDetails(APIView):
         if response["status"] == True:
             return Response(response)
         else:
-            return Response({"error":"Please try again later"})
+            return Response({"error":"Please try again later", "Response":response})
 
 class AnshPayout(APIView):
     def post(self, request, *args, **kwargs):
@@ -641,6 +641,7 @@ class GetUsers(APIView):
 class CheckCustomer(APIView):
     def post(self, request):
         mobile_number = request.data.get('mobile_number')
+        register_with = request.data.get('register_with')
         if not mobile_number:
             return Response({'error': 'Mobile number not provided'}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -656,16 +657,23 @@ class CheckCustomer(APIView):
                 payload = {"mobile": mobile_number, "bank3_flag": "NO"}
                 response = query_remitter(payload=payload)
                 print("Response from query_remitter:", response)
-                if response['data'] == "Please verify details":
+                if response['data']['message'] == "Remitter details fetch successfully.":
                     remitter_data = response['data']['data']
-                    new_customer = Customer.objects.create(
-                        customer_firstname=remitter_data['fname'],
-                        customer_lastname=remitter_data['lname'],
-                        customer_mobile=remitter_data['mobile'],
-                        registered_with=mobile_number,
-                        is_active=True
+                    # new_customer = Customer.objects.create(
+                    #     customer_firstname=remitter_data['fname'],
+                    #     customer_lastname=remitter_data['lname'],
+                    #     customer_mobile=remitter_data['mobile'],
+                    #     registered_with=register_with,
+                    #     is_active=True
+                    # )
+                    customer_details =  Customer.objects.create(
+                    customer_firstname = remitter_data['fname'],
+                    customer_lastname = remitter_data['lname'],
+                    customer_mobile = remitter_data['mobile'],
+                    registered_with_id=register_with,
+                    is_active = True
                     )
-                    serializer = CustomerSerializer(new_customer)
+                    serializer = CustomerSerializer(customer_details)
                     return Response({
                         "message": "Customer created from paysprint",
                         "data": serializer.data,

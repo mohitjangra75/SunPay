@@ -5,7 +5,7 @@ import json
 import requests
 import random
 import csv
-from .models import BBPSProviders, State, BillType
+from .models import BBPSProviders, State, BillType, PaysprintBanks
 import ssl
 from requests.adapters import HTTPAdapter
 
@@ -448,3 +448,12 @@ def data_load_state(file_path):
                 update_date=update_date
             )
             state.save()
+
+def data_load_paysprintbanks(file_path):
+    with open(file_path, 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            bank_code, bank_name = row
+            paysprintbanks=PaysprintBanks.objects.create(bank_name=bank_name, bank_code=bank_code)
+            paysprintbanks.save()
+

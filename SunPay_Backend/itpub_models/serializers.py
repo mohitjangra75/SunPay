@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, BankDetails, Bank, CompanyBank, BBPSProviders, State, UserWallet, UserTransactions, Customer, WalletTransactions
+from .models import User, BankDetails, Bank, CompanyBank, BBPSProviders,PaysprintBanks, State, UserWallet, UserTransactions, Customer, WalletTransactions
 
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -40,6 +40,11 @@ class BBPSProviderSerializer(serializers.ModelSerializer):
 class StateSerializer(serializers.ModelSerializer):
     class Meta:
         model = State
+        fields = '__all__'
+
+class PaysprinrbankSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaysprintBanks
         fields = '__all__'
 
 class UserTransactionSerializer(serializers.ModelSerializer):

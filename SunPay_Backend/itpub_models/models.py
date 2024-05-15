@@ -75,7 +75,14 @@ class Bank(models.Model):
 
     def __str__(self):
         return self.bank_name
+    
+class PaysprintBanks(models.Model):
+    bank_name = models.CharField(max_length=255, blank=True, null=True)
+    bank_code = models.CharField(max_length=255, blank=True, null=True)
 
+    def __str__(self):
+        return self.bank_name
+    
 class PaymentMode(object):
     IMPS = 1
     NEFT = 1

@@ -28,7 +28,7 @@ const Moneytransfer = (props) => {
             const result = await response.json(); // Parse JSON response
             const resultmessage = result.message; // Extract message from parsed JSON data
 
-            if (resultmessage === 'Customer found') {
+            if (resultmessage === 'Customer found' || resultmessage === 'Customer created from paysprint') {
                 try {
                     const detbene = await fetch('https://new.sunpay.co.in/api/fetch_beneficiary/', {
                         method: 'POST',
@@ -65,9 +65,17 @@ const Moneytransfer = (props) => {
     }
 }
 
+  const addbeneficiary = event => {
+      
+    setIsShown(current => !current);
+  }
+
   const handlesearchbyacc = event => {
     
-    setIsShown(current => !current);
+    navigate('/member/addcustomer', {
+      state: { number: mobile_number },
+  });
+
   }
 
   const [mobile_number,setmobile] = useState('')
@@ -113,11 +121,11 @@ const Moneytransfer = (props) => {
                   <input type='number' name="accountsearch" placeholder='Enter Account Number' className='md:ml-20 max-sm: p-1 rounded-md sm:ml-10' id="" />
                   <input type="submit" value="Search" className='text-lg px-2 md:ml-2 bg-white border border-black hover:bg-blue-700 hover:text-white hover:cursor-pointer rounded-md'/>
               </div>
-              <NavLink to='/member/addnewbeneficiary' >
-                <button type="submit" className='text-lg md:ml-36 px-2 bg-white border border-black hover:bg-blue-700 hover:text-white hover:cursor-pointer rounded-md'>
+              <div>
+                <button type="submit" onClick={addbeneficiary} className='text-lg md:ml-36 px-2 bg-white border border-black hover:bg-blue-700 hover:text-white hover:cursor-pointer rounded-md'>
                   Add New
                 </button>
-              </NavLink>
+              </div>
             </div>
 
             <div className='beneficiarylist '>
