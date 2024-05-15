@@ -659,21 +659,14 @@ class CheckCustomer(APIView):
                 print("Response from query_remitter:", response)
                 if response['data']['message'] == "Remitter details fetch successfully.":
                     remitter_data = response['data']['data']
-                    # new_customer = Customer.objects.create(
-                    #     customer_firstname=remitter_data['fname'],
-                    #     customer_lastname=remitter_data['lname'],
-                    #     customer_mobile=remitter_data['mobile'],
-                    #     registered_with=register_with,
-                    #     is_active=True
-                    # )
-                    customer_details =  Customer.objects.create(
-                    customer_firstname = remitter_data['fname'],
-                    customer_lastname = remitter_data['lname'],
-                    customer_mobile = remitter_data['mobile'],
-                    registered_with_id=register_with,
-                    is_active = True
+                    new_customer = Customer.objects.create(
+                        customer_firstname=remitter_data['fname'],
+                        customer_lastname=remitter_data['lname'],
+                        customer_mobile=remitter_data['mobile'],
+                        registered_with=register_with,
+                        is_active=True
                     )
-                    serializer = CustomerSerializer(customer_details)
+                    serializer = CustomerSerializer(new_customer)
                     return Response({
                         "message": "Customer created from paysprint",
                         "data": serializer.data,
