@@ -691,14 +691,11 @@ class CheckCustomer(APIView):
                 response = query_remitter(payload=payload)
                 print("Response from query_remitter:", response)
                 
-<<<<<<< HEAD
                 try:
-                    user = User.objects.get(username=register_with)
+                    user = User.objects.get(username=register_with_user)
                 except User.DoesNotExist:
                     return Response({'error': 'User not found'}, status=status.HTTP_400_BAD_REQUEST)
                 
-=======
->>>>>>> 18c77cd5ea829d0f186015aaeb0bae4a6fae554e
                 if response['data']['message'] == "Remitter details fetch successfully.":
                     remitter_data = response['data']['data']
                      # Retrieve the User instance
@@ -707,11 +704,7 @@ class CheckCustomer(APIView):
                         customer_firstname=remitter_data['fname'],
                         customer_lastname=remitter_data['lname'],
                         customer_mobile=remitter_data['mobile'],
-<<<<<<< HEAD
                         registered_with=user,
-=======
-                        registered_with=register_with_user,
->>>>>>> 18c77cd5ea829d0f186015aaeb0bae4a6fae554e
                         is_active=True
                         )
                         serializer = CustomerSerializer(new_customer)
