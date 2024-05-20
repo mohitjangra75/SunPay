@@ -12,16 +12,24 @@ from django.contrib.auth.hashers import check_password
 from rest_framework import viewsets, status, mixins
 from django.db import transaction
 import requests
+from ip2geotools.databases.noncommercial import DbIpCity
 
 class RegisterUser(APIView):
     def post(self, request, *args, **kwargs):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             ip_address = request.META.get('REMOTE_ADDR')
-            user = serializer.save(ip_address=ip_address)
+            latitude, longitude = None, None
+            try:
+                response = DbIpCity.get(ip_address, api_key='free')
+                latitude = response.latitude
+                longitude = response.longitude
+            except Exception as e:
+                print("Error getting location:", e)
+            user = serializer.save(ip_address=ip_address, latitude=latitude, longitude=longitude)
             return Response({"message": "User created successfully", "user_id": user.id}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
 class GetUsers(APIView):
     def get(self, request, id=None): 
         if id is not None:
