@@ -5,6 +5,15 @@ import axios from 'axios'
 import { AiFillDelete } from "react-icons/ai";
 import { AiOutlineCheckSquare } from "react-icons/ai";
 
+const today = new Date();
+const date = today.setDate(today.getDate()); 
+const defaultValue = new Date(date).toISOString().split('T')[0]
+
+const hours = String(today.getHours()).padStart(2, '0');
+const minutes = String(today.getMinutes()).padStart(2, '0');
+const seconds = String(today.getSeconds()).padStart(2, '0');
+const currentTime = `${hours}:${minutes}:${seconds}`;
+
 const Moneytransfer = (props) => {
   const [isShown, setIsShown] = useState(false);
   const navigate = useNavigate();
@@ -15,6 +24,24 @@ const Moneytransfer = (props) => {
   }
   const [error, setError] = useState(null);
 
+
+  const [username, setusername] = useState('');
+  const bank_account_number = '65626123531235'
+
+  const fetchUser = async () => {
+   
+
+    try {
+      const userresponse = await axios.get(`https://new.sunpay.co.in/api/users/${props.data.id}`);
+      
+      const repusername = userresponse.data.username;
+      setregister_with(repusername);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+  fetchUser();
+
   const handlesearchbymob = async (e) => {
     if (mobile_number) {
         try {
@@ -23,12 +50,12 @@ const Moneytransfer = (props) => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ mobile_number }),
+                body: JSON.stringify({ mobile_number,register_with }),
             });
             const result = await response.json(); // Parse JSON response
             const resultmessage = result.message; // Extract message from parsed JSON data
-
-            if (resultmessage === 'Customer found' || resultmessage === 'Customer created from paysprint') {
+            
+            if (resultmessage === "Customer found" || resultmessage ==="Customer created from paysprint") {
                 try {
                     const detbene = await fetch('https://new.sunpay.co.in/api/fetch_beneficiary/', {
                         method: 'POST',
@@ -40,22 +67,24 @@ const Moneytransfer = (props) => {
                     const benfetresp = await detbene.json();
                     const custbank = benfetresp.Response;
                     setallfetbank(custbank)
-
                     if (custbank){
                       setIsShown(current => !current);
                     }
-
                     // if (benfetresp.message === 'Customer found') {
                     //     setIsShown(current => !current);
                     // } else {
                     //     alert("Customer not found. Register first.", benfetresp.message);
                     // }
                 } catch (error) {
+                  alert('Technical Error')
                 }
-            } else {
+            } 
+            else {
                 alert("Customer not found. Register first.");
-                navigate('/member/addcustomer', {
-                    state: { number: mobile_number },
+                const paysstateresp = result.response.data.stateresp
+                if (resultmessage === "Customer not found. Paysprint also doesn't have the customer.")
+                  navigate('/member/addcustomer', {
+                    state: { number: mobile_number,stateresp: paysstateresp},
                 });
             }
         } catch (error) {
@@ -65,27 +94,32 @@ const Moneytransfer = (props) => {
     }
 }
 
+const handleimpstransfer = async (bene_id) => {
+console.log('id',bene_id)
+}
+
+
   const addbeneficiary = event => {
-      
-    setIsShown(current => !current);
+    navigate('/member/addnewbeneficiary', {
+      state: { number: mobile_number },
+  });
   }
+  
 
   const handlesearchbyacc = event => {
     
-    navigate('/member/addcustomer', {
-      state: { number: mobile_number },
-  });
+  //   navigate('/member/addbeneficiary', {
+  //     state: { number: mobile_number },
+  // });
 
   }
 
   const [mobile_number,setmobile] = useState('')
+  const [register_with, setregister_with]=useState()
   const [account,setaccount] = useState('')
   const [allfetbank, setallfetbank] =  useState()
   const [amount, setamount] =  useState()
   const [dataall, setDatall] = useState();  
-  useEffect(() => {
-    setDatall(props);
-  }, []);
 
   return (
     <div>
@@ -184,7 +218,7 @@ const Moneytransfer = (props) => {
                             <td scope="col" className="px-6 py-3  border border-black">            
                                 <input type="number" placeholder='Amount' onChange={(e) => setamount(e.target.value)} className=' border border-gray-300 text-gray-900 text-sm rounded-lg p-2 hover:cursor-pointer dark:focus:border-blue-500'/>
                             </td>
-                            <td scope="col" className="px-6 py-3  border border-black"> <NavLink to='/member/confirmdmt'><button type="submit" className='border bg-blue-700 text-white border-white px-1'>IMPS</button><button type="submit" className='border ml-2 bg-blue-700 text-white border-white px-1'>NEFT</button></NavLink></td>
+                            <td scope="col" className="px-6 py-3  border border-black"> <button type="submit" onClick={() => handleimpstransfer(allfetbank.bene_id)} className='border bg-blue-700 text-white border-white px-1'>IMPS</button><button type="submit" className='border ml-2 bg-blue-700 text-white border-white px-1'>NEFT</button></td>
                             <td scope="col" className="px-6 py-3  border border-black"><div className='flex gap-2 text-2xl'><AiFillDelete className='hover:cursor-pointer'/> <AiOutlineCheckSquare className='hover:cursor-pointer'/></div></td>
                           </tr>
                         ))}

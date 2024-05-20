@@ -113,11 +113,11 @@ const Navbar = (props) => {
                             </Button>
                             )}
                         </Menu.Item>
-                        {user.role_id === 2 ? (
+                        {user.role_id === 2 && user.role_id === 1 ? (
                             <div>
                                  <Menu.Item>
                                         {({ active }) => (
-                                        <NavLink to='/member/createretailer' className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>
+                                        <NavLink to='/member/addcustomer' className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>
                                             Add customer
                                         </NavLink>
                                         )}

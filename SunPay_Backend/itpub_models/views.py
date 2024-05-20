@@ -2,9 +2,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
-from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, CompanyBankSerializer, BBPSProviderSerializer, StateSerializer, CustomerSerializer, UserTransactionSerializer
+from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, CompanyBankSerializer, BBPSProviderSerializer, StateSerializer, CustomerSerializer, UserTransactionSerializer, PaysprinrbankSerializer
 from .services import penny_drop,add_beneficary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_paysprintbeneficiary, zpay_verification, zpay_bankadd, zpay_transfer, zpay_upiadd, zpaygetallbeneficiary, zpaybeneficiarybyid, bank_verification
-from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSTransactions, UserWallet, Package, CompanyBank, BBPSProviders, State, Customer, FundRequest
+from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSTransactions, UserWallet, Package, CompanyBank, BBPSProviders, State, Customer, FundRequest, PaysprintBanks
 import uuid
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
@@ -71,6 +71,17 @@ class States(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except State.DoesNotExist:
             return Response({"message": "State does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+class Paysprintbanklist(APIView):
+    def get(self, request):
+        try:
+
+            Pays_banks = PaysprintBanks.objects.all().order_by('bank_name')
+            serializer = PaysprinrbankSerializer(Pays_banks, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except State.DoesNotExist:
+            return Response({"message": "State does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
 
 class LoginAPIView(APIView):
     def post(self, request, *args, **kwargs):
@@ -154,8 +165,8 @@ class OTPVerification(APIView):
 class AddBenAccount(APIView):
     def post(self, request, *args, **kwargs):
         beneficiary_name = request.data.get("beneficiary_name")
-        account_number = request.data.get("account_number")
-        ifsc_code = request.data.get("ifsc_code")
+        account_number = request.data.get("bank_account_number")
+        ifsc_code = request.data.get("bank_ifsc_code")
         mobile_number = request.data.get("mobile_number")
         bank_id = request.data.get("bank_id")
         pin_code = request.data.get("pin_code")
@@ -176,9 +187,22 @@ class AddBenAccount(APIView):
         }
         response = add_beneficary(payload)
         print("paysprint response", response)
-
-        if response.get('status'):
-            return Response({"message": "Details uploaded successfully", "response":response}, status=status.HTTP_201_CREATED)
+        
+        if response['data']['message'] == "Receiver account successfully added.":
+            data = response.get("data")
+            beneficiary_data = data.get("data")
+            print(data)
+            if data:
+                bank_details = BankDetails.objects.get_or_create(
+                    beneficiary_name=beneficiary_data.get("name"),
+                    bank_name=beneficiary_data.get("bankname"),
+                    account_number=beneficiary_data.get("accno"),
+                    ifsc_code=beneficiary_data.get("ifsc"),
+                    mobile_number=mobile_number,
+                    registered_with=Customer.objects.get(customer_mobile=mobile_number),
+                    bene_id=beneficiary_data.get("bene_id"),
+            )
+            return Response({"message": "Beneficiary Details uploaded successfully", "response":response}, status=status.HTTP_201_CREATED)
         else:
             return Response({"error": "Failed to add beneficiary"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -657,20 +681,32 @@ class CheckCustomer(APIView):
                 payload = {"mobile": mobile_number, "bank3_flag": "NO"}
                 response = query_remitter(payload=payload)
                 print("Response from query_remitter:", response)
+                
+                try:
+                    user = User.objects.get(username=register_with)
+                except User.DoesNotExist:
+                    return Response({'error': 'User not found'}, status=status.HTTP_400_BAD_REQUEST)
+                
                 if response['data']['message'] == "Remitter details fetch successfully.":
                     remitter_data = response['data']['data']
-                    new_customer = Customer.objects.create(
+                     # Retrieve the User instance
+                    if(user):
+                        new_customer = Customer.objects.create(
                         customer_firstname=remitter_data['fname'],
                         customer_lastname=remitter_data['lname'],
                         customer_mobile=remitter_data['mobile'],
-                        registered_with=register_with,
+                        registered_with=user,
                         is_active=True
-                    )
-                    serializer = CustomerSerializer(new_customer)
-                    return Response({
-                        "message": "Customer created from paysprint",
-                        "data": serializer.data,
-                    }, status=status.HTTP_200_OK)
+                        )
+                        serializer = CustomerSerializer(new_customer)
+                        return Response({
+                            "message": "Customer created from paysprint",
+                            "data": serializer.data,
+                        }, status=status.HTTP_200_OK)
+                    else:
+                        return Response({
+                            "message": "Registered With User not found",
+                        }, status=status.HTTP_200_OK)
                 else:
                     return Response({
                         "message": "Customer not found. Paysprint also doesn't have the customer.",
@@ -685,7 +721,7 @@ class RegisterRemitter(APIView):
     def post(self, request):
         first_name = request.data.get("first_name")
         last_name = request.data.get("last_name")
-        adress = request.data.get("adress")
+        adress = request.data.get("address")
         pin_code = request.data.get("pin_code")
         otp = request.data.get("otp")
         stateresp = request.data.get("stateresp")
@@ -707,27 +743,35 @@ class RegisterRemitter(APIView):
             "gst_state" : "17",
             "bank3_flag" : "no",
             "stateresp":stateresp}
+        print(payload)
         response = register_remitter(payload=payload)
-        
         if response["status"]==True:
+            print(response)
             try:
-                customer_details =  Customer.objects.get(
+                if response['data']['message'] == "Remitter already registered":
+                    return Response({"message": "Customer already registered."}, status=status.HTTP_208_ALREADY_REPORTED)
+                
+                elif response['data']['message'] == "Remitter successfully registered":
+                    customer_details =  Customer.objects.create(
                     customer_firstname = first_name,
                     customer_lastname = last_name,
                     customer_mobile = mobile_number,
                     registered_with_id=registered_with,
                     is_active = True
                 )
-                return Response({"message": "Customer Already registered"}, status=status.HTTP_201_CREATED)
-            except Customer.DoesNotExist:
-                customer_details =  Customer.objects.create(
-                    customer_firstname = first_name,
-                    customer_lastname = last_name,
-                    customer_mobile = mobile_number,
-                    registered_with_id=registered_with,
-                    is_active = True
-                )
-                return Response({"message": "Customer registered successfully"}, status=status.HTTP_201_CREATED)
+                    return Response({"message": "Customer registered successfully."}, status=status.HTTP_400_BAD_REQUEST)
+                
+                elif response['data']['message'] == "Invalid OTP":
+                    return Response({"message": "Invalid OTP"}, status=status.HTTP_401_UNAUTHORIZED)
+                
+                elif response['data']['message'] == "Mobile Number is not allowed to do remittance.":
+                    return Response({"message": "Entered Mobile NUmber is not allowed to register"}, status=status.HTTP_401_UNAUTHORIZED)
+
+                else:
+                    return Response({"message": "Technical Error. Kindly contact to your admin"}, status=status.HTTP_400_BAD_REQUEST)
+            except:
+                return Response({"message": "Something Went Wrong. Please try again later."}, status=status.HTTP_400_BAD_REQUEST)
+
         else:
             return Response({"error": "Failed to add customer"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -845,9 +889,7 @@ class zpayaddbankbeneficiary(APIView):
             "name_of_account_holder": name_of_account_holder,
             "email": email,
             "phone": phone,
-            "type" : "account_number",
-            "key_1": "DD",
-            "key_2": "XOF"
+            "type" : "account_number"
         }
         response = zpay_bankadd(payload=payload)
         if( response["status"] == True):
@@ -916,11 +958,18 @@ class zpayverification(APIView):
             "force_penny_drop": False
         }
         response = zpay_verification(payload=payload)
-        if response["status"] == True:
-            return Response(response)
+        print('views resp', response)
+        if isinstance(response, dict) and 'data' in response and 'status' in response['data']:
+            if response['data']['status'] == "success":
+                return Response({"Message": "Bank verified successfully", "Response":response}, status=status.HTTP_200_OK)
+            if response['data']['status'] == "failed":
+                return Response({"Message": "Details unverified", "Response":response}, status=status.HTTP_400_BAD_REQUEST)
+            else:     
+                return Response({"Message": "Something went wrong. Please verify details", "Response":response}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({"error":"Please try again later"}, response)
-        
+            # Handle unexpected response format
+            return Response({"Message": "Bad request from Zpay", "Response":response}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class zpaybanktansfer(APIView):
     def post(self, request, *args, **kwargs):  

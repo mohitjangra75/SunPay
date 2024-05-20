@@ -264,6 +264,7 @@ def zpay_verification(payload):
     else:
         print(response.json())
         return {"status":False,
+        "response": response.json(),
         "data":"Please verify details"} 
 
 def zpay_transfer(payload):

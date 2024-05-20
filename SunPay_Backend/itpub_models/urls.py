@@ -25,6 +25,7 @@ urlpatterns = [
     path('companybanks/', Companybank.as_view(), name='companybanks'),
     path('get_providers/', BBPSproviders.as_view(), name='BBPSproviders'),
     path('get_state/', States.as_view(), name='States'),
+    path('paysprintbanks/', Paysprintbanklist.as_view(), name='paysprintbanks'),
     path('get_customer/', CheckCustomer.as_view(), name='CheckCustomer'),
     path('fetch_beneficiary/', fetch_beneficiary.as_view(), name='fetch_beneficiary'),
     path('update_fund_request/', UpdateFundRequest.as_view(), name='update_fund_request'),
