@@ -88,7 +88,6 @@ const Addbeneficiary = (props) => {
 
   useEffect(() => {
     fetchUser();
-    console.log(options)
   }, []);
 
   const bankverify = async () => {

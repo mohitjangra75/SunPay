@@ -1,13 +1,124 @@
 import React from 'react'
+import { useState } from 'react'
+import axios from 'axios'
+import { useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { NavLink } from 'react-router-dom'
-import { useState, useEffect } from 'react';
+
 
 const Confirmmoneytransfer = (props) => {
-  const [dataall, setDatall] = useState();  
+
+ 
+  const location = useLocation();
+  const data = location.state;
+  
+
+  const fetchUser = async () => {
+
+    try {
+      const userresponse = await axios.get(`https://new.sunpay.co.in/api/users/${props.data.id}`);
+      const respuser = userresponse.data
+      setcuruser(respuser)
+      const repusername = userresponse.data.username;
+      setregister_with(repusername);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+  // fetchUser();
   useEffect(() => {
-    setDatall(props);
-    console.log('dataall from navbar', dataall);
+    fetchUser();
   }, []);
+
+  const [currentuser, setcuruser] = useState();
+  const [register_with, setregister_with] = useState();
+  const [tpin, setpin] = useState();
+  const [payeeDetails, setpayeeDetails] = useState();
+  const bene_id = data.bene_id
+  const accno = data.accno
+  const ifsc = data.ifsc
+  const name = data.name
+  const bankid = data.bankid
+  const bankname = data.bankname
+
+  const txn_type = data.txn_type
+  const mobile = data.mobile
+  const pipe = data.pipe
+  const surcharge = data.surcharge
+  const amount = parseInt(data.amount)
+ 
+  const sendmoney = async() => {
+        const today = new Date();
+      const date = today.setDate(today.getDate()); 
+      const defaultValue = new Date(date).toISOString().split('T')[0]
+
+      const dd = String(today.getDate()).padStart(2, '0');
+      const mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
+      const yy = String(today.getFullYear()).slice(-2);
+      const hh = String(today.getHours()).padStart(2, '0');
+      const min = String(today.getMinutes()).padStart(2, '0');
+      const ss = String(today.getSeconds()).padStart(2, '0');
+
+      const currentTime = `${dd}${mm}${yy}${hh}${min}${ss}`;
+
+
+      const ref_id = register_with + accno +currentTime
+      console.log('curruser',currentuser.id)
+      const user_id = currentuser.id
+        console.log(bene_id)
+        console.log(txn_type)
+        console.log(amount)
+        console.log(pipe)
+        console.log(mobile)
+        console.log(user_id)
+        console.log(tpin)
+        console.log(ref_id)
+        console.log(surcharge)
+
+        console.log(bankname)
+        console.log(name)
+        console.log(ifsc)
+        console.log(bankid)
+        console.log(accno)
+        console.log(typeof(amount))
+
+        try {
+          const response = await fetch('https://new.sunpay.co.in/api/funds_transfer/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({bene_id , txn_type, amount, pipe, mobile, user_id, tpin, ref_id, surcharge}),
+        });
+          const sendresponse = await response.json();
+          const senderror = sendresponse.error;
+          if(senderror=="Insufficient Balance"){
+            alert(senderror)
+          }
+          
+          else if (senderror=="Please provide required fields"){
+            alert(senderror) 
+          }
+          else if (senderror=="Invalid mobile number"){
+            alert(senderror) 
+          }
+          else if (senderror=="Invalid tpin"){
+            alert(senderror) 
+          }
+          else if (senderror=="Invalid Details"){
+            alert("Amount transferred but not update here") 
+            console.log(sendresponse)
+          }
+          else{
+
+          } 
+        }
+        catch (error) {
+          console.error('Error fetching data:', error);
+        }
+
+
+  }
   return (
     <div className='p-4'>
       <div className='bg-slate-300 p-2 border-2 px-6 border-red-200'>
@@ -82,14 +193,14 @@ const Confirmmoneytransfer = (props) => {
                   MPIN :
                 </div>
                 <div className='border p-2 border-black'>
-                  <input type="password" name="" id="" className='rounded-lg text-lg'/>
+                  <input type="password" onChange={(e) => setpin(e.target.value)} className='rounded-lg text-lg'/>
                 </div>
               </div>
               <div className='mt-4 flex gap-2'>
                 {/* Money transfer final api */}
-              <NavLink to='/member/moneytransfer'>
-                <button className='border border-gray-300 text-white text-xl rounded-lg block p-2 px-6 mt-4 bg-blue-500 hover:text-red-600' type="submit">Submit</button>
-              </NavLink>
+             
+                <button onClick={sendmoney} className='border border-gray-300 text-white text-xl rounded-lg block p-2 px-6 mt-4 bg-blue-500 hover:text-red-600' type="submit">Submit</button>
+           
 
               <NavLink to='/member/moneytransfer'>
                 <button className='border border-gray-300 text-white text-xl rounded-lg block p-2 px-6 mt-4 bg-blue-500 hover:text-red-600' type="submit">Back</button>

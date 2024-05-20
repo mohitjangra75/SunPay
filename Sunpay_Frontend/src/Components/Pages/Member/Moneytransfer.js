@@ -5,14 +5,7 @@ import axios from 'axios'
 import { AiFillDelete } from "react-icons/ai";
 import { AiOutlineCheckSquare } from "react-icons/ai";
 
-const today = new Date();
-const date = today.setDate(today.getDate()); 
-const defaultValue = new Date(date).toISOString().split('T')[0]
 
-const hours = String(today.getHours()).padStart(2, '0');
-const minutes = String(today.getMinutes()).padStart(2, '0');
-const seconds = String(today.getSeconds()).padStart(2, '0');
-const currentTime = `${hours}:${minutes}:${seconds}`;
 
 const Moneytransfer = (props) => {
   const [isShown, setIsShown] = useState(false);
@@ -33,9 +26,10 @@ const Moneytransfer = (props) => {
 
     try {
       const userresponse = await axios.get(`https://new.sunpay.co.in/api/users/${props.data.id}`);
-      
+      const respuser = userresponse.data
       const repusername = userresponse.data.username;
       setregister_with(repusername);
+      setcuruser(respuser)
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -95,12 +89,43 @@ const Moneytransfer = (props) => {
 }
 
 const handleimpsbtnclick = async (index) => {
-  const payeeDetails = allfetbank[index];
-  setpayeebank(allfetbank[index])
-  console.log(payeeDetails)
 
+    const payeeDetails = allfetbank[index];
+
+    const bene_id = payeeDetails.bene_id
+    const txn_type = 'IMPS'
+    const mobile = mobile_number
+    const pipe = "bank1"
+    const surcharge = 20
+    const accno = payeeDetails.accno
+    const bankid = payeeDetails.bankid
+    const bankname = payeeDetails.bankname
+    const ifsc = payeeDetails.ifsc
+    const name = payeeDetails.name
+
+    
+
+
+    setpayeebank(allfetbank[index])
+
+    console.log(payeeDetails)
+    console.log(bene_id)
+    console.log(txn_type)
+    console.log(amount)
+    console.log(pipe)
+    console.log(mobile)
+
+    if (amount){
+      navigate('/member/confirmdmt', {
+        state: {payeee: payeeDetails, bene_id: bene_id, accno: accno, ifsc:ifsc, name:name, bankid:bankid, bankname, txn_type:txn_type, mobile:mobile_number, amount:amount, pipe:pipe, surcharge:surcharge},
+    });
+    }
+    else{
+      alert('Kindly Enter amount')
+    }
+    
+  
 }
-
 
   const addbeneficiary = event => {
     navigate('/member/addnewbeneficiary', {
@@ -119,12 +144,12 @@ const handleimpsbtnclick = async (index) => {
 
   const [mobile_number,setmobile] = useState('')
   const [register_with, setregister_with]=useState()
+  const [currentuser, setcuruser] = useState();
   const [account,setaccount] = useState('')
   const [allfetbank, setallfetbank] =  useState()
   const [amount, setamount] =  useState()
   const [dataall, setDatall] = useState(); 
   const [payeebankdetails, setpayeebank] = useState(); 
-
 
   return (
     <div>
