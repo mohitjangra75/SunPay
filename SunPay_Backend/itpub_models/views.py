@@ -665,11 +665,20 @@ class GetUsers(APIView):
 class CheckCustomer(APIView):
     def post(self, request):
         mobile_number = request.data.get('mobile_number')
-        register_with = request.data.get('register_with')
+        register_with_username = request.data.get('register_with')
+        
         if not mobile_number:
             return Response({'error': 'Mobile number not provided'}, status=status.HTTP_400_BAD_REQUEST)
         
+        if not register_with_username:
+            return Response({'error': 'Register with username not provided'}, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
+            try:
+                register_with_user = User.objects.get(username=register_with_username)
+            except User.DoesNotExist:
+                return Response({'error': 'Register with user not found in User model'}, status=status.HTTP_400_BAD_REQUEST)
+            
             customer = Customer.objects.filter(customer_mobile=mobile_number)
             if customer.exists():
                 serializer = CustomerSerializer(customer.first())
@@ -682,11 +691,14 @@ class CheckCustomer(APIView):
                 response = query_remitter(payload=payload)
                 print("Response from query_remitter:", response)
                 
+<<<<<<< HEAD
                 try:
                     user = User.objects.get(username=register_with)
                 except User.DoesNotExist:
                     return Response({'error': 'User not found'}, status=status.HTTP_400_BAD_REQUEST)
                 
+=======
+>>>>>>> 18c77cd5ea829d0f186015aaeb0bae4a6fae554e
                 if response['data']['message'] == "Remitter details fetch successfully.":
                     remitter_data = response['data']['data']
                      # Retrieve the User instance
@@ -695,7 +707,11 @@ class CheckCustomer(APIView):
                         customer_firstname=remitter_data['fname'],
                         customer_lastname=remitter_data['lname'],
                         customer_mobile=remitter_data['mobile'],
+<<<<<<< HEAD
                         registered_with=user,
+=======
+                        registered_with=register_with_user,
+>>>>>>> 18c77cd5ea829d0f186015aaeb0bae4a6fae554e
                         is_active=True
                         )
                         serializer = CustomerSerializer(new_customer)
@@ -712,7 +728,7 @@ class CheckCustomer(APIView):
                         "message": "Customer not found. Paysprint also doesn't have the customer.",
                         "response": response,
                     }, status=status.HTTP_404_NOT_FOUND)
-                
+        
         except Exception as e:
             return Response({'Message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

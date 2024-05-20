@@ -94,8 +94,11 @@ const Moneytransfer = (props) => {
     }
 }
 
-const handleimpstransfer = async (bene_id) => {
-console.log('id',bene_id)
+const handleimpsbtnclick = async (index) => {
+  const payeeDetails = allfetbank[index];
+  setpayeebank(allfetbank[index])
+  console.log(payeeDetails)
+
 }
 
 
@@ -119,7 +122,9 @@ console.log('id',bene_id)
   const [account,setaccount] = useState('')
   const [allfetbank, setallfetbank] =  useState()
   const [amount, setamount] =  useState()
-  const [dataall, setDatall] = useState();  
+  const [dataall, setDatall] = useState(); 
+  const [payeebankdetails, setpayeebank] = useState(); 
+
 
   return (
     <div>
@@ -139,9 +144,7 @@ console.log('id',bene_id)
            <div className='md:flex gap-8'>
             <input type="text" name="remarks" placeholder='Enter Account Number' onChange={(e) => setaccount(e.target.value)} className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 hover:cursor-pointer dark:focus:border-blue-500'/>
             <input type="submit" value="Submit" onClick={handlesearchbyacc}  className='p-2 bg-white border border-black hover:bg-blue-700 hover:text-white rounded-lg'/>
-           </div>
-
-          
+           </div>  
         </div>
 
         
@@ -218,7 +221,7 @@ console.log('id',bene_id)
                             <td scope="col" className="px-6 py-3  border border-black">            
                                 <input type="number" placeholder='Amount' onChange={(e) => setamount(e.target.value)} className=' border border-gray-300 text-gray-900 text-sm rounded-lg p-2 hover:cursor-pointer dark:focus:border-blue-500'/>
                             </td>
-                            <td scope="col" className="px-6 py-3  border border-black"> <button type="submit" onClick={() => handleimpstransfer(allfetbank.bene_id)} className='border bg-blue-700 text-white border-white px-1'>IMPS</button><button type="submit" className='border ml-2 bg-blue-700 text-white border-white px-1'>NEFT</button></td>
+                            <td scope="col" className="px-6 py-3  border border-black"> <button type="submit" onClick={() => handleimpsbtnclick(index)} className='border bg-blue-700 text-white border-white px-1'>IMPS</button><button type="submit" className='border ml-2 bg-blue-700 text-white border-white px-1'>NEFT</button></td>
                             <td scope="col" className="px-6 py-3  border border-black"><div className='flex gap-2 text-2xl'><AiFillDelete className='hover:cursor-pointer'/> <AiOutlineCheckSquare className='hover:cursor-pointer'/></div></td>
                           </tr>
                         ))}
