@@ -19,7 +19,6 @@ const Moneytransfer = (props) => {
 
 
   const [username, setusername] = useState('');
-  const bank_account_number = '65626123531235'
 
   const fetchUser = async () => {
    
