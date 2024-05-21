@@ -100,7 +100,7 @@ const Addbeneficiary = (props) => {
         body: JSON.stringify({ bank_account_number, bank_ifsc_code, merchant_reference_id }),
       });
       const bankverifyresponse = await response.json();
-      // console.log(bankverifyresponse);
+      
       
       const respmessage = bankverifyresponse.Message;
       // console.log(respmessage);
