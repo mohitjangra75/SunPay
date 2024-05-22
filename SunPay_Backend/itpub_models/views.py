@@ -6,6 +6,7 @@ from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer,
 from .services import penny_drop,add_beneficary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_paysprintbeneficiary, zpay_verification, zpay_bankadd, zpay_transfer, zpay_upiadd, zpaygetallbeneficiary, zpaybeneficiarybyid, bank_verification
 from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSTransactions, UserWallet, Package, CompanyBank, BBPSProviders, State, Customer, FundRequest, PaysprintBanks
 import uuid
+import random
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
@@ -297,17 +298,19 @@ class DelBenAccount(APIView):
         else:
             return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
 
-class GetBeneficiaryLinked(APIView):
+class GetAccountLinked(APIView):
     def get(self, request, *args, **kwargs):
-        mobile_number = request.query_params.get("mobile_number")
-        if not mobile_number:
-            return Response({"error": "Please add mobile_number in query params"}, status=status.HTTP_400_BAD_REQUEST)
+        account_number = request.query_params.get("account_number")
+        if not account_number:
+            return Response({"error": "Please add account_number in query params"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            customer = Customer.objects.get(mobile_number=mobile_number)
-            data = BeneficiarySerializer(customer.bankdetails_set.filter(is_active=True), many=True)
-            return Response({"data":data,})
-        except:
-            return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
+            bank_details = BankDetails.objects.get(account_number=account_number)
+            serializer = BeneficiarySerializer(bank_details)
+            return Response({"Message": "Account Found", "Response": serializer.data}, status=status.HTTP_200_OK)
+        except BankDetails.DoesNotExist:
+            return Response({"Message": "Account not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # class RegisterRemitter(APIView):
@@ -371,11 +374,23 @@ class SendMoneyDMT(APIView):
 
         wallet_obj.available_balance = wallet_obj.available_balance - (amount + surcharge)
         wallet_obj.save()
-        main_wallet = UserWallet.objects.get(user_id=6)
-        main_wallet.available_balance = main_wallet.available_balance + surcharge
-        main_wallet.save()
+        
+        # ref_id = str(uuid.uuid4()).replace('-', 'D')[1:21]
+        ref_id = ''.join([str(random.randint(0, 9)) for _ in range(12)])
 
-        ref_id = str(uuid.uuid4()).replace('-', 'D')[1:21]
+
+        tr_obj = DMTTransactions.objects.create(
+                bank_acc_number=bank_acc_number,
+                ref_id = ref_id, 
+                user=user,  
+                bene_id = bene_id, 
+                transaction_status = TransactionStatus.PENDING,
+                amount = amount,
+                charge = surcharge,
+                # order_id = response["data"]["utr"],
+                transaction_type = TransactionType.IMPS if txntype == "IMPS" else TransactionType.NEFT,
+                payment_remark = remark
+            )
         payload = {"mobile":mobile,
              "referenceid":ref_id,     
              "pipe":pipe,     
@@ -392,38 +407,32 @@ class SendMoneyDMT(APIView):
         # if response["status"]==True:
         response = True
         if response == True:
-            tr_obj = DMTTransactions.objects.create(
-                bank_acc_number=bank_acc_number,
-                ref_id = ref_id, 
-                user=user,  
-                bene_id = bene_id, 
-                transaction_status = TransactionStatus.SUCCESS,
-                amount = amount,
-                charge = surcharge,
-                # order_id = response["data"]["utr"],
-                transaction_type = TransactionType.IMPS if txntype == "IMPS" else TransactionType.NEFT,
-                payment_remark = remark
-            )
+            tr_obj.order_id = "1234try"
+            tr_obj.transaction_status = TransactionStatus.SUCCESS
+            tr_obj.save()
         
             if user.parent_id:
                 wallet_obj.refresh_from_db()
                 wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * 0.5 -  (surcharge*0.5)*0.05)
                 wallet_obj.save()
                 parent_user = UserWallet.objects.get(user_id=user.parent_id)
-                print(parent_user)
-                print(parent_user.available_balance)
                 parent_user.available_balance = parent_user.available_balance + (surcharge * 0.2 - (surcharge * 0.2)*0.05) 
                 parent_user.save()
-                print(parent_user.available_balance)
+                main_wallet = UserWallet.objects.get(user_id=6)
+                main_wallet.available_balance = main_wallet.available_balance + (surcharge - ( (surcharge * 0.5 -  (surcharge*0.5)*0.05) + (surcharge * 0.2 - (surcharge * 0.2)*0.05) ))
+                main_wallet.save()
             else:
                 wallet_obj.refresh_from_db()
                 wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * 0.7 -  (surcharge*0.7)*0.05)
                 wallet_obj.save()
+                main_wallet = UserWallet.objects.get(user_id=6)
+                main_wallet.available_balance = main_wallet.available_balance + (surcharge - (surcharge * 0.7 -  (surcharge*0.7)*0.05) )
+                main_wallet.save()
 
 
             return Response({"message": "Funds transferred successfully"}, status=status.HTTP_201_CREATED)
         else:
-            return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"transaction created": "Transaction Created"}, status=status.HTTP_400_BAD_REQUEST)
 
 class FundRequest(APIView):
     def post(self, request, *args, **kwargs):
@@ -994,179 +1003,73 @@ class zpayverification(APIView):
 
 
 class zpaybanktansfer(APIView):
-    def post(self, request, *args, **kwargs):  
-        ref_id = str(uuid.uuid4()).replace('-', 'D')[1:21]
+    
+    def post(self, request, *args, **kwargs):
 
         beneficiary_id = request.data.get("beneficiary_id")
         amount = request.data.get("amount")
+        merchant_reference_id = request.data.get("merchant_reference_id")
         payment_remark = request.data.get("payment_remark")
         payment_mode = request.data.get("payment_mode")
-        tpin = request.data.get("tpin")
+        bank_acc_number = request.data.get("bank_acc_number")
         user_id = request.data.get("user_id")
-        surcharge = request.data.get("surcharge")
-    #   merchant_reference_id = request.data.get("merchant_reference_id")
-
-        if not amount and not beneficiary_id and not payment_mode and not ref_id and not tpin:
-            return Response({"error": "Please provide required fields"}, status=status.HTTP_400_BAD_REQUEST)
+        surcharge =  request.data.get("surcharge")
+        if not (beneficiary_id and amount and merchant_reference_id and payment_remark):
+            return Response({"error":"Please fill details"})
         try:
             user=User.objects.get(id=user_id)
-            # surcharge = Package.get(surcharge)
         except:
             return Response({"error": "Invalid mobile number"}, status=status.HTTP_400_BAD_REQUEST)
-        wallet_obj = user.userwallet_set.first()
-        if not (amount+surcharge)<wallet_obj.available_balance:
-            return Response({"error": "Insufficient Balance"}, status=status.HTTP_400_BAD_REQUEST)
-        if not user.tpin == tpin:
-            return Response({"error": "Invalid mpin"}, status=status.HTTP_400_BAD_REQUEST)
-
-        wallet_obj.available_balance = wallet_obj.available_balance - (amount + surcharge)
-        wallet_obj.save()
-        main_wallet = UserWallet.objects.get(user_id=6)
-        main_wallet.available_balance = main_wallet.available_balance + surcharge
-        main_wallet.save()
-
+        payload = {
+             "type":"account_number",
+             "debit_account_id" : "va_iGTXTqO47awKr9OdhaF0km2Qe",
+             "beneficiary_id": beneficiary_id,
+             "amount": amount,
+             "currency_code" : "inr",
+             "payment_mode" : payment_mode,
+             "merchant_reference_id": merchant_reference_id,
+             "payment_remark": payment_remark,
+             
+         }
+    
+#     response = zpay_transfer(payload=payload)
         
-        # payload = {
-        #     "type":"account_number",
-        #     "debit_account_id" : "va_iGTXTqO47awKr9OdhaF0km2Qe",
-        #     "beneficiary_id": beneficiary_id,
-        #     "amount": amount,
-        #     "currency_code" : "inr",
-        #     "payment_mode" : payment_mode,
-        #     "merchant_reference_id": ref_id,
-        #     "payment_remark": payment_remark,
-        # }
-        # response = fund_transfer(payload)
-        tr_obj = DMTTransactions.objects.create(
-                ref_id = ref_id, 
+#     if response["status"] == True:
+   
+        response = True
+        if response == True:
+            tr_obj = DMTTransactions.objects.create(
+                bank_acc_number=bank_acc_number,
+                ref_id = merchant_reference_id, 
                 user=user,  
                 bene_id = beneficiary_id, 
                 transaction_status = TransactionStatus.SUCCESS,
                 amount = amount,
                 charge = surcharge,
                 # order_id = response["data"]["utr"],
-                trasaction_type = TransactionType.IMPS if payment_mode == "IMPS" else TransactionType.NEFT
+                transaction_type = TransactionType.IMPS if payment_mode == "IMPS" else TransactionType.NEFT,
+                payment_remark = payment_remark
             )
-
-
-        # if response["status"]==True:
-
-        if user.parent_id:
+        
+            if user.parent_id:
                 wallet_obj.refresh_from_db()
                 wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * 0.5 -  (surcharge*0.5)*0.05)
                 wallet_obj.save()
                 parent_user = UserWallet.objects.get(user_id=user.parent_id)
+                print(parent_user)
+                print(parent_user.available_balance)
                 parent_user.available_balance = parent_user.available_balance + (surcharge * 0.2 - (surcharge * 0.2)*0.05) 
                 parent_user.save()
-        else:
+                print(parent_user.available_balance)
+            else:
                 wallet_obj.refresh_from_db()
                 wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * 0.7 -  (surcharge*0.7)*0.05)
                 wallet_obj.save()
 
 
-        return Response({"message": "Funds transferred successfully"}, status=status.HTTP_201_CREATED)
-        # else:
-        #     return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
-        
-    #     amount = request.data.get("amount")
-    #     bene_id =request.data.get("bene_id")
-    #     txntype = request.data.get("txn_type")
-    #     referenceid =request.data.get("ref_id")
-    #     amount =request.data.get("amount")
-    #     pipe = request.data.get("pipe")
-    #     mobile = request.data.get("mobile")
-    #     mpin = request.data.get("mpin")
-    #     surcharge = request.data.get("surcharge")
-    #     user_id = request.data.get("user_id")
-
-    #     if not amount and not bene_id and not txntype and not referenceid and not mobile and not mpin:
-    #         return Response({"error": "Please provide required fields"}, status=status.HTTP_400_BAD_REQUEST)
-    #     try:
-    #         user=User.objects.get(id=user_id)
-    #     except:
-    #         return Response({"error": "Invalid mobile number"}, status=status.HTTP_400_BAD_REQUEST)
-    #     wallet_obj = user.userwallet_set.first()
-    #     if not (amount+surcharge)<wallet_obj.available_balance:
-    #         return Response({"error": "Insufficient Balance"}, status=status.HTTP_400_BAD_REQUEST)
-    #     if not user.mpin == mpin:
-    #         return Response({"error": "Invalid mpin"}, status=status.HTTP_400_BAD_REQUEST)
-
-    #     wallet_obj.available_balance = wallet_obj.available_balance - (amount + surcharge)
-    #     wallet_obj.save()
-    #     main_wallet = UserWallet.objects.get(user_id=1)
-    #     main_wallet.available_balance = main_wallet.available_balance + surcharge
-    #     main_wallet.save()
-
-    #     ref_id = str(uuid.uuid4()).replace('-', 'D')[1:21]
-    #     payload = {"mobile":mobile,
-    #          "referenceid":ref_id,     
-    #          "pipe":pipe,     
-    #          "pincode":"302020",
-    #          "address":"UP",     
-    #          "dob":"1995-02-05",
-    #          "gst_state":"17",     
-    #          "bene_id":bene_id,     
-    #          "txntype":txntype,     
-    #          "amount":amount}
-
-    #     response = fund_transfer(payload)
-
-    #     if response["status"]==True:
-    #         tr_obj = DMTTransactions.objects.create(
-    #             ref_id = ref_id, 
-    #             user=user,  
-    #             bene_id = bene_id, 
-    #             transaction_status = TransactionStatus.SUCCESS,
-    #             amount = amount,
-    #             charge = surcharge,
-    #             order_id = response["data"]["utr"],
-    #             trasaction_type = TransactionType.IMPS if txntype == "IMPS" else TransactionType.NEFT
-    #         )
-        
-    #         if user.parent_id:
-    #             wallet_obj.refresh_from_db()
-    #             wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * 0.5 -  (surcharge*0.5)*0.05)
-    #             wallet_obj.save()
-    #             parent_user = UserWallet.objects.get(user_id=user.parent_id)
-    #             parent_user.available_balance = parent_user.available_balance + (surcharge * 0.2 - (surcharge * 0.2)*0.05) 
-    #             parent_user.save()
-    #         else:
-    #             wallet_obj.refresh_from_db()
-    #             wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * 0.7 -  (surcharge*0.7)*0.05)
-    #             wallet_obj.save()
-
-
-    #         return Response({"message": "Funds transferred successfully"}, status=status.HTTP_201_CREATED)
-    #     else:
-    #         return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-    # def post(self, request, *args, **kwargs):
-
-    #     beneficiary_id = request.data.get("beneficiary_id")
-    #     amount = request.data.get("amount")
-    #     merchant_reference_id = request.data.get("merchant_reference_id")
-    #     payment_remark = request.data.get("payment_remark")
-    #     payment_mode = request.data.get("payment_mode")
-    #     if not (beneficiary_id and amount and merchant_reference_id and payment_remark):
-    #         return Response({"error":"Please fill details"})
-        
-    #     payload = {
-    #         "type":"account_number",
-    #         "debit_account_id" : "va_iGTXTqO47awKr9OdhaF0km2Qe",
-    #         "beneficiary_id": beneficiary_id,
-    #         "amount": amount,
-    #         "currency_code" : "inr",
-    #         "payment_mode" : payment_mode,
-    #         "merchant_reference_id": merchant_reference_id,
-    #         "payment_remark": payment_remark,
-    #     }
-    #     response = zpay_transfer(payload=payload)
-    #     if response["status"] == True:
-    #         return Response(response)
-    #     else:
-    #         return Response({"error":"Please try again later"}, response)
+            return Response({"message": "Funds transferred successfully"}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
 
 class zpayupitansfer(APIView):
     def post(self, request, *args, **kwargs):

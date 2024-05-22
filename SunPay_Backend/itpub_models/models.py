@@ -331,16 +331,19 @@ class DMTTransactions(models.Model):
 		(TransactionType.NEFT, 'NEFT'),)
 
     created_at = models.DateTimeField(auto_now_add=True)
-    ref_id = models.CharField(max_length=255, blank=True, null=True)
+    ref_id = models.CharField(max_length=255, unique=True, blank=True, null=True)
     user =  models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
     bank_acc_number = models.CharField(max_length=255, blank=True, null=True)
     bene_id = models.IntegerField(blank=True, null=True)
     transaction_status = models.SmallIntegerField(choices=STATUS, db_index=True,)
     amount = models.IntegerField()
-    order_id =  models.IntegerField(blank=True, null=True)
+    order_id =  models.CharField(blank=True, null=True, max_length=255)
     charge = models.IntegerField(blank=True, null=True)
     transaction_type = models.SmallIntegerField(choices=TYPE, db_index=True,)
     payment_remark = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.ref_id} - {self.user.username}"
 
 class UserTransactions(models.Model):
     STATUS = (

@@ -47,7 +47,7 @@ const ConfirmPayout = (props) => {
   const surcharge = data.surcharge
   const amount = parseInt(data.amount)
  
-  const ConfirmPayout = async() => {
+  const sendmoney = async() => {
         const today = new Date();
       const date = today.setDate(today.getDate()); 
       const defaultValue = new Date(date).toISOString().split('T')[0]

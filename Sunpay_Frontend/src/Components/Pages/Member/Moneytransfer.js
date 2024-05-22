@@ -135,13 +135,36 @@ const handleimpsbtnclick = async (index) => {
   }
   
 
-  const handlesearchbyacc = event => {
-    
-  //   navigate('/member/addbeneficiary', {
-  //     state: { number: mobile_number },
-  // });
+  const handlesearchbyacc = async (e) => {
+    try {
+        const accountNumber = account;
+        console.log(accountNumber);
+        
+        const response = await fetch(`https://new.sunpay.co.in/api/get_linked_account/?account_number=${accountNumber}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
 
-  }
+        if (response.ok) {
+            const resp = await response.json(); // Await the promise to get the resolved data
+            const respmessage = resp.Message
+            const custbank = resp.Response
+            if (respmessage==="Account Found"){
+              setallfetbank(custbank)
+              setIsShown(current => !current);
+            }
+        }
+        else {
+            alert('Error fetching account:',accountNumber);
+        }
+    } catch (error) {
+        alert('Technical Error');
+        console.error('Technical Error:', error); // Log the error for debugging purposes
+    }
+};
+
 
   const [mobile_number,setmobile] = useState('')
   const [register_with, setregister_with]=useState()

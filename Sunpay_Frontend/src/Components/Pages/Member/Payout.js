@@ -117,7 +117,7 @@ const handleimpsbtnclick = async (index) => {
     console.log(mobile)
 
     if (amount){
-      navigate('/member/confirmdmt', {
+      navigate('/member/confirmpayout', {
         state: {payeee: payeeDetails, bene_id: bene_id, accno: accno, ifsc:ifsc, name:name, bankid:bankid, bankname, txn_type:txn_type, mobile:mobile_number, amount:amount, pipe:pipe, surcharge:surcharge},
     });
     }
@@ -135,12 +135,27 @@ const handleimpsbtnclick = async (index) => {
   }
   
 
-  const handlesearchbyacc = event => {
-    
-  //   navigate('/member/addbeneficiary', {
-  //     state: { number: mobile_number },
-  // });
+  const handlesearchbyacc = async(e) => {
+    try {
+      const accountNumber = account;
+      const response = await fetch(`https://new.sunpay.co.in/api/get_linked_account/?account_number=${accountNumber}`, {
+          method: 'GET',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+      });
+      const data = response.json();
 
+      if (response.ok) {
+          console.log(data);
+      } else {
+          console.error('Error fetching linked account:', response.status, response.statusText);
+      }
+        
+        
+    } catch (error) {
+      alert('Technical Error')
+    } 
   }
 
   const [mobile_number,setmobile] = useState('')
