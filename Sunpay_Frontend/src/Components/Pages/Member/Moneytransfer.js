@@ -21,8 +21,6 @@ const Moneytransfer = (props) => {
   const [username, setusername] = useState('');
 
   const fetchUser = async () => {
-   
-
     try {
       const userresponse = await axios.get(`https://new.sunpay.co.in/api/users/${props.data.id}`);
       const respuser = userresponse.data
@@ -33,7 +31,11 @@ const Moneytransfer = (props) => {
       console.error('Error fetching data:', error);
     }
   };
-  fetchUser();
+
+  useEffect(() => {
+    fetchUser(); // Fetch data when the component mounts
+  }, []);
+ 
 
   const handlesearchbymob = async (e) => {
     if (mobile_number) {

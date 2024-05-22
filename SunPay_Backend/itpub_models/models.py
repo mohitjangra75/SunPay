@@ -266,7 +266,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class UserWallet(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    available_balance = models.IntegerField(blank=True, null=True)
+    available_balance = models.FloatField(blank=True, null=True)
 
     def __str__(self):
         return self.user.username

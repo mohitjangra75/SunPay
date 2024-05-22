@@ -387,9 +387,11 @@ class SendMoneyDMT(APIView):
              "txntype":txntype,     
              "amount":amount}
 
-        response = fund_transfer(payload)
+        # response = fund_transfer(payload)
 
-        if response["status"]==True:
+        # if response["status"]==True:
+        response = True
+        if response == True:
             tr_obj = DMTTransactions.objects.create(
                 bank_acc_number=bank_acc_number,
                 ref_id = ref_id, 
@@ -398,7 +400,7 @@ class SendMoneyDMT(APIView):
                 transaction_status = TransactionStatus.SUCCESS,
                 amount = amount,
                 charge = surcharge,
-                order_id = response["data"]["utr"],
+                # order_id = response["data"]["utr"],
                 transaction_type = TransactionType.IMPS if txntype == "IMPS" else TransactionType.NEFT,
                 payment_remark = remark
             )
@@ -408,8 +410,11 @@ class SendMoneyDMT(APIView):
                 wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * 0.5 -  (surcharge*0.5)*0.05)
                 wallet_obj.save()
                 parent_user = UserWallet.objects.get(user_id=user.parent_id)
+                print(parent_user)
+                print(parent_user.available_balance)
                 parent_user.available_balance = parent_user.available_balance + (surcharge * 0.2 - (surcharge * 0.2)*0.05) 
                 parent_user.save()
+                print(parent_user.available_balance)
             else:
                 wallet_obj.refresh_from_db()
                 wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * 0.7 -  (surcharge*0.7)*0.05)
@@ -520,7 +525,7 @@ class PayRecharge(APIView):
             'provider_id' : provider_id,
             'amount' : amount,
             'client_id' : client_id,
-            'user_id' : "9311395921",
+            'user_id' : "",
             'api_token' :"1vuiyiyiniitnadhsalha$(%23$%(%26@)$@usow89342mdfu",
             'provider_code' :"NA",
             "bill_context" : billcontext
@@ -555,10 +560,10 @@ class GetBillDetails(APIView):
             return Response({"error":"Please fill number client_id and provider_id"})
 
         payload = {
-            'api_token' :"1vuiyiyiniitnadhsalha$(%23$%(%26@)$@usow89342mdfu",
+            'api_token' :"JGWYCBMaoMM9PGknp6u6xFAVHsdwZlPWlJJIMlXZqME1F7vsE8p576YsNKV3",
             'number' :number,
             'provider_id' : provider_id,
-            'user_id' : "9311395921",
+            'user_id' : "216",
             'client_id' : client_id,
             "Retailer_MobileNumber" : retailer_mobile
         }

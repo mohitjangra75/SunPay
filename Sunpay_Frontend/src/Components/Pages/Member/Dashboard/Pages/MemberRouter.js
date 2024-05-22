@@ -45,6 +45,7 @@ import Mcdtollservics from '../../Mcdtollservics'
 import Insurance from '../../Insurance'
 import AddCustomer from '../../Addcustomer';
 import Retailerregister from '../../Retailerregister';
+import ConfirmPayout from '../../ConfirmPayout';
 
 const MemberRouter = (props, {IsLoggedIn}) => {
   // const location = useLocation();
@@ -101,6 +102,7 @@ const MemberRouter = (props, {IsLoggedIn}) => {
           {category === 'fund-request' && <Fundrequest data={data} />}
           {category === 'reports' && <Reports data={data} />}
           {category === 'payoutDMT' && <Payout data={data} />}
+          {category === 'confirmpayout' && <ConfirmPayout data={data} />}
           {category === 'accountlagger' && <Accountlagger data={data} />}
           {category === 'complaints' && <Complaint data={data} />}
           {category === 'settings' && <MemberSettings data={data} />}

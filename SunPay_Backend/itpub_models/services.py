@@ -220,13 +220,14 @@ def pay_recharge(payload):
 
 def get_bill_details(payload):
     headers = {
-        # "Token":token,
-        # "Authorisedkey":"NjJiNDhmMTI3NWMyNDVhYzZiYTVkNmIyNWQyMzNiZDQ=",
         "Accept": "application/json",
         "Content-Type": "application/json"
     }
-    url = "https://api.levinfintech.com/api/levin/bbps/get-biller-details"
+    url = "https://api.levinfintech.com/api/levin/bbps/fetched-bill"
     response = requests.post(url=url,json=payload, headers=headers)
+    print(response)
+    print("Status Code:", response.status_code)
+    print("Response Content:", response.text)
     if response.ok:
         return {"status":True,
         "data":response.json()}
