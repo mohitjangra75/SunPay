@@ -200,7 +200,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     shop_adress = models.CharField(max_length=255, blank=True, null=True)
     otp = models.IntegerField(null=True, blank=True)
     # surcharge = models.FloatField(null=True, blank=True)
-    dicashbackper = models.FloatField(null=True, blank=True)
+    diback = models.FloatField(null=True, blank=True)
+    retback = models.FloatField(null=True, blank=True)
+    compback = models.FloatField(null=True, blank=True)
+
     
     USERNAME_FIELD = 'username'
     objects = UserManager()
@@ -304,6 +307,8 @@ class Customer(models.Model):
 
     def __str__(self):
         return self.customer_mobile + "-" + self.registered_with.username
+    
+
 
 class BankDetails(models.Model):
     upi_id = models.CharField(max_length=255, blank=True, null=True)
@@ -314,6 +319,29 @@ class BankDetails(models.Model):
     mobile_number = models.CharField(max_length=10,blank=True, null=True)
     registered_with = models.ForeignKey(Customer, on_delete=models.CASCADE, blank=True, null=True)
     bene_id = models.IntegerField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active =  models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.beneficiary_name
+    
+class ZpayBankDetail(models.Model):
+    VPA = 'vpa'
+    ACCOUNT_NUMBER = 'account_number'
+    TYPE_CHOICES = [
+        (VPA, 'VPA'),
+        (ACCOUNT_NUMBER, 'Account Number'),
+    ]
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES, default=ACCOUNT_NUMBER)
+    bene_id = models.CharField(max_length=255, blank=True, null=True)
+    beneficiary_name = models.CharField(max_length=255, blank=True, null=True)
+    email = models.CharField(max_length=255, blank=True, null=True)
+    mobile_number = models.CharField(max_length=10,blank=True, null=True)
+    account_number = models.CharField(max_length=255, blank=True, null=True)
+    ifsc_code = models.CharField(max_length=50, blank=True, null=True)
+    bank_name = models.CharField(max_length=255, blank=True, null=True)
+    upi = models.CharField(max_length=255, blank=True, null=True)
+    registered_with = models.ForeignKey(Customer, on_delete=models.CASCADE, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_active =  models.BooleanField(default=True)
 
@@ -334,7 +362,7 @@ class DMTTransactions(models.Model):
     ref_id = models.CharField(max_length=255, unique=True, blank=True, null=True)
     user =  models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
     bank_acc_number = models.CharField(max_length=255, blank=True, null=True)
-    bene_id = models.IntegerField(blank=True, null=True)
+    bene_id = models.CharField(max_length=255, blank=True, null=True)
     transaction_status = models.SmallIntegerField(choices=STATUS, db_index=True,)
     amount = models.IntegerField()
     order_id =  models.CharField(blank=True, null=True, max_length=255)

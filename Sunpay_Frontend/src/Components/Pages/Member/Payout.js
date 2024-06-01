@@ -15,14 +15,10 @@ const Payout = (props) => {
     setmobile('');
     setIsShown(current => !current);
   }
-  const [error, setError] = useState(null);
-
-
-  const [username, setusername] = useState('');
 
   const fetchUser = async () => {
     try {
-      const userresponse = await axios.get(`https://new.sunpay.co.in/api/users/${props.data.id}`);
+      const userresponse = await axios.get(`http://118.139.167.172/api/users/${props.data.id}`);
       const respuser = userresponse.data
       const repusername = userresponse.data.username;
       setregister_with(repusername);
@@ -40,7 +36,7 @@ const Payout = (props) => {
   const handlesearchbymob = async (e) => {
     if (mobile_number) {
         try {
-            const response = await fetch('https://new.sunpay.co.in/api/get_customer/', {
+            const response = await fetch('http://118.139.167.172/api/get_customer/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -52,7 +48,7 @@ const Payout = (props) => {
             
             if (resultmessage === "Customer found" || resultmessage ==="Customer created from paysprint") {
                 try {
-                    const detbene = await fetch('https://new.sunpay.co.in/api/fetch_beneficiary/', {
+                    const detbene = await fetch('http://118.139.167.172/api/fetch_beneficiary/', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -60,7 +56,9 @@ const Payout = (props) => {
                         body: JSON.stringify({ mobile_number }),
                     });
                     const benfetresp = await detbene.json();
-                    const custbank = benfetresp.Response;
+                    console.log(benfetresp)
+                    const custbank = benfetresp.data;
+                    console.log(custbank)
                     setallfetbank(custbank)
                     if (custbank){
                       setIsShown(current => !current);
@@ -89,44 +87,39 @@ const Payout = (props) => {
     }
 }
 
-const handleimpsbtnclick = async (index) => {
+  const handleimpsbtnclick = async (index) => {
 
     const payeeDetails = allfetbank[index];
 
-    const bene_id = payeeDetails.bene_id
     const txn_type = 'IMPS'
     const mobile = mobile_number
-    const pipe = "bank1"
-    const surcharge = 20
-    const accno = payeeDetails.accno
-    const bankid = payeeDetails.bankid
-    const bankname = payeeDetails.bankname
-    const ifsc = payeeDetails.ifsc
-    const name = payeeDetails.name
-
-    
-
+    const surcharge = 50
+    const accno = payeeDetails.account_number
+    const bankname = payeeDetails.bank_name
+    const ifsc = payeeDetails.ifsc_code
+    const name = payeeDetails.beneficiary_name
+    const email = currentuser.email
 
     setpayeebank(allfetbank[index])
 
-    console.log(payeeDetails)
-    console.log(bene_id)
-    console.log(txn_type)
-    console.log(amount)
-    console.log(pipe)
-    console.log(mobile)
+    // console.log('Payee details',payeeDetails)
+    // console.log('Trans type',txn_type)
+    // console.log('amount',amount)
+    // console.log('mobile',mobile)
+    // console.log('bankname',bankname)
+    // console.log('ifsc',ifsc)
+    // console.log('name',name)
+    // console.log('email',email)
 
-    if (amount){
+    if (amount && txn_type && mobile && bankname && ifsc && name && email && payeeDetails){
       navigate('/member/confirmpayout', {
-        state: {payeee: payeeDetails, bene_id: bene_id, accno: accno, ifsc:ifsc, name:name, bankid:bankid, bankname, txn_type:txn_type, mobile:mobile_number, amount:amount, pipe:pipe, surcharge:surcharge},
+        state: {payeee: payeeDetails, accno: accno, ifsc:ifsc, name:name, bankname:bankname, txn_type:txn_type, email:email, mobile:mobile_number, amount:amount, surcharge:surcharge},
     });
     }
     else{
       alert('Kindly Enter amount')
-    }
-    
-  
-}
+    }  
+  }
 
   const addbeneficiary = event => {
     navigate('/member/addnewbeneficiary', {
@@ -135,28 +128,37 @@ const handleimpsbtnclick = async (index) => {
   }
   
 
-  const handlesearchbyacc = async(e) => {
+  const handlesearchbyacc = async (e) => {
     try {
-      const accountNumber = account;
-      const response = await fetch(`https://new.sunpay.co.in/api/get_linked_account/?account_number=${accountNumber}`, {
-          method: 'GET',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-      });
-      const data = response.json();
+        const accountNumber = account;
+        console.log(accountNumber);
+        
+        const response = await fetch(`http://118.139.167.172/api/get_linked_account/?account_number=${accountNumber}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+            const resp = await response.json(); // Await the promise to get the resolved data
+            const respmessage = resp.Message
+            console.log(respmessage);
+            const custbank = resp.Response
+            console.log(custbank);
 
-      if (response.ok) {
-          console.log(data);
-      } else {
-          console.error('Error fetching linked account:', response.status, response.statusText);
-      }
-        
-        
+        if (response.ok) {
+            if (respmessage==="Account Found"){
+              setallfetbank(custbank)
+              setIsShown(current => !current);
+            }
+        }
+        else {
+            alert('Error fetching account:',accountNumber);
+        }
     } catch (error) {
-      alert('Technical Error')
-    } 
-  }
+        alert('Technical Error');
+        console.error('Technical Error:', error); // Log the error for debugging purposes
+    }
+};
 
   const [mobile_number,setmobile] = useState('')
   const [register_with, setregister_with]=useState()
@@ -164,7 +166,6 @@ const handleimpsbtnclick = async (index) => {
   const [account,setaccount] = useState('')
   const [allfetbank, setallfetbank] =  useState()
   const [amount, setamount] =  useState()
-  const [dataall, setDatall] = useState(); 
   const [payeebankdetails, setpayeebank] = useState(); 
 
   return (
@@ -179,7 +180,7 @@ const handleimpsbtnclick = async (index) => {
             <input type="submit" value="Submit" onClick={handlesearchbymob} className='p-2 bg-white border border-black hover:bg-blue-700 hover:text-white rounded-lg'/>
            </div>
 
-              <b className='text-2xl'>OR</b>
+            <b className='text-2xl'>OR</b>
 
            <label htmlFor=''>Enter Account Number</label>
            <div className='md:flex gap-8'>
@@ -187,8 +188,6 @@ const handleimpsbtnclick = async (index) => {
             <input type="submit" value="Submit" onClick={handlesearchbyacc}  className='p-2 bg-white border border-black hover:bg-blue-700 hover:text-white rounded-lg'/>
            </div>  
         </div>
-
-        
       )}
 
       {isShown && (
@@ -209,34 +208,7 @@ const handleimpsbtnclick = async (index) => {
             <div className='beneficiarylist '>
               <h1 className='bg-green-800 mt-6 text-white text-2xl md:pl-4 p-1'>Beneficiary List</h1>
               <div className =" relative overflow-x-auto shadow-md border-black ">
-                 {/* <table className="w-full text-sm text-left rtl:text-right border border-black text-gray-500 dark:text-gray-400 border-collapse ">
-                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                      <tr className='border text-center border-black'>
-                        <th scope="col" className="px-6 py-3 font-black border border-black">SNO</th>
-                          <th className='px-6 py-3  border border-black'>Beneficiary Name</th>
-                          <th className='px-6 py-3  border border-black'>Bank</th>
-                          <th className='px-6 py-3  border border-black'>Account No.</th>
-                          <th className='px-6 py-3  border border-black'>IFSC</th>
-                          <th className='px-6 py-3  border border-black'>Amount</th>
-                          <th className='px-6 py-3  border border-black'>Mode</th>
-                          <th className='px-6 py-3  border border-black'>Action</th>
-                      </tr>
-                    </thead>
-                  
-                    <tbody>
-                      {/* <tr className="bg-white border text-center border-black dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">                        
-                        <td scope="col" className="px-6 py-3  border border-black"></td>
-                        <td scope="col" className="px-6 py-3  border border-black">Gourav</td>
-                        <td scope="col" className="px-6 py-3  border border-black">Union</td>
-                        <td scope="col" className="px-6 py-3  border border-black">2300020213</td>
-                        <td scope="col" className="px-6 py-3  border border-black">UBIN01515</td>
-                        <td scope="col" className="px-6 py-3  border border-black">5000</td>
-                        <td scope="col" className="px-6 py-3  border border-black"> <NavLink to='/member/confirmdmt'><button type="submit" className='border bg-blue-700 text-white border-white px-1'>IMPS</button><button type="submit" className='border ml-2 bg-blue-700 text-white border-white px-1'>NEFT</button></NavLink></td>
-                        <td scope="col" className="px-6 py-3  border border-black"><div className='flex gap-2 text-2xl'><AiFillDelete className='hover:cursor-pointer'/> <AiOutlineCheckSquare className='hover:cursor-pointer'/></div></td>
-                      </tr> 
-                          
-                    </tbody>
-                 </table>*/}
+                 
                   <table className="w-full text-sm text-left rtl:text-right border border-black text-gray-500 dark:text-gray-400 border-collapse ">
                   <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                       <tr className='border text-center border-black'>
@@ -255,10 +227,10 @@ const handleimpsbtnclick = async (index) => {
                         {allfetbank.map((item, index) => (
                           <tr key={index} className="bg-white border text-center border-black dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                             <td scope="col" className="px-6 py-3  border border-black">{index+1}</td>
-                            <td scope="col" className="px-6 py-3  border border-black">{item.name}</td>
-                            <td scope="col" className="px-6 py-3  border border-black">{item.bankname}</td>
-                            <td scope="col" className="px-6 py-3  border border-black">{item.accno}</td>
-                            <td scope="col" className="px-6 py-3  border border-black">{item.ifsc}</td>
+                            <td scope="col" className="px-6 py-3  border border-black">{item.beneficiary_name}</td>
+                            <td scope="col" className="px-6 py-3  border border-black">{item.bank_name}</td>
+                            <td scope="col" className="px-6 py-3  border border-black">{item.account_number}</td>
+                            <td scope="col" className="px-6 py-3  border border-black">{item.ifsc_code}</td>
                             <td scope="col" className="px-6 py-3  border border-black">            
                                 <input type="number" placeholder='Amount' onChange={(e) => setamount(e.target.value)} className=' border border-gray-300 text-gray-900 text-sm rounded-lg p-2 hover:cursor-pointer dark:focus:border-blue-500'/>
                             </td>

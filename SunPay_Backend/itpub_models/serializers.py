@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, BankDetails, Bank, CompanyBank, BBPSProviders,PaysprintBanks, State, UserWallet, UserTransactions, Customer, WalletTransactions
+from .models import User, BankDetails, Bank, CompanyBank, BBPSProviders,PaysprintBanks, State, UserWallet, UserTransactions, Customer, WalletTransactions, ZpayBankDetail, DMTTransactions
 
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -55,6 +55,11 @@ class UserTransactionSerializer(serializers.ModelSerializer):
     def get_transaction_status(self,obj):
         return obj.get_transaction_status_display()
 
+class DmttransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMTTransactions
+        fields = '__all__'
+
 class WalletTransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = WalletTransactions
@@ -63,4 +68,9 @@ class WalletTransactionSerializer(serializers.ModelSerializer):
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
+        fields = ['customer_mobile', 'registered_with', 'is_active']
+
+class ZpayBanks(serializers.ModelSerializer):
+    class Meta:
+        model = ZpayBankDetail
         fields = ['customer_mobile', 'registered_with', 'is_active']

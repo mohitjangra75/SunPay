@@ -68,8 +68,8 @@ const Addbeneficiary = (props) => {
 
     const fetchUser = async () => {
       try {
-        const userResponse = await axios.get(`https://new.sunpay.co.in/api/users/${props.data.id}`);
-        const response = await axios.get('https://new.sunpay.co.in/api/paysprintbanks/');
+        const userResponse = await axios.get(`http://118.139.167.172/api/users/${props.data.id}`);
+        const response = await axios.get('http://118.139.167.172/api/paysprintbanks/');
         const bankResp = response.data;
         setOptions(bankResp);
   
@@ -92,7 +92,7 @@ const Addbeneficiary = (props) => {
 
   const bankverify = async () => {
     try {
-      const response = await fetch('https://new.sunpay.co.in/api/zpayverify/', {
+      const response = await fetch('http://118.139.167.172/api/zpayverify/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -136,7 +136,7 @@ const Addbeneficiary = (props) => {
   const handlesubmit = async (e) => {
 
     try {
-      const response = await fetch('https://new.sunpay.co.in/api/add_beneficiary/', {
+      const response = await fetch('http://118.139.167.172/api/add_beneficiary/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

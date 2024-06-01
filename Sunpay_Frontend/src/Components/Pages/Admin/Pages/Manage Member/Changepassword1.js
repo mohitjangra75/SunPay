@@ -78,7 +78,7 @@ const Changepassword1 = (props) => {
     const fetchData = async () => {
       try {
         // Fetch data from your backend API
-        const response = await fetch(`https://new.sunpay.co.in/api/get_users/`);
+        const response = await fetch(`http://118.139.167.172/api/get_users/`);
         if (!response.ok) {
           throw new Error('Failed to fetch data');
         }

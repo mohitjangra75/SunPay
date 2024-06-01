@@ -71,7 +71,7 @@ const Fundrequest = (props) => {
   const fetchBank = async () => {
     try {
       
-      const response = await axios.get('https://new.sunpay.co.in/api/companybanks/'); // Assuming '/api/options' is your backend endpoint
+      const response = await axios.get('http://118.139.167.172/api/companybanks/'); // Assuming '/api/options' is your backend endpoint
       setOptions(response.data);       
       
     } catch (error) {
@@ -109,7 +109,7 @@ const Fundrequest = (props) => {
         e.preventDefault();
         const add_date = defaultValue
         const amount = parseFloat(amoun); 
-        const userresponse = await axios.get(`https://new.sunpay.co.in/api/users/${props.data.id}`);
+        const userresponse = await axios.get(`http://118.139.167.172/api/users/${props.data.id}`);
         const username = userresponse.data.username;
     
         const requestBody = {
@@ -126,7 +126,7 @@ const Fundrequest = (props) => {
     
         console.log('Form submitted:', requestBody);
     
-        const response = await fetch('https://new.sunpay.co.in/api/fund_request/', {
+        const response = await fetch('http://118.139.167.172/api/fund_request/', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -151,7 +151,7 @@ const Fundrequest = (props) => {
     
     const getfundrequest = async (e) => {
       e.preventDefault();
-      const funreqresponse = await axios.get(`https://new.sunpay.co.in/api/get_fund_request/?user_id=${props.data.id}`);
+      const funreqresponse = await axios.get(`http://118.139.167.172/api/get_fund_request/?user_id=${props.data.id}`);
       const allrequest = funreqresponse.data
       setallfundrequest(allrequest)
       console.log(allfundrequest)

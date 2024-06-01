@@ -83,6 +83,7 @@ def fetch_paysprintbeneficiary(payload):
         "accept": "application/json"
     }
     response = requests.post(url=url,json=payload, headers=headers)
+    print (response)
     if response.ok:
         return {
             "status": True,
@@ -303,13 +304,10 @@ def zpay_bankadd(payload):
     url = "https://api.zwitch.io/v1/accounts/va_iGTXTqO47awKr9OdhaF0km2Qe/beneficiaries"
     response = requests.post(url, json=payload, headers=headers)
     if response.ok:
-        return {"status":True,
-        "data":response.json()}
+        return {"status": True, "data": response.json()}
     else:
         print(response.json())
-        return {"status":False,
-        "message":"Please verify details",
-        "data":response.json()}
+        return {"status": False, "message": "Please verify details", "data": response.json()}
 
 def zpay_upiadd(payload):
     headers = {
@@ -345,41 +343,174 @@ def zpay_transfer(payload):
         "message":"Please verify details",
         "data":response.json()}
 
+# def zpaygetallbeneficiary():
+#     headers = {
+#         "Accept": "application/json",
+#         "Content-Type": "application/json",
+#         "Authorization" : "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
+#         }
+    
+#     url = "https://api.zwitch.io/v1/accounts/va_iGTXTqO47awKr9OdhaF0km2Qe/beneficiaries?results_per_page=100"
+
+#     response = requests.get(url, headers=headers)
+#     if response.ok:
+#         return {"status":True,
+#         "data":response.json()}
+#     else:
+#         print(response.json())
+#         return {"status":False,
+#         "data":"Please verify details"}
+
+
+
+# def zpaygetallbeneficiary():
+#     headers = {
+#         "Accept": "application/json",
+#         "Content-Type": "application/json",
+#         "Authorization": "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
+#     }
+    
+#     base_url = "https://api.zwitch.io/v1/accounts/va_iGTXTqO47awKr9OdhaF0km2Qe/beneficiaries"
+#     params = {
+#         "results_per_page": 100
+#     }
+    
+#     all_data = []
+#     start_after = None
+    
+#     while True:
+#         if start_after:
+#             params["start_after"] = start_after
+        
+#         response = requests.get(base_url, headers=headers, params=params)
+        
+#         if response.ok:
+#             data = response.json()
+#             beneficiaries = data.get("data", [])
+#             all_data.extend(beneficiaries)
+#             if len(beneficiaries) < 100:
+#                 break
+            
+#             start_after = beneficiaries[-1]["id"]  # Update start_after with the last beneficiary_id
+#         else:
+#             print(response.json())
+#             return {
+#                 "status": False,
+#                 "data": "Please verify details"
+#             }
+    
+#     return {
+#         "status": True,
+#         "data": all_data
+#     }
+
+
+from requests.exceptions import RequestException
+import time
+
 def zpaygetallbeneficiary():
     headers = {
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "Authorization" : "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
-        }
+        "Authorization": "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
+    }
     
-    url = "https://api.zwitch.io/v1/accounts/va_iGTXTqO47awKr9OdhaF0km2Qe/beneficiaries?results_per_page=100"
-
-    response = requests.get(url, headers=headers)
-    if response.ok:
-        return {"status":True,
-        "data":response.json()}
-    else:
-        print(response.json())
-        return {"status":False,
-        "data":"Please verify details"}
-
-def zpaybeneficiarybyid(param1):
-   
-    headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Authorization" : "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
+    base_url = "https://api.zwitch.io/v1/accounts/va_iGTXTqO47awKr9OdhaF0km2Qe/beneficiaries"
+    params = {
+        "results_per_page": 100
+    }
+    
+    all_data = []
+    start_after = None
+    max_retries = 3
+    retry_delay = 1  # Initial retry delay in seconds
+    
+    for retry_count in range(max_retries):
+        try:
+            while True:
+                if start_after:
+                    params["start_after"] = start_after
+                
+                response = requests.get(base_url, headers=headers, params=params)
+                
+                if response.ok:
+                    try:
+                        data = response.json()
+                        beneficiaries = data.get("data", [])
+                        all_data.extend(beneficiaries)
+                        
+                        if len(beneficiaries) < 100:
+                            break
+                        
+                        start_after = beneficiaries[-1]["id"]  # Update start_after with the last beneficiary_id
+                        print(start_after)
+                    except ValueError as e:
+                        print(f"ValueError decoding JSON: {e}")
+                        print(f"Response content: {response.content}")
+                        return {
+                            "status": False,
+                            "data": "Invalid JSON response"
+                        }
+                
+                else:
+                    if response.status_code == 429:
+                        # Handle rate limiting by retrying after waiting
+                        retry_after = int(response.headers.get('Retry-After', retry_delay))
+                        print(f"Rate limited, retrying in {retry_after} seconds...")
+                        time.sleep(retry_after)
+                    else:
+                        print(f"Request failed with status code: {response.status_code}")
+                        print(f"Response content: {response.content}")
+                        return {
+                            "status": False,
+                            "data": "Request failed"
+                        }
+        
+        except RequestException as e:
+            print(f"RequestException: {e}")
+            if retry_count < max_retries - 1:
+                print(f"Retrying in {retry_delay} seconds...")
+                time.sleep(retry_delay)
+                retry_delay *= 2  # Exponential backoff for retry delay
+            else:
+                return {
+                    "status": False,
+                    "data": "Exceeded maximum retries"
+                }
+        
+        else:
+            return {
+                "status": True,
+                "data": all_data
             }
-    url = "https://api.zwitch.io/v1/accounts/beneficiaries/{param1}"
+    
+    return {
+        "status": False,
+        "data": "Unexpected error"
+    }
 
-    response = requests.get(url, headers=headers)
-    if response.ok:
-        return {"status":True, "data":response.json()
-        }
-    else:
-        print(response.json())
-        return ({"status":False,
-        "data":"Please verify details"})
+
+
+
+def zpaybeneficiarybyid(beneficiary_id):
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ak_live_CYlUjZ3HgAI84thmh0qtK5pUr6Ar6LKQ6FNC:sk_live_2vzdx3JgIqFvQrMGsApgsNcHrmTUOeuwh1OG"
+    }
+    url = f"https://api.zwitch.io/v1/accounts/beneficiaries/{beneficiary_id}"
+
+    try:
+        response = requests.get(url, headers=headers)
+        if response.ok:
+            return {"status": True, "data": response.json()}
+        else:
+            print(response.json())
+            return {"status": False, "data": "Unable to retrieve beneficiary details. Please verify details."}
+    except requests.RequestException as e:
+        print(f"HTTP Request failed: {e}")
+        return {"status": False, "data": "Unable to retrieve beneficiary details. Please verify details."}
+
 
 def generate_otp(length=4):
     digits = "0123456789"

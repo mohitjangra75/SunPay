@@ -5,8 +5,6 @@ import axios from 'axios'
 import { AiFillDelete } from "react-icons/ai";
 import { AiOutlineCheckSquare } from "react-icons/ai";
 
-
-
 const Moneytransfer = (props) => {
   const [isShown, setIsShown] = useState(false);
   const navigate = useNavigate();
@@ -15,14 +13,10 @@ const Moneytransfer = (props) => {
     setmobile('');
     setIsShown(current => !current);
   }
-  const [error, setError] = useState(null);
-
-
-  const [username, setusername] = useState('');
 
   const fetchUser = async () => {
     try {
-      const userresponse = await axios.get(`https://new.sunpay.co.in/api/users/${props.data.id}`);
+      const userresponse = await axios.get(`http://118.139.167.172/api/users/${props.data.id}`);
       const respuser = userresponse.data
       const repusername = userresponse.data.username;
       setregister_with(repusername);
@@ -40,7 +34,7 @@ const Moneytransfer = (props) => {
   const handlesearchbymob = async (e) => {
     if (mobile_number) {
         try {
-            const response = await fetch('https://new.sunpay.co.in/api/get_customer/', {
+            const response = await fetch('http://118.139.167.172/api/get_customer/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -52,7 +46,7 @@ const Moneytransfer = (props) => {
             
             if (resultmessage === "Customer found" || resultmessage ==="Customer created from paysprint") {
                 try {
-                    const detbene = await fetch('https://new.sunpay.co.in/api/fetch_beneficiary/', {
+                    const detbene = await fetch('http://118.139.167.172/api/fetch_beneficiary/', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -60,7 +54,9 @@ const Moneytransfer = (props) => {
                         body: JSON.stringify({ mobile_number }),
                     });
                     const benfetresp = await detbene.json();
-                    const custbank = benfetresp.Response;
+                    console.log(benfetresp)
+                    const custbank = benfetresp.data;
+                    console.log(custbank)
                     setallfetbank(custbank)
                     if (custbank){
                       setIsShown(current => !current);
@@ -140,17 +136,19 @@ const handleimpsbtnclick = async (index) => {
         const accountNumber = account;
         console.log(accountNumber);
         
-        const response = await fetch(`https://new.sunpay.co.in/api/get_linked_account/?account_number=${accountNumber}`, {
+        const response = await fetch(`http://118.139.167.172/api/get_linked_account/?account_number=${accountNumber}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
             },
         });
-
-        if (response.ok) {
             const resp = await response.json(); // Await the promise to get the resolved data
             const respmessage = resp.Message
+            console.log(respmessage);
             const custbank = resp.Response
+            console.log(custbank);
+
+        if (response.ok) {
             if (respmessage==="Account Found"){
               setallfetbank(custbank)
               setIsShown(current => !current);
@@ -263,10 +261,10 @@ const handleimpsbtnclick = async (index) => {
                         {allfetbank.map((item, index) => (
                           <tr key={index} className="bg-white border text-center border-black dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                             <td scope="col" className="px-6 py-3  border border-black">{index+1}</td>
-                            <td scope="col" className="px-6 py-3  border border-black">{item.name}</td>
-                            <td scope="col" className="px-6 py-3  border border-black">{item.bankname}</td>
-                            <td scope="col" className="px-6 py-3  border border-black">{item.accno}</td>
-                            <td scope="col" className="px-6 py-3  border border-black">{item.ifsc}</td>
+                            <td scope="col" className="px-6 py-3  border border-black">{item.beneficiary_name}</td>
+                            <td scope="col" className="px-6 py-3  border border-black">{item.bank_name}</td>
+                            <td scope="col" className="px-6 py-3  border border-black">{item.account_number}</td>
+                            <td scope="col" className="px-6 py-3  border border-black">{item.ifsc_code}</td>
                             <td scope="col" className="px-6 py-3  border border-black">            
                                 <input type="number" placeholder='Amount' onChange={(e) => setamount(e.target.value)} className=' border border-gray-300 text-gray-900 text-sm rounded-lg p-2 hover:cursor-pointer dark:focus:border-blue-500'/>
                             </td>

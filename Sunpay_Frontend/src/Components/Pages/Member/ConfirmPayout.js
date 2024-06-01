@@ -5,50 +5,49 @@ import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { NavLink } from 'react-router-dom'
 
-
 const ConfirmPayout = (props) => {
 
- 
   const location = useLocation();
   const data = location.state;
-  
+
+  const [currentuser, setcuruser] = useState({});
+  const [register_with, setregister_with] = useState('');
 
   const fetchUser = async () => {
-
     try {
-      const userresponse = await axios.get(`https://new.sunpay.co.in/api/users/${props.data.id}`);
-      const respuser = userresponse.data
-      setcuruser(respuser)
+      const userresponse = await axios.get(`http://118.139.167.172/api/users/${props.data.id}`);
+      const respuser = userresponse.data;
+      setcuruser(respuser);
       const repusername = userresponse.data.username;
       setregister_with(repusername);
+      setpayeeDetails(data)
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
-  // fetchUser();
+
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [props.data.id]);
 
-  const [currentuser, setcuruser] = useState();
-  const [register_with, setregister_with] = useState();
   const [tpin, setpin] = useState();
   const [payeeDetails, setpayeeDetails] = useState();
-  const bene_id = data.bene_id
   const accno = data.accno
   const ifsc = data.ifsc
   const name = data.name
-  const bankid = data.bankid
   const bankname = data.bankname
 
   const txn_type = data.txn_type
   const mobile = data.mobile
-  const pipe = data.pipe
   const surcharge = data.surcharge
+  const emailid = data.email
   const amount = parseInt(data.amount)
  
   const sendmoney = async() => {
-        const today = new Date();
+
+    console.log('Payee details',payeeDetails)
+
+      const today = new Date();
       const date = today.setDate(today.getDate()); 
       const defaultValue = new Date(date).toISOString().split('T')[0]
 
@@ -65,80 +64,114 @@ const ConfirmPayout = (props) => {
       const ref_id = register_with + accno +currentTime
       console.log('curruser',currentuser.id)
       const user_id = currentuser.id
-        console.log(bene_id)
-        console.log(txn_type)
-        console.log(amount)
-        console.log(pipe)
-        console.log(mobile)
-        console.log(user_id)
-        console.log(tpin)
-        console.log(ref_id)
-        console.log(surcharge)
-
-        console.log(bankname)
-        console.log(name)
-        console.log(ifsc)
-        console.log(bankid)
-        console.log(accno)
-        console.log(typeof(amount))
+      
+      const bank_account_number = 
+      
+      console.log('Payee details',payeeDetails)
+      console.log('Trans type',txn_type)
+      console.log('account no',accno)
+      console.log('amount',amount)
+      console.log('mobile',mobile)
+      console.log('bankname',bankname)
+      console.log('ifsc',ifsc)
+      console.log('name',name)
+      console.log('email',emailid)
+      console.log('surcharge',surcharge)
+      console.log('Type of amount',typeof(amount))
+      console.log('TPIN',tpin)
 
         try {
-          const response = await fetch('https://new.sunpay.co.in/api/funds_transfer/', {
+          const bank_account_number = accno
+          const bank_ifsc_code = ifsc
+          const name_of_account_holder = name
+          const email = emailid
+          const phone = mobile
+          
+        const response = await fetch('http://118.139.167.172/api/zpayaddbank/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({bene_id , txn_type, amount, pipe, mobile, user_id, tpin, ref_id, surcharge}),
+        body: JSON.stringify({bank_account_number, bank_ifsc_code, name_of_account_holder, email, phone}),
         });
-          const sendresponse = await response.json();
-          const senderror = sendresponse.error;
-          if(senderror=="Insufficient Balance"){
-            alert(senderror)
-          }
           
-          else if (senderror=="Please provide required fields"){
-            alert(senderror) 
+        const sendresponse = await response.json();
+        const respmessage = sendresponse.Message;
+        const respdata = sendresponse.Response.data;
+          
+          if(respmessage=="Please fill details"){
+            alert(respmessage)
           }
-          else if (senderror=="Invalid mobile number"){
-            alert(senderror) 
+          else if (respmessage=="Beneficiary found and added" || respmessage === "Beneficiary already exists"){
+            console.log('data',respdata)
+            const beneficiary_id = respdata.id
+            const bank_acc_number = respdata.bank_account_number
+            const bank_ifsc_code = respdata.bank_ifsc_code
+            const merchant_reference_id = ref_id
+            const payment_mode = txn_type
+            const user_id = currentuser.id
+
+            console.log(beneficiary_id, bank_account_number, amount, bank_ifsc_code,merchant_reference_id, payment_mode, user_id, surcharge, tpin)
+
+            const monsendresp = await fetch('http://118.139.167.172/api/zpaytransfer/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({beneficiary_id, amount, bank_acc_number, bank_ifsc_code, merchant_reference_id, payment_mode, user_id, surcharge, tpin}),
+              });
+
+              const moneyresponse = await monsendresp.json();
+              console.log(moneyresponse)
+              const senderror = moneyresponse.error;
+              if(senderror=="Insufficient Balance"){
+                alert(senderror)
+              }
+              
+              else if (senderror=="Please provide required fields"){
+                alert(senderror) 
+              }
+              else if (senderror=="Invalid mobile number"){
+                alert(senderror) 
+              }
+              else if (senderror=="Invalid tpin"){
+                alert(senderror) 
+              }
+              if(moneyresponse.message=="Funds transferred successfully"){
+                alert("Transaction successful")
+              }
+
           }
-          else if (senderror=="Invalid tpin"){
-            alert(senderror) 
-          }
-          else if (senderror=="Invalid Details"){
-            alert("Amount transferred but not update here") 
-            console.log(sendresponse)
+          else if (respmessage=="Beneficiary not fetched"){
+            alert("Unable to proceed") 
           }
           else{
-
+            alert("Technical error!")
           } 
         }
         catch (error) {
           console.error('Error fetching data:', error);
         }
-
-
   }
+
   return (
     <div className='p-4'>
       <div className='bg-slate-300 p-2 border-2 px-6 border-red-200'>
       {/* Heading */}
-      <div className='flex flex-wrap mt-4 gap-2'>
+      <div className='flex flex-wrap mt-4 md:gap-24'>
         <h1 className='font-black md:w-42'>Money Transfer</h1>
-        <div className='md:w-72 font-black'></div>
-        <div className='md:w-28 font-black'>Sender</div>
-        <div className='md:w-52 font-black'>Sender Mobile Number</div>
-        <div className=' font-black'>Available Limit</div>
+        <div className='w-28 font-black'>Sender</div>
+        <div className='w-52 font-black'>Sender Mobile Number</div>
+        <div className='w-52 font-black'>Merchant Code</div>
+
       </div>
       {/* Values */}
-      <div className='flex flex-wrap gap-2'>
-        <h1 className='md:w-42'>Quick Pay Beneficiary</h1>
-        <div className='md:w-64'></div>
-        <div className='md:w-28'>Gourav</div>
-        <div className='md:w-52'>8184812024</div>
-        <div className=''>Sender Mobile Number</div>
+      <div className='flex flex-wrap gap-2 md:gap-24'>
+          <div className='w-28 '>{txn_type}</div>
+          <div className='w-28'>{currentuser?.shop_name || 'Loading...'}</div>
+          <div className='w-52'>{currentuser?.mobile || 'Loading...'}</div>
+          <div className='w-52'>{currentuser?.username || 'Loading...'}</div>
       </div>
-
       <br /><br />
       {/* Heading */}
       <div className='flex flex-wrap gap-2 bg-stone-600 text-white'>
@@ -151,18 +184,18 @@ const ConfirmPayout = (props) => {
       </div>
       {/* Values */}
       <div className='flex flex-wrap gap-2 mt-2'>
-        <div className='md:w-36'>Gourav Dhalwal</div>
-        <div className='md:w-40 '>6584616065063565</div>
-        <div className='md:w-40 '>United Bank of India</div>
-        <div className='md:w-32 '>UBIN050035</div>
-        <div className='md:w-36 '>₹ </div>
-        <div className='md:w-40 '>IMPS</div>
+        <div className='md:w-36'>{name}</div>
+        <div className='md:w-40 '>{accno}</div>
+        <div className='md:w-40 '>{bankname}</div>
+        <div className='md:w-32 '>{ifsc}</div>
+        <div className='md:w-36 '>₹ {amount}</div>
+        <div className='md:w-40 '>{txn_type}</div>
       </div>
       
         <div className='md:flex md:flex-wrap mt-20 p-8 md:gap-16 justify-center border border-black'>
         <div className='border-2 p-3 border-slate-700'>
           <table className="w-full text-sm text-left rtl:text-right border border-black text-gray-500 dark:text-gray-400 border-collapse ">
-                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
 
                         </tr>
@@ -171,17 +204,16 @@ const ConfirmPayout = (props) => {
                             <th scope="col" className="px-6 py-3 font-black border border-black w-32">S.NO</th>
                             <th className='px-6 py-3 w-32 border border-black'>Amount</th>
                             <th className='px-6 py-3  border border-black w-32'>Charges</th>
-
                           </tr>
-                        </thead>
+                </thead>
                       
-                        <tbody>
+                <tbody>
                           <tr className="bg-white border text-center border-black dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">                        
                             <td scope="col" className="px-6 py-3  border border-black">1</td>
                             <td scope="col" className="px-6 py-3  border border-black">Gourav</td>
                             <td scope="col" className="px-6 py-3  border border-black">Union</td>
                           </tr>
-                        </tbody>
+                </tbody>
           </table>
         </div>
 
@@ -200,9 +232,8 @@ const ConfirmPayout = (props) => {
                 {/* Money transfer final api */}
              
                 <button onClick={sendmoney} className='border border-gray-300 text-white text-xl rounded-lg block p-2 px-6 mt-4 bg-blue-500 hover:text-red-600' type="submit">Submit</button>
-           
 
-              <NavLink to='/member/moneytransfer'>
+              <NavLink to='/member/payoutDMT'>
                 <button className='border border-gray-300 text-white text-xl rounded-lg block p-2 px-6 mt-4 bg-blue-500 hover:text-red-600' type="submit">Back</button>
               </NavLink>
               </div>
@@ -210,8 +241,7 @@ const ConfirmPayout = (props) => {
         </div>
       </div>
     </div>
-  </div>
-    
+  </div> 
   )
 }
 

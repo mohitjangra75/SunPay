@@ -13,12 +13,8 @@ const Login = ({ setIsLoggedIn }, { IsLoggedIn }) => {
   const [login_id, setlogin_id] = useState('');
   const [password, setPassword] = useState('');
   const [pin, settpin] = useState('');
-  const [auth, setisauth] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [data, setData] = useState(null); 
 
   useEffect(() => {
     const handleBackButton = () => {
@@ -35,10 +31,8 @@ const Login = ({ setIsLoggedIn }, { IsLoggedIn }) => {
 
 
   const handleLogin = async () => {
-    setError(null);
-    setLoading(true);
     try {
-      const response = await fetch('https://new.sunpay.co.in/api/login/', {
+      const response = await fetch('http://118.139.167.172/api/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -61,7 +55,7 @@ const Login = ({ setIsLoggedIn }, { IsLoggedIn }) => {
   const handletpin = async () => {
     try {
       const tpin = parseInt(pin);
-      const response = await fetch('https://new.sunpay.co.in/api/tpin/', {
+      const response = await fetch('http://118.139.167.172/api/tpin/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,9 +66,7 @@ const Login = ({ setIsLoggedIn }, { IsLoggedIn }) => {
       if (result.message === 'Login Successful') {
         const apidata = result.data;
         localStorage.setItem('apiData', JSON.stringify(apidata));           
-        setisauth(true);
           setIsLoggedIn(true);
-          setisauth(true)
           if(apidata.role_id===1 || apidata.role_id===2){
             navigate('/member/dashboard', {
               state: { data: apidata, IsLoggedIn: IsLoggedIn  },

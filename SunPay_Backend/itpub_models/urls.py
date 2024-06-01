@@ -36,10 +36,11 @@ urlpatterns = [
     path('zpayaddbank/', zpayaddbankbeneficiary.as_view(), name='zpayaddbanks'),
     path('zpayaddupi/', zpayaddvpabeneficiary.as_view(), name='zpayaddupis'),
     path('zpaytransfer/', zpaybanktansfer.as_view(), name='zpaytransferbank'),
-    path('zpaygetbeneficiarybyid/', zpaygetbeneficiarybyid.as_view(), name='zpaybenebyid'),
+    path('zpaygetbeneficiarybyid/', ZPayGetBeneficiaryById.as_view(), name='zpaybenebyid'),
     path('zpayupitransfer/', zpayupitansfer.as_view(), name='zpaytransferupi'),
     path('penny-drop/', PennyDrop.as_view(), name='penny-drop'),
     path('bank-verify/', Bankverify.as_view(), name='bank-verify'),
+    path('dmttransaction/', GetDmtTransactions.as_view(), name='dmttransactions'),
 
 ]
 

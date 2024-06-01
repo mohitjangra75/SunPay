@@ -7,7 +7,7 @@ const Changerole = () => {
   useEffect(() => {
     // Function to fetch data from local storage or any other source
     const getdata = async (e) => {
-      const alluser= await axios.get(`https://new.sunpay.co.in/api/get_users/`);
+      const alluser= await axios.get(`http://118.139.167.172/api/get_users/`);
       const all = [alluser.data]
 
       // const filteruser = all.filter(array =>  array.filter(

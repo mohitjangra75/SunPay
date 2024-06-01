@@ -216,7 +216,7 @@ const closeModal = () => {
 
 const getfundrequest = async (e) => {
   e.preventDefault();
-  const funreqresponse = await axios.get(`https://new.sunpay.co.in/api/get_fund_request/?is_admin=${true}`);
+  const funreqresponse = await axios.get(`http://118.139.167.172/api/get_fund_request/?is_admin=${true}`);
   const allrequest = funreqresponse.data
   setallfundrequest(allrequest)
   console.log('Allfundrequest',allfundrequest)

@@ -19,12 +19,12 @@ const handleChange = (e) => {
 
   const getdata = async (e) => {
 
-    const funreqresponse = await axios.get(`https://new.sunpay.co.in/api/get_fund_request/?is_admin=${true}`);
+    const funreqresponse = await axios.get(`http://118.139.167.172/api/get_fund_request/?is_admin=${true}`);
     const allrequest = funreqresponse.data.length
  
     setallfundrequest(allrequest)
   
-    const alluser= await axios.get(`https://new.sunpay.co.in/api/get_users/`);
+    const alluser= await axios.get(`http://118.139.167.172/api/get_users/`);
     const all = [alluser.data]
 
     const dist = all.map(array => array.filter(item => item.role_id == 1));

@@ -16,7 +16,7 @@ const Confirmmoneytransfer = (props) => {
   const fetchUser = async () => {
 
     try {
-      const userresponse = await axios.get(`https://new.sunpay.co.in/api/users/${props.data.id}`);
+      const userresponse = await axios.get(`http://118.139.167.172/api/users/${props.data.id}`);
       const respuser = userresponse.data
       setcuruser(respuser)
       const repusername = userresponse.data.username;
@@ -65,25 +65,10 @@ const Confirmmoneytransfer = (props) => {
       const ref_id = register_with + accno +currentTime
       console.log('curruser',currentuser.id)
       const user_id = currentuser.id
-        console.log(bene_id)
-        console.log(txn_type)
-        console.log(amount)
-        console.log(pipe)
-        console.log(mobile)
-        console.log(user_id)
-        console.log(tpin)
-        console.log(ref_id)
-        console.log(surcharge)
 
-        console.log(bankname)
-        console.log(name)
-        console.log(ifsc)
-        console.log(bankid)
-        console.log(accno)
-        console.log(typeof(amount))
 
         try {
-          const response = await fetch('https://new.sunpay.co.in/api/funds_transfer/', {
+          const response = await fetch('http://118.139.167.172/api/funds_transfer/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -97,19 +97,19 @@ export default function App() {
               Quick Links
             </h6>
             <p className="mb-4">
-              <NavLink className="text-white dark:text-neutral-200"
+              <NavLink to='/' className="text-white dark:text-neutral-200"
               >Home</NavLink>
             </p>
             <p className="mb-4">
-              <NavLink className="text-white dark:text-neutral-200"
+              <NavLink to='/about-us' className="text-white dark:text-neutral-200"
               >About us</NavLink>
             </p>
             <p className="mb-4">
-              <NavLink className="text-white dark:text-neutral-200"
+              <NavLink to='/services' className="text-white dark:text-neutral-200"
               >Services</NavLink>
             </p>
             <p>
-              <NavLink className="text-white dark:text-neutral-200"
+              <NavLink to='/contact-us' className="text-white dark:text-neutral-200"
               >Contact us</NavLink>
             </p>
           </div>

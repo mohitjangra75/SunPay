@@ -26,7 +26,7 @@ const Addcustomer = (props) => {
     
     try {
       
-      const userresponse = await axios.get(`https://new.sunpay.co.in/api/users/${props.data.id}`);
+      const userresponse = await axios.get(`http://118.139.167.172/api/users/${props.data.id}`);
       setaddress(userresponse.data.address)
       setpincode(userresponse.data.pin_code)
       setdob(userresponse.data.dob) 
@@ -55,7 +55,7 @@ const Addcustomer = (props) => {
   const handlesubmit = async (e) => {
     try{
       console.log(mobile_number, first_name, last_name, address, pin_code, dob, otp, stateresp)
-      const addresponse = await fetch('https://new.sunpay.co.in/api/register_remitter/', {
+      const addresponse = await fetch('http://118.139.167.172/api/register_remitter/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

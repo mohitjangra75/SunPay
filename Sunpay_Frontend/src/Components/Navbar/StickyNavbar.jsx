@@ -17,7 +17,7 @@ export default function StickyNavbar() {
   <nav className=" w-full top-0 left-0 fixed bg-white border-b border-gray-200 dark:border-gray-600 z-50">
     <div className="max-w-screen-xl flex flex-wrap items-center justify-between p-2 ps-16">
   
-    <NavLink to=""  className="flex items-center hover:bg-slate-500 p-2"> 
+    <NavLink to="/"  className="flex items-center hover:bg-slate-500 p-2"> 
       <img src={navlogo} className="h-12a " alt="Flowbite Logo"/>
     </NavLink>
 

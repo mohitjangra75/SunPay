@@ -134,7 +134,7 @@ const MemberRegistration = () => {
   };
 
   const fetchstate = async (e) =>  {
-    const stateresponse = await axios.get('https://new.sunpay.co.in/api/companybanks/'); 
+    const stateresponse = await axios.get('http://118.139.167.172/api/companybanks/'); 
     const statearr = stateresponse.data;
     console.log('state',statearr)
 
@@ -145,7 +145,7 @@ const MemberRegistration = () => {
 
 const getparentid = async (e) => {
     //Getting parent ID
-    const response = await fetch('https://new.sunpay.co.in/api/get_users/', {
+    const response = await fetch('http://118.139.167.172/api/get_users/', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -171,7 +171,7 @@ const getparentid = async (e) => {
   console.log('Formdata submitted 1' , formData)
 
   if(formData.parent_id){
-    const regresponse = await fetch('https://new.sunpay.co.in/api/register_user/', {
+    const regresponse = await fetch('http://118.139.167.172/api/register_user/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
