@@ -1052,6 +1052,7 @@ class UpdateFundRequest(APIView):
             elif action == "UPDATE":
                 try:
                     user = User.objects.get(username=fundtran.user)
+                    userwallet = UserWallet.objects.get(user_id=user.id)
                 except User.DoesNotExist:
                     return Response({'Error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
                 if fundtran.transaction_status == TransactionStatus.REINITIATE:
@@ -1075,6 +1076,8 @@ class UpdateFundRequest(APIView):
 
             elif action == "REINITIATE":
                 try:
+                    user = User.objects.get(username=fundtran.user)
+                    userwallet = UserWallet.objects.get(user_id=user.id)
                     comuser = User.objects.get(id=upduser)
                 except User.DoesNotExist:
                     return Response({'Error': 'Initiating user not found.'}, status=status.HTTP_404_NOT_FOUND)
