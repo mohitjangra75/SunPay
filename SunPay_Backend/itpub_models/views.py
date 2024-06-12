@@ -4,7 +4,7 @@ from rest_framework import status
 from django.contrib.auth import authenticate
 from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, CompanyBankSerializer, BBPSProviderSerializer, StateSerializer, CustomerSerializer, FundRequestsSerializer, PaysprinrbankSerializer, DmttransactionSerializer, WalletTransactionSerializer, WallettoWalletTransactionSerializer, BBPSTransactionSerializer, SurchargeSerializer
 from .services import penny_drop,add_beneficary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_paysprintbeneficiary, zpay_verification, zpay_bankadd, zpay_transfer, zpay_upiadd, zpaygetallbeneficiary, zpaybeneficiarybyid, bank_verification
-from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, FundRequests, BBPSTransactions, UserWallet, Surcharge, CompanyBank, BBPSProviders, State, Customer, FundRequest, PaysprintBanks, ZpayBankDetail, WalletTransactions, CompTransactionType, TransactionDirection, Wallet_to_Wallet_transaction, Surcharge
+from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, FundRequests, BBPSTransactions, UserWallet, Surcharge, CompanyBank, BBPSProviders, State, Customer, PaysprintBanks, ZpayBankDetail, WalletTransactions, CompTransactionType, TransactionDirection, Wallet_to_Wallet_transaction, Surcharge
 import uuid
 import random
 from django.http import JsonResponse

@@ -103,34 +103,6 @@ class PaymentMode(object):
     CHEQUE_DD = 9
 
 
-class FundRequest(models.Model):
-    # user jiske through ye request lgi h
-    user = models.CharField(max_length=255, blank=True, null=True)
-    amount = models.FloatField(blank=True, null=True)
-    bank_reference = models.CharField(max_length=255, blank=True, null=True, unique=True)
-    payment_mode=  ((PaymentMode.IMPS, 'IMPS'),
-		(PaymentMode.NEFT, 'NEFT'),
-        (PaymentMode.RTGS, 'RTGS'),
-        (PaymentMode.CASH, 'CASH'),
-        (PaymentMode.UPI, 'UPI'),
-        (PaymentMode.CHEQUE, 'CHEQUE'),
-        (PaymentMode.DD, 'DD'))
-    remark = models.CharField(max_length=255, blank=True, null=True)
-    cashslip = models.FileField(upload_to='profile_pics/', null=True, blank=True)
-    # approve only admin krega emp id
-    isapproved = models.BooleanField(default=False)
-    isupdate = models.BooleanField(default=False)
-    isdelete = models.BooleanField(default=False)
-    reason = models.CharField(max_length=500, blank=True, null=True)
-    status = (
-		(TransactionStatus.PENDING, 'PENDING'),
-		(TransactionStatus.FAILURE, 'FAILURE'),
-		(TransactionStatus.SUCCESS, 'SUCCESS'),
-	)
-    companybank = models.CharField(max_length=255, blank=True, null=True)
-    adddate = models.TimeField(blank=True, null=True)
-    approvedate = models.TimeField(blank=True, null=True)
-    lastupdate = models.TimeField(blank=True, null=True)
 
 class User(AbstractBaseUser, PermissionsMixin):
 
@@ -424,7 +396,8 @@ class FundRequests(models.Model):
     running_balance = models.FloatField(blank=True, null=True)
 
     def __str__(self):
-        return self.user.name
+        return f"{self.user.username} | Status: {self.get_transaction_status_display()} | Ref: {self.reference_number} | Amount: {self.amount}"
+
 
 
 

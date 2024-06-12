@@ -71,10 +71,17 @@ const UpdateModel = ({ isOpen, onClose, item }) => {
     });
 
     const backresp = await response.json();
+    const error = backresp.Error
     console.log('Response:', backresp);
     if (backresp.Message === "Updated successfully"){
         alert("Fund Request Updated Successfully");
         onClose();
+    }
+    else if(error){
+      alert(error)
+    }
+    else{
+      alert("Technical Error")
     }
   };
 
@@ -229,211 +236,6 @@ const UpdateModel = ({ isOpen, onClose, item }) => {
   );
 };
 
-
-
-// const UpdateModel = ({ isOpen, onClose, item }) => {
-//   const [isEntering, setIsEntering] = useState(false);
-//   const [options, setOptions] = useState([]);
-
-//   const [bank_acc_number, setBank] = useState('');
-//   const [amount, setAmount] = useState(0);
-//   const [ref_number, setRef] = useState('');
-//   const [payment_mode, setMode] = useState('');
-//   const [payment_date, setDate] = useState('');
-//   const [remark, setRemark] = useState('');
-//   const [formBankName, setBankName] = useState('');
-
-//   useEffect(() => {
-//     if (item) {
-//       setBank(item.bank_ref_number || '');
-//       setAmount(item.amount || 0);
-//       setRef(item.bank_ref_number || '');
-//       setMode(item.payment_mode || '');
-//       setDate(item.payment_date || '');
-//       setRemark(item.remark || '');
-//       setBankName(item.bank_name || ''); // Ensure formBankName is set based on item.bank_name
-//     }
-//   }, [item]);
-
-//   const fetchBank = async () => {
-//     try {
-//       const response = await axios.get('http://118.139.167.172/api/companybanks/');
-//       setOptions(response.data);
-//       console.log(options)
-//     } catch (error) {
-//       console.error('Error fetching data:', error);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchBank();
-//   }, []);
-
-//   const handleClose = () => {
-//     onClose();
-//   };
-
-//   const update = async (e) => {
-//     e.preventDefault();
-
-//     const requestBody = {
-//       amount,
-//       bank_acc_number,
-//       ref_number,
-//       payment_mode,
-//       payment_date,
-//       remark,
-//     };
-
-//     console.log('Form submitted:', requestBody);
-
-//     try {
-//       const response = await fetch('http://118.139.167.172/api/fund_request/', {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-//         body: JSON.stringify(requestBody),
-//       });
-
-//       const backresp = await response.json();
-//       console.log('Response:', backresp);
-//     } catch (error) {
-//       console.error('Error submitting form:', error);
-//     }
-//   };
-
-//   return (
-//     <Transition
-//       show={isOpen}
-//       enter="transition-opacity duration-150"
-//       enterFrom="opacity-0"
-//       enterTo="opacity-100"
-//       leave="transition-opacity duration-150"
-//       leaveFrom="opacity-100"
-//       leaveTo="opacity-0"
-//       className="fixed inset-0 z-50 overflow-auto bg-gray-900 bg-opacity-50"
-//     >
-//       <div className="flex items-center justify-center min-h-screen">
-//         <Transition.Child
-//           enter="transition-transform duration-150"
-//           enterFrom="transform scale-95"
-//           enterTo="transform scale-100"
-//           leave="transition-transform duration-150"
-//           leaveFrom="transform scale-100"
-//           leaveTo="transform scale-95"
-//         >
-//           <div className="bg-white rounded-lg p-8 shadow-lg">
-//             <div className="mt-2 flex gap-4 border-b border-black">
-//               <h1 className="text-2xl font-semibold p-4 text-green-600">Update Model</h1>
-//             </div>
-//             <h1 className="font-bold text-2xl border-b-2 border-gray-400">FUND REQUEST</h1>
-//             <div>
-//               <form className="md:flex md:flex-wrap md:gap-8 mt-4" onSubmit={update}>
-//                 <div>
-//                   <label htmlFor="banks" className="text-lg">Select a Bank</label>
-//                   <select
-//                     id="banks"
-//                     required
-//                     value={bank_acc_number}
-//                     onChange={(e) => setBank(e.target.value)}
-//                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-//                   >
-//                     <option value="">Bank List</option>
-//                     {options.map(option => (
-//                       <option
-//                         key={option.bank_name}
-//                         value={option.account_no}
-//                         selected={item && option.bank_name === item.bank_name}
-//                       >
-//                         {option.bank_name}  {option.account_no}
-//                       </option>
-//                     ))}
-//                   </select>
-
-//                 </div>
-//                 <div className="col-md-3">
-//                   <label htmlFor="Amount">Amount</label>
-//                   <input
-//                     type="text"
-//                     required
-//                     value={amount}
-//                     onChange={(e) => setAmount(e.target.value)}
-//                     name="Amount"
-//                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-//                   />
-//                 </div>
-//                 <div className="col-md-3">
-//                   <label htmlFor="Bank reference">Bank Reference No.</label>
-//                   <input
-//                     type="text"
-//                     required
-//                     value={ref_number}
-//                     onChange={(e) => setRef(e.target.value)}
-//                     name="Bank reference"
-//                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-//                   />
-//                 </div>
-//                 <div className="col-md-3">
-//                   <label htmlFor="Payment mode">Payment Mode</label>
-//                   <select
-//                     required
-//                     value={payment_mode}
-//                     onChange={(e) => setMode(e.target.value)}
-//                     id="paymentmode"
-//                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-//                   >
-//                     <option value="">Select Payment Mode</option>
-//                     <option value="8">IMPS/RTGS/NEFT</option>
-//                     <option value="9">Cheque/DD</option>
-//                     <option value="4">Cash</option>
-//                     <option value="5">UPI</option>
-//                   </select>
-//                 </div>
-//                 <div className="col-md-3">
-//                   <label htmlFor="Payment date">Payment Date</label>
-//                   <input
-//                     id="dateRequired"
-//                     type="date"
-//                     value={payment_date}
-//                     onChange={(e) => setDate(e.target.value)}
-//                     name="dateRequired"
-//                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-//                     required
-//                   />
-//                 </div>
-//                 <div className="col-md-3">
-//                   <label htmlFor="remark">Remark</label>
-//                   <input
-//                     type="text"
-//                     name="remarks"
-//                     value={remark}
-//                     onChange={(e) => setRemark(e.target.value)}
-//                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-//                     required
-//                   />
-//                 </div>
-//                 <div className="col-md-3">
-//                   <label htmlFor=""></label><br />
-//                   <button type="submit" name="submit" className="border border-gray-300 bg-blue-600 text-white text-sm rounded-lg block w-full p-2.5 hover:cursor-pointer">Save</button>
-//                 </div>
-//               </form>
-//             </div>
-
-//             <button
-//               onClick={handleClose}
-//               className="mt-4 px-4 py-2 bg-gray-500 text-white rounded-lg"
-//             >
-//               Close
-//             </button>
-//           </div>
-//         </Transition.Child>
-//       </div>
-//     </Transition>
-//   );
-// };
-
-
 const today = new Date();
 const defaultValue = today.toISOString().split('T')[0];
 
@@ -527,6 +329,23 @@ const Fundreqreport = (props) => {
     setSelectedItem(null); // Reset the selected item
   };
 
+  const formatDate = (dateTimeString) => {
+    const dateObj = new Date(dateTimeString);
+    const dd = String(dateObj.getDate()).padStart(2, '0');
+    const mm = String(dateObj.getMonth() + 1).padStart(2, '0'); // January is 0!
+    const yy = dateObj.getFullYear().toString().substr(-2);
+    return `${dd}:${mm}:${yy}`;
+  };
+
+  // Function to format time as HH:MM:SS
+  const formatTime = (dateTimeString) => {
+    const dateObj = new Date(dateTimeString);
+    const HH = String(dateObj.getHours()).padStart(2, '0');
+    const MM = String(dateObj.getMinutes()).padStart(2, '0');
+    const SS = String(dateObj.getSeconds()).padStart(2, '0');
+    return `${HH}:${MM}:${SS}`;
+  };
+
   return (
     <div>
        <UpdateModel isOpen={isModalOpen} onClose={closeModal} item={selectedItem} />
@@ -607,19 +426,19 @@ const Fundreqreport = (props) => {
                                 <span>-</span>
                               )}
                           </td>
-                          <td className="px-6 py-3 border border-black">{item.transaction_status_display}</td>
-                          <td className="px-4 py-3 border border-black">{item.payment_date}</td>
-                          <td className="px-6 py-3 border border-black">{item.payment_mode_display}</td>
-                          <td className="px-6 py-3 border border-black">{item.bank_name}</td>
-                          <td className="px-6 py-3 border border-black">{item.amount}</td>
-                          <td className="px-6 py-3 border border-black">{item.bank_ref_number}</td>
-                          <td className="px-6 py-3 border border-black">{item.remark}</td>
-                          <td className="pl-2 py-3 border border-black">{item.add_date}</td>
-                          <td className="py-3 border border-black">{item.update_date}</td>
-                          <td className="px-6 py-3 border border-black">
+                          <td className="px-6 py-3 border border-black whitespace-nowrap">{item.transaction_status_display}</td>
+                          <td className="px-4 py-3 border border-black whitespace-nowrap">{item.payment_date}</td>
+                          <td className="px-6 py-3 border border-black whitespace-nowrap">{item.payment_mode_display}</td>
+                          <td className="px-6 py-3 border border-black whitespace-nowrap">{item.bank_name}</td>
+                          <td className="px-6 py-3 border border-black whitespace-nowrap">{item.amount}</td>
+                          <td className="px-6 py-3 border border-black whitespace-nowrap">{item.bank_ref_number}</td>
+                          <td className="px-6 py-3 border border-black whitespace-nowrap">{item.remark}</td>
+                          <td className="px-6 py-3 border border-black whitespace-nowrap">On:{formatDate(item.add_date)} <br/>At:{formatTime(item.add_date)}</td>
+                          <td className="px-6 py-3 border border-black whitespace-nowrap">On:{formatDate(item.lastupdate)} <br/>At:{formatTime(item.lastupdate)}</td>
+                          <td className="px-6 py-3 border border-black whitespace-nowrap">
                             <button className="px-4 py-2 bg-blue-500 text-white rounded-lg">Bond</button>
                           </td>
-                          <td className="px-6 py-3 border border-black"></td>
+                          <td className="px-6 py-3 border border-black whitespace-nowrap">{item.payment_remark}</td>
                         </tr>
                       ))
                     ) : (
