@@ -69,12 +69,14 @@ const Main = (props) => {
 
               {user.role_id === 1 ? (
                 <div className='flex flex-wrap my-2 gap-12 gap-y-16'>
-                   <NavLink to='/member/wallet-to-wallet'>
-                      <div className='service bg-white border-[2px]  w-24 h-24 border-slate-950 rounded-lg hover:bg-blue-500 hover:text-white'>
-                        <img src={wallet} alt="" className='w-full h-full'/>
-                        <h1 className='text-lg text-center mt-2 font-semibold'>Wallet to Wallet</h1>
-                      </div>
-                   </NavLink>
+                  {/* {user.username !== 'SRT101' && ( */}
+                      <NavLink to='/member/wallet-to-wallet'>
+                        <div className='service bg-white border-[2px] w-24 h-24 border-slate-950 rounded-lg hover:bg-blue-500 hover:text-white'>
+                          <img src={wallet} alt="Wallet" className='w-full h-full'/>
+                          <h1 className='text-lg text-center mt-2 font-semibold'>Wallet to Wallet</h1>
+                        </div>
+                      </NavLink>
+                  {/* )}  */}
 
                   <NavLink to='/member/moneytransfer'>
                     <div className='service bg-white border-[2px]  w-24 h-24 border-slate-950 rounded-lg hover:bg-blue-500 hover:text-white'>

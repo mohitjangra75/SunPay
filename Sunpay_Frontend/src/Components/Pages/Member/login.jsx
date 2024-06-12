@@ -13,7 +13,9 @@ const Login = ({ setIsLoggedIn }, { IsLoggedIn }) => {
   const [login_id, setlogin_id] = useState('');
   const [password, setPassword] = useState('');
   const [pin, settpin] = useState('');
+  const [otp, setotp] = useState('');
   const [isVisible, setIsVisible] = useState(false);
+  const [istpinvis, settpinvisible] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,9 +42,18 @@ const Login = ({ setIsLoggedIn }, { IsLoggedIn }) => {
 
         body: JSON.stringify({ login_id, password }),
       });
+      const result = await response.json();
+
 
       if (response.ok) {
         setIsVisible(true);
+        if(result.message == "User Found Proceed with TPIN"){
+          settpinvisible(true)
+        }
+        else{
+          settpinvisible(false)
+        }
+       
       } else {
         setIsVisible(false);
         alert('Invalid Credentials');
@@ -80,6 +91,55 @@ const Login = ({ setIsLoggedIn }, { IsLoggedIn }) => {
       console.error('Invalid TPIN:', error);
     }
   };
+
+  const handletotp = async () => {
+    try {
+      const payload = {
+        login_id,
+        password,
+        otp: otp.toString(), // Ensure OTP is sent as a string
+      };
+  
+      console.log(`Sending payload: ${JSON.stringify(payload)}`);
+  
+      const response = await fetch('http://118.139.167.172/api/verify_otp/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      if (!response.ok) {
+        // Handle HTTP errors
+        const errorText = await response.text();
+        alert('Failed to verify OTP. Please try again.');
+        return;
+      }
+  
+      const result = await response.json();
+  
+      if (result.message === 'Login successful') {
+        const apidata = result.data;
+        localStorage.setItem('apiData', JSON.stringify(apidata));
+        setIsLoggedIn(true);
+  
+        if (apidata.role_id === 1 || apidata.role_id === 2) {
+          navigate('/member/dashboard', {
+            state: { data: apidata, IsLoggedIn: true },
+          });
+        }
+      } else {
+        alert('Invalid Credentials');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred while verifying OTP. Please try again.');
+    }
+  };
+  
+  
+  
 
   const handleback = async () => {
     setIsVisible(false);
@@ -239,32 +299,63 @@ const Login = ({ setIsLoggedIn }, { IsLoggedIn }) => {
             )}
 
             {isVisible && (
-              <div className='block'>
-                <label className='font-semibold text-2xl'>Tpin:</label>
-                <input
-                  type='password'
-                  value={pin}
-                  onChange={(e) => settpin(e.target.value)}
-                  className=' ml-2 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
-                  maxlength='4'
-                  id='pin'
-                  pattern='^0[1-9]|[1-9]\d$'
-                  required
-                />
-                <br />
-                <button
-                  onClick={handletpin}
-                  className='mt-4 ml-1 p-2 px-3 border border-white bg-blue-700 text-white rounded-lg'
-                >
-                  Submit
-                </button>
-                <button
-                  onClick={handleback}
-                  className='mt-4 ml-4 p-2 px-4 border border-white bg-blue-700 text-white rounded-lg'
-                >
-                  Back
-                </button>
-              </div>
+            <div>
+                {istpinvis ? (
+                  <div className='block'>
+                    <label className='font-semibold text-2xl'>Tpin:</label>
+                    <input
+                      type='password'
+                      value={pin}
+                      onChange={(e) => settpin(e.target.value)}
+                      className=' ml-2 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
+                      maxLength='4'
+                      id='pin'
+                      pattern='^0[1-9]|[1-9]\d$'
+                      required
+                    />
+                    <br />
+                    <button
+                      onClick={handletpin}
+                      className='mt-4 ml-1 p-2 px-3 border border-white bg-blue-700 text-white rounded-lg'
+                    >
+                      Submit
+                    </button>
+                    <button
+                      onClick={handleback}
+                      className='mt-4 ml-4 p-2 px-4 border border-white bg-blue-700 text-white rounded-lg'
+                    >
+                      Back
+                    </button>
+                  </div>
+                ) : (
+                  <div className='block'>
+                    <label className='font-semibold text-2xl'>OTP:</label>
+                    <input
+                      type='password'
+                      value={otp}
+                      onChange={(e) => setotp(e.target.value)}
+                      className=' ml-2 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
+                      maxLength='4'
+                      id='pin'
+                      pattern='^0[1-9]|[1-9]\d$'
+                      required
+                    />
+                    <br />
+                    <button
+                      onClick={handletotp}
+                      className='mt-4 ml-1 p-2 px-3 border border-white bg-blue-700 text-white rounded-lg'
+                    >
+                      Submit
+                    </button>
+                    <button
+                      onClick={handleback}
+                      className='mt-4 ml-4 p-2 px-4 border border-white bg-blue-700 text-white rounded-lg'
+                    >
+                      Back
+                    </button>
+                  </div>
+                )} 
+            </div>
             )}
           </div>
         </div>

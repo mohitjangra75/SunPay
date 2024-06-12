@@ -13,7 +13,7 @@ const Telephone = (props) =>  {
     const[no,setno] = useState();
      const[amount,setamount] = useState();
 //    const[circle, setcircle] = useState();
- //   const[circlecode, setcirclecode] = useState();
+//   const[circlecode, setcirclecode] = useState();
     const[retailer_mobile,setretailer_mobile] = useState();
     const [show, setshow] = useState();
     const [mpin, setmpin] = useState();

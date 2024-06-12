@@ -47,11 +47,8 @@ import BBPSsurcharge from '../Pages/Surcharge/BBPSsurcharge'
 
 const AdminDashboardRouter = () => {
 
-  const {category} = useParams()
-  let cat = Data?.find((categ) => categ?.url === parseInt(category)) 
-
-  const [localuser, setlocaluser] = useState([]);
-  const [liveuser, setliveuser] = useState([]);
+  const { category } = useParams();
+  const [localuser, setData] = useState([]);
 
   useEffect(() => {
     // Function to fetch data from local storage or any other source
@@ -59,11 +56,10 @@ const AdminDashboardRouter = () => {
       // Example: fetching from local storage
       const storedData = localStorage.getItem('apiData');
       if (storedData) {
-        setlocaluser(JSON.parse(storedData));
+        setData(JSON.parse(storedData));
       }
     };
 
-    
     fetchData(); // Fetch data when component mounts
   }, []);
  
@@ -71,7 +67,7 @@ const AdminDashboardRouter = () => {
   return (
     <div className='bg-slate-50'>
 
-      <div className=""><Navbar /></div>
+      <div className=""><Navbar data={localuser}/></div>
 
       <div className="main max-w-[2300px] mt-[90px] flex flex-1 justify-between">
       <aside class="h-full sticky top-0">

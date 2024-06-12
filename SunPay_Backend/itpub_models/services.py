@@ -511,38 +511,34 @@ def zpaybeneficiarybyid(beneficiary_id):
         print(f"HTTP Request failed: {e}")
         return {"status": False, "data": "Unable to retrieve beneficiary details. Please verify details."}
 
-
-def generate_otp(length=4):
-    digits = "0123456789"
-    otp = ''.join(random.choice(digits) for _ in range(length))
-    return otp
-    
-def send_otp(mobile_number):
-    otp = generate_otp()
+def send_otp(mobile_number, genotp):
+    otp = genotp
+    message = f"{otp} is your device authentication code, Please do not share it with anyone. THANKS SUNPAY"
     url = "http://sms.anshpe.in/rest/services/sendSMS/sendGroupSms"
     payload = {
-        "smsContent": f"Your OTP is: {otp}",
-        "groupId": "0",
-        "routeId": "1",
-        "mobileNumbers": mobile_number,
-        "senderId": "DEMOOS",
-        "signature": "signature",
-        "smsContentType": "ENGLISH",
-        "entityid": "NoneedIfAddedInPanel",
-        "tmid": "140200000022",
-        "templateid": "NoneedIfAddedInPanel"
+        'AUTH_KEY': "c5ea69e56dcb107bb3ed988af8c5c3e5",
+        'message': message,
+        'senderId': "ASUNPY",
+        'routeId': 1,
+        'mobileNos': str(mobile_number),
+        'smsContentType': 'english',
+        'entityid': '',
+        'tmid': '140200000022',
+        'templateid': '1707168871364810375'
     }
-    querystring = {"AUTH_KEY": 'c5ea69e56dcb107bb3ed988af8c5c3e5'}
-    headers = {
-        'Content-Type': "application/json",
-        'Cache-Control': "no-cache"
-    }
-    response = requests.post(url, json=payload, headers=headers, params=querystring)
-    print("Payload:", payload)
-    print("Response:", response)
-    print("Response JSON:", response.json())
-    return otp
-
+    # headers = {
+    #     'Authorization': 'ASUNPY'
+    # }
+    response = requests.get(url, params=payload)
+    
+    if response.status_code == 200 and response.json().get('responseCode') == '3001':
+        print("Response:", response.json())
+        print("OTP:", otp)
+        return otp
+    else:
+        print("Failed to send OTP. Response:", response.text)
+        return None
+    
 def data_load_bbps_providers(file_path):
     with open(file_path, 'r') as file:
         reader = csv.DictReader(file)

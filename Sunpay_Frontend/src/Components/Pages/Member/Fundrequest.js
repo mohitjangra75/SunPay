@@ -242,10 +242,10 @@ const Fundrequest = (props) => {
                 <label htmlFor="Payment mode">Payment Mode</label>
                 <select required onChange={(e) => setmode(e.target.value)} id="paymentmode" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                 <option selected>Select Payment Mode</option>
-                <option value="neftrtgs">NEFT/IMPS/RTGS</option>
-                <option value="cheque">Cheque/DD</option>
-                <option value="cash">Cash</option>
-                <option value="upi">UPI</option>
+                <option value="8">NEFT/IMPS/RTGS</option>
+                <option value="9">Cheque/DD</option>
+                <option value="">Cash</option>
+                <option value="5">UPI</option>
               </select>
               </div>
               {/* Payment Date */}
@@ -412,154 +412,6 @@ const Fundrequest = (props) => {
 
       }
 
-      <div className='bg-slate-300 p-2 mt-8 border-2 border-red-200'>
-        <h1 className=' font-bold text-2xl border-b-2 border-gray-400'>FUND REQUEST LIST</h1>
-
-        <div className='mt-4'>
-          <div className='datefetch md:flex md:flex-wrap gap-6'>
-            {/* From Date */}
-            <div className="col-md-3">
-              <label htmlFor="Payment date">From Date</label>
-              <input id="dateRequired" type="date" onChange={handledateChange} name="dateRequired" defaultValue={defaultValue} className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'/>
-              {/* <input type="date" onChange={handleChange} ref={dateInputRef} className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'/> */}
-            </div>
-            
-            {/* TO Date */}
-            <div className="col-md-3">
-              <label htmlFor="Payment date">To Date</label>
-              <input id="dateRequired" type="date" onChange={handledateChange} name="dateRequired" defaultValue={defaultValue} className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'/>
-              {/* <input type="date" onChange={handleChange} ref={dateInputRef} className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'/> */}
-            </div>
-
-            <div className="col-md-3 ">
-              <input id="dateRequired" type="submit" name="dateRequired" defaultValue='Submit' onClick={getfundrequest} className='mt-6 bg-blue-600 text-white border border-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'/>
-              {/* <input type="date" onChange={handleChange} ref={dateInputRef} className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'/> */}
-            </div>
-          </div>
-
-          <div className='mt-4'>
-              <div className =" relative overflow-x-auto shadow-md border-black">
-              {/*   <table className="w-full text-sm text-left rtl:text-right mt-2 border border-black text-gray-500 dark:text-gray-400 border-collapse ">
-                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                      <tr className='border border-black'>
-                      <th scope="col" className="px-6 py-3 border border-black">SNO</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Action</th>
-                      <th scope="col" className="px-6 py-3 border border-black">RequestID</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Payment Date</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Payment Mode</th>
-                      <th scope="col" className="px-6 py-3 border border-black w-56">Company Bank Name</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Amount</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Remark</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Bank Ref ID</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Add Date</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Approve Date</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Company Remarks</th>
-                      <th scope="col" className="px-6 py-3 border border-black">Status</th>
-                      </tr>
-                    </thead>
-                  
-                    <tbody>
-                       {allfundrequest.map(item => (
-                        <tr key={item.id} class>
-                          <td scope="col" className="px-6 py-3 border border-black">{item.key}</td>
-                          <td scope="col" className="px-6 py-3 border border-black"></td>
-                          <td scope="col" className="px-6 py-3 border border-black">{item.id}</td>
-                          <td scope="col" className="px-6 py-3 border border-black">{item.payment_date}</td>
-                          <td scope="col" className="px-6 py-3 border border-black">{item.payment_mode}</td>
-                          <td scope="col" className="px-6 py-3 border border-black">{item.bank_name}</td>
-                          <td scope="col" className="px-6 py-3 border border-black">{item.amount}</td>
-                          <td scope="col" className="px-6 py-3 border border-black">{item.remark}</td>
-                          <td scope="col" className="px-6 py-3 border border-black">{item.bank_ref_number}</td>
-                          <td scope="col" className="px-6 py-3 border border-black">{item.add_date}</td>
-                          <td scope="col" className="px-6 py-3 border border-black">{item.update_date}</td>
-                          <td scope="col" className="px-6 py-3 border border-black"></td>
-                          <td scope="col" className="px-6 py-3 border border-black">{item.transaction_status}</td>
-                        </tr>
-                      ))} 
-                    </tbody>
-                 </table>*/}
-
-                <table className="w-full text-sm text-left rtl:text-right mt-2 border border-black text-gray-500 dark:text-gray-400 border-collapse ">
-                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                      <tr className='border border-black'>
-                        <th scope="col" className="px-6 py-3 border border-black">SNO</th>
-                        <th scope="col" className="px-6 py-3 border border-black">Transaction Id</th>
-                        <th scope="col" className="px-6 py-3 border border-black">Action</th>
-                        <th scope="col" className="px-6 py-3 border border-black">Status</th>
-                        {/* <th scope="col" className="px-6 py-3 border border-black">RequestID</th> */}
-                        <th scope="col" className="px-6 py-3 border border-black">Payment Date</th>
-                        <th scope="col" className="px-6 py-3 border border-black">Payment Mode</th>
-                        <th scope="col" className="px-6 py-3 border border-black w-56">Company Bank Name</th>
-                        <th scope="col" className="px-6 py-3 border border-black">Amount</th>
-                        <th scope="col" className="px-6 py-3 border border-black">Bank Reference ID</th>
-                        <th scope="col" className="px-6 py-3 border border-black">Remark</th>
-                        <th scope="col" className="px-6 py-3 border border-black">Add Date</th>
-                        <th scope="col" className="px-6 py-3 border border-black">Update Date</th>
-                        <th scope="col" className="px-6 py-3 border border-black">Bond</th>
-                        <th scope="col" className="px-6 py-3 border border-black">Company Remarks</th>
-                      </tr>
-                    </thead>
-                  
-                  {showrow && (
-                    <tbody>
-                    {allfundrequest.map((item, index) => (
-                        <tr key={item.id} className='bg-white'>
-                          
-                          <td scope="col" className="px-6 py-3 border border-black">{index+1}</td>
-                          <td scope="col" className="px-6 py-3 border border-black">{item.id}</td>
-                          <td scope="col" className="px-6 py-3 border border-black"></td>
-                          <td scope="col" className="px-6 py-3 border border-black">{item.transaction_status}</td>
-                          <td scope="col" className="px-4 py-3 border border-black">{item.payment_date}</td>
-                          <td scope="col" className="px-6 py-3 border border-black">{item.payment_mode}</td>
-                          <td scope="col" className="px-6 py-3 border border-black">{item.bank_name}</td>
-                          <td scope="col" className="px-6 py-3 border border-black">{item.amount}</td>
-                          <td scope="col" className="px-6 py-3 border border-black">{item.bank_ref_number}</td>
-                          <td scope="col" className="px-6 py-3 border border-black">{item.remark}</td>
-                          <td scope="col" className="pl-2 py-3 border border-black">{item.add_date}</td>
-                          <td scope="col" className=" py-3 border border-black">{item.update_date}</td>
-                          <td scope="col" className="px-6 py-3 border border-black">
-                            <button  className="px-4 py-2 bg-blue-500 text-white rounded-lg">Bond</button>
-                            {/* {isModalOpen && (
-                                <Modal isOpen={isModalOpen} onClose={closeModal} />
-                            )} */}
-                          </td>
-                          <td scope="col" className="px-6 py-3 border border-black"></td>
-
-
-                        </tr>
-                      ))}
-                      {/* <tr className="bg-white border border-black dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                        <td scope="col" className="px-6 py-3 border border-black">SNO</td>
-                        <td scope="col" className="px-6 py-3 border border-black">Action</td>
-                        <td scope="col" className="px-6 py-3 border border-black">RequestID</td>
-                        <td scope="col" className="px-6 py-3 border border-black">Member ID</td>
-                        <td scope="col" className="px-6 py-3 border border-black">Name</td>
-                        <td scope="col" className="px-6 py-3 border border-black">Payment Date</td>
-                        <td scope="col" className="px-6 py-3 border border-black">Payment Mode</td>
-                        <td scope="col" className="px-6 py-3 border border-black w-56">Company Bank Name</td>
-                        <td scope="col" className="px-6 py-3 border border-black">Amount</td>
-                        <td scope="col" className="px-6 py-3 border border-black">Bank Ref ID</td>
-                        <td scope="col" className="px-6 py-3 border border-black">Transaction ID</td>
-                        <td scope="col" className="px-6 py-3 border border-black">Remark</td>
-                        <td scope="col" className="px-6 py-3 border border-black">Add Date</td>
-                        <td scope="col" className="px-6 py-3 border border-black">Approve Date</td>
-                       
-                        <td scope="col" className="px-6 py-3 border border-black">Company Remarks</td>
-                        <td scope="col" className="px-6 py-3 border border-black">                          
-                          <button type="submit" className='border-2 border-zinc-500 bg-blue-500 text-white px-2 p-1 text-lg'>Slip</button>
-                        </td>
-                        <td scope="col" className="px-6 py-3 border border-black">
-                          <button type="submit" className='border-2 border-zinc-500 bg-green-500 text-white px-2 p-1 text-lg'>Success</button>
-                        </td>
-                      </tr>  */}
-                    </tbody>
-                  )}
-                    
-                 </table>
-              </div>
-        </div>
-      </div>
-      </div>
     </div>
   )
 }

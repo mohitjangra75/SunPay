@@ -5,10 +5,12 @@ import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { NavLink } from 'react-router-dom'
 
+
 const ConfirmPayout = (props) => {
 
   const location = useLocation();
   const data = location.state;
+  const navigate = useNavigate();
 
   const [currentuser, setcuruser] = useState({});
   const [register_with, setregister_with] = useState('');
@@ -39,7 +41,6 @@ const ConfirmPayout = (props) => {
 
   const txn_type = data.txn_type
   const mobile = data.mobile
-  const surcharge = data.surcharge
   const emailid = data.email
   const amount = parseInt(data.amount)
  
@@ -64,21 +65,6 @@ const ConfirmPayout = (props) => {
       const ref_id = register_with + accno +currentTime
       console.log('curruser',currentuser.id)
       const user_id = currentuser.id
-      
-      const bank_account_number = 
-      
-      console.log('Payee details',payeeDetails)
-      console.log('Trans type',txn_type)
-      console.log('account no',accno)
-      console.log('amount',amount)
-      console.log('mobile',mobile)
-      console.log('bankname',bankname)
-      console.log('ifsc',ifsc)
-      console.log('name',name)
-      console.log('email',emailid)
-      console.log('surcharge',surcharge)
-      console.log('Type of amount',typeof(amount))
-      console.log('TPIN',tpin)
 
         try {
           const bank_account_number = accno
@@ -103,27 +89,27 @@ const ConfirmPayout = (props) => {
             alert(respmessage)
           }
           else if (respmessage=="Beneficiary found and added" || respmessage === "Beneficiary already exists"){
-            console.log('data',respdata)
             const beneficiary_id = respdata.id
+            const mobile = respdata.phone
+            const bene_name = respdata.name_of_account_holder
             const bank_acc_number = respdata.bank_account_number
             const bank_ifsc_code = respdata.bank_ifsc_code
             const merchant_reference_id = ref_id
             const payment_mode = txn_type
             const user_id = currentuser.id
 
-            console.log(beneficiary_id, bank_account_number, amount, bank_ifsc_code,merchant_reference_id, payment_mode, user_id, surcharge, tpin)
-
             const monsendresp = await fetch('http://118.139.167.172/api/zpaytransfer/', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify({beneficiary_id, amount, bank_acc_number, bank_ifsc_code, merchant_reference_id, payment_mode, user_id, surcharge, tpin}),
+              body: JSON.stringify({beneficiary_id, amount, bank_acc_number, bank_ifsc_code, merchant_reference_id, payment_mode, user_id, tpin, mobile, bene_name}),
               });
 
               const moneyresponse = await monsendresp.json();
               console.log(moneyresponse)
               const senderror = moneyresponse.error;
+              const transaction = moneyresponse.transaction
               if(senderror=="Insufficient Balance"){
                 alert(senderror)
               }
@@ -137,10 +123,12 @@ const ConfirmPayout = (props) => {
               else if (senderror=="Invalid tpin"){
                 alert(senderror) 
               }
-              if(moneyresponse.message=="Funds transferred successfully"){
+              if(moneyresponse.message=="Funds transferred successfully" || moneyresponse.message=="Transaction id Pending"){
                 alert("Transaction successful")
+                navigate('/member/moneytransferreceipt', {
+                  state: {shopname:currentuser.shop_name, mobile:mobile, name:currentuser.name, date: currentTime, beneficiary:name_of_account_holder,accno:bank_acc_number, bankname:bankname, ifsc:bank_ifsc_code, transaction:transaction},
+              });
               }
-
           }
           else if (respmessage=="Beneficiary not fetched"){
             alert("Unable to proceed") 
@@ -197,7 +185,6 @@ const ConfirmPayout = (props) => {
           <table className="w-full text-sm text-left rtl:text-right border border-black text-gray-500 dark:text-gray-400 border-collapse ">
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
-
                         </tr>
                           
                           <tr className='border text-center border-black'>

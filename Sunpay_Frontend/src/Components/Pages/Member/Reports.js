@@ -21,10 +21,9 @@ const Reports = (props) => {
     { name: "AEPS Report", link: "/member/aeps-history", icon: VscOutput }, 
     { name: "DMT Report", link: "/member/dmt-history", icon: VscOutput }, 
     { name: "Recharge & Utility", link: "/member/recharge-history", icon: VscOutput },
-    { name: "Account Lagger", link: "/member/account-lagger", icon: VscOutput },
     { name: "Payout History", link: "/member/payoutDMT", icon: VscOutput },
-    { name: "Credit Card", link: "/member/credithistory", icon: VscOutput }
- 
+    { name: "Credit Card", link: "/member/credithistory", icon: VscOutput },
+    { name: "Wallet to Wallet", link: "/member/wallettowallet-history", icon: VscOutput }
   ]
 
   return (

@@ -14,6 +14,7 @@ const Sidebar = (props) => {
 const menus = [
     { name: "dashboard", link: "/member/dashboard", icon: MdOutlineDashboard },
     { name: "Fund Request", link: "/member/fund-request", icon: GiReceiveMoney },
+    { name: "Fund Report", link: "/member/fundreport", icon: GiReceiveMoney },
     { name: "Reports", link: "/member/reports", icon: AiFillDatabase },
     { name: "Account Lagger", link: "/member/accountlagger", icon: TbReportAnalytics, margin: true },
     { name: "Complaint", link: "/member/complaints", icon: BsChatLeftDotsFill },

@@ -222,9 +222,6 @@ const getfundrequest = async (e) => {
   console.log('Allfundrequest',allfundrequest)
   console.log('user',allfundrequest.user)
   setshowrow(current => !current)
-
-
-
 }
 
 const [showrow, setshowrow] = useState()
@@ -297,7 +294,7 @@ const [allfundrequest,setallfundrequest] = useState();
                   
                   {
                     showrow && (
-<tbody>
+                  <tbody>
                     {allfundrequest.map((item, index) => (
                         <tr key={item.id} className='bg-white'>
                           

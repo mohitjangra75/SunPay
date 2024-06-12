@@ -46,6 +46,8 @@ import Insurance from '../../Insurance'
 import AddCustomer from '../../Addcustomer';
 import Retailerregister from '../../Retailerregister';
 import ConfirmPayout from '../../ConfirmPayout';
+import WalletTransactionreport from '../../WalletTransactionreport';
+import Fundreqreport from '../../Fundreqreport';
 
 const MemberRouter = (props, {IsLoggedIn}) => {
   // const location = useLocation();
@@ -100,6 +102,7 @@ const MemberRouter = (props, {IsLoggedIn}) => {
           {category === 'createretailer' && (<Retailerregister data={data}/>)}
           {category === 'profile' && <Memberprofile data={data} />}
           {category === 'fund-request' && <Fundrequest data={data} />}
+          {category === 'fundreport' && (<Fundreqreport data={data}/>)}
           {category === 'reports' && <Reports data={data} />}
           {category === 'payoutDMT' && <Payout data={data} />}
           {category === 'confirmpayout' && <ConfirmPayout data={data} />}
@@ -108,6 +111,7 @@ const MemberRouter = (props, {IsLoggedIn}) => {
           {category === 'settings' && <MemberSettings data={data} />}
           {category === 'aeps-history' && <AEPSreport data={data} />}
           {category === 'dmt-history' && <DMTreport data={data} />}
+          {category === 'wallettowallet-history' && (<WalletTransactionreport data={data}/>)}
           {category === 'payout-report' && <Payoutreport data={data} />}
           {category === 'recharge-history' && <Rechargeutilityreport data={data} />}
           {category === 'moneytransfer' && <Moneytransfer data={data} />}

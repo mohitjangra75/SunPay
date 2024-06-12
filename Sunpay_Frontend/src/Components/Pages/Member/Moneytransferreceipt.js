@@ -1,9 +1,11 @@
 import React, { useRef } from 'react'
 import logo from './Dashboard/DashboardComponents/Data/imgs/logo.png'
-import ReactToPrint, { useReactToPrint } from 'react-to-print'
-import { useState, useEffect } from 'react'
+import { useReactToPrint } from 'react-to-print'
+import { useLocation } from 'react-router-dom'
 
 const Moneytransferreceipt = () => {
+    const location = useLocation();
+    const data = location.state;
     const divprint = useRef();
     const handliprint = useReactToPrint({
         content : () => divprint.current
@@ -17,10 +19,10 @@ const Moneytransferreceipt = () => {
                 <img src={logo} alt="" className='float-left w-60 h-28 text-center'/>
 
                 <div className='float-right text-lg'>
-                    <h1>Shopname : </h1>
-                    <h1>Mobile No. : </h1>
-                    <h1>Sender Name : </h1>
-                    <h1>Date : </h1>
+                    <h1>Shopname : {data.shopname} </h1>
+                    <h1>Mobile No. : {data.mobile} </h1>
+                    <h1>Sender Name : {data.name}</h1>
+                    <h1>Date : {data.date}</h1>
                 </div>
             </div>
             <hr className='bg-lime-900 h-1'/>
@@ -30,13 +32,13 @@ const Moneytransferreceipt = () => {
                 
                     <div className='flow-root'>
                         <div className='float-left'>
-                        <h1>Beneficiary. : </h1>
-                        <h1>Bank Name : </h1>
+                        <h1>Beneficiary. : {data.beneficiary}</h1>
+                        <h1>Bank Name : {data.bankname} </h1>
                         </div>
 
                         <div className='float-right'>
-                        <h1>Account No. : </h1>
-                        <h1>IFSC : </h1>
+                        <h1>Account No. : {data.accno}</h1>
+                        <h1>IFSC : {data.ifsc}</h1>
                         </div>
                     </div>
             </div>
@@ -53,8 +55,19 @@ const Moneytransferreceipt = () => {
                     </thead>
                     
                     <tbody>    
-                        <tr className="bg-white border border-black dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                            
+                        <tr className="text-center bg-white border border-black dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                            <td className="px-6 py-3 border border-black">
+                                {data.transaction.ref_id}
+                            </td>
+                            <td className="px-6 py-3 border border-black">
+                                {data.transaction.transaction_type_display}
+                            </td>
+                            <td className="px-6 py-3 border border-black">
+                                {data.transaction.transaction_status_display}
+                            </td>
+                            <td className="px-6 py-3 border border-black">
+                                {data.transaction.amount}
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -69,7 +82,7 @@ const Moneytransferreceipt = () => {
             </div>  
        </div>
       </div>
-      <div className='text-center flex gap-4 mt-4'>
+        <div className='text-center flex gap-4 mt-4'>
             <input type="submit" onClick={handliprint} value="Print" className='border text-xl py-2 px-4 rounded-xl hover:text-white hover:cursor-pointer bg-yellow-400 border-gray-900' />
         </div>
     </div>

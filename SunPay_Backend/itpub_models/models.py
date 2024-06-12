@@ -9,14 +9,22 @@ from django.contrib.auth.models import (
     )
 
 class TransactionStatus(object):
-	SUCCESS = 1
-	FAILURE = 2
-	PENDING = 3
+    SUCCESS = 1
+    FAILURE = 2
+    PENDING = 3
+    REINITIATE = 4
+
 
 class TransactionType(object):   
     IMPS = 1
     NEFT = 2
     WALLET = 3
+
+class CompTransactionType(object):   
+    DMT = 1
+    WALLET = 2
+    BBPS = 3
+    UPI = 4
 
 class BillType(object):
     ELECTRICITY = 0
@@ -85,12 +93,15 @@ class PaysprintBanks(models.Model):
     
 class PaymentMode(object):
     IMPS = 1
-    NEFT = 1
-    RTGS = 1
-    CASH = 2
-    UPI = 3
-    CHEQUE = 4
-    DD = 4
+    NEFT = 2
+    RTGS = 3
+    CASH = 4
+    UPI = 5
+    CHEQUE= 6
+    DD = 7
+    IMPS_RTGS_NEFT = 8
+    CHEQUE_DD = 9
+
 
 class FundRequest(models.Model):
     # user jiske through ye request lgi h
@@ -132,13 +143,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=30, unique=True, blank=True, null=True)
     password = models.CharField(max_length=128, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
-    city_id = models.IntegerField(blank=True, null=True)
     package_id = models.IntegerField(blank=True, null=True)
     parent_id = models.IntegerField(blank=True, null=True)
-    login_pin = models.CharField(max_length=10, blank=True, null=True)
     # is_email_verify = models.BooleanField(default=False)
     is_mobile_verify = models.BooleanField(default=False)
-    bc_registration_id = models.CharField(max_length=20, blank=True, null=True)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
     msrno = models.IntegerField(blank=True, null=True)
@@ -146,8 +154,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_kyc_approved = models.BooleanField(default=False)
     login_on_off = models.BooleanField(default=False)
     device_id = models.CharField(max_length=30, blank=True, null=True)
-    psa_id_pan = models.CharField(max_length=30, blank=True, null=True)
-    request_id = models.CharField(max_length=30, blank=True, null=True)
     pan_status = models.BooleanField(default=False)
     alternative_mobile_number = models.CharField(max_length=15, blank=True, null=True)
     aadhar = models.CharField(max_length=20, blank=True, null=True)
@@ -155,9 +161,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     # is_show_notification = models.BooleanField(default=True)
     pin_code = models.CharField(max_length=10, blank=True, null=True)
     dob = models.DateField(blank=True, null=True)
-    on_hold = models.BooleanField(default=False)
+    # on_hold = models.BooleanField(default=False)
     shop_name = models.CharField(max_length=255, blank=True, null=True)
-    mac_address = models.CharField(max_length=30, blank=True, null=True)
+    # mac_address = models.CharField(max_length=30, blank=True, null=True)
     # actived_for_rnfi = models.BooleanField(default=False)
     state_id = models.IntegerField(blank=True, null=True)
     city_name = models.CharField(max_length=255, blank=True, null=True)
@@ -165,7 +171,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     # video_kyc = models.BooleanField(default=False)
     active_profile = models.BooleanField(default=False)
     emp_id = models.CharField(max_length=30, blank=True, null=True)
-    hold_amt = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    # hold_amt = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     # device_register = models.BooleanField(default=False)
     # parent_str = models.CharField(max_length=30, blank=True, null=True)
     # pattern = models.CharField(max_length=255, blank=True, null=True)
@@ -186,11 +192,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_tpin_enabled = models.BooleanField(default=False)
     tpin = models.IntegerField(blank=True, null=True)
     is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
+    # is_active = models.BooleanField(default=False)
     # mpin = models.IntegerField(blank=True, null=True, unique=True)
-    start_val = models.IntegerField(default=0,blank=True, null=True,)
-    end_val = models.IntegerField(default=2001,blank=True, null=True,)
-    available_balance = models.IntegerField(blank=True, null=True,)
+    # start_val = models.IntegerField(default=0,blank=True, null=True,)
+    # end_val = models.IntegerField(default=2001,blank=True, null=True,)
+    available_balance = models.FloatField(blank=True, null=True,)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     distributor_name = models.CharField(max_length=30, blank=True, null=True)
     is_distributor = models.BooleanField(default=False)
@@ -198,11 +204,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     asm_name = models.CharField(max_length=30, blank=True, null=True)
     city = models.CharField(max_length=30, blank=True, null=True)
     shop_adress = models.CharField(max_length=255, blank=True, null=True)
-    otp = models.IntegerField(null=True, blank=True)
+    otp = models.CharField(max_length=4,null=True, blank=True)
     # surcharge = models.FloatField(null=True, blank=True)
     diback = models.FloatField(null=True, blank=True)
     retback = models.FloatField(null=True, blank=True)
     compback = models.FloatField(null=True, blank=True)
+    rechretback = models.FloatField(null=True, blank=True)
+    rechdiback = models.FloatField(null=True, blank=True)
 
     
     USERNAME_FIELD = 'username'
@@ -360,43 +368,65 @@ class DMTTransactions(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     ref_id = models.CharField(max_length=255, unique=True, blank=True, null=True)
+    mobile = models.CharField(max_length=255, blank=True, null=True)
+    bene_name = models.CharField(max_length=255, blank=True, null=True)
     user =  models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
     bank_acc_number = models.CharField(max_length=255, blank=True, null=True)
     bene_id = models.CharField(max_length=255, blank=True, null=True)
     transaction_status = models.SmallIntegerField(choices=STATUS, db_index=True,)
-    amount = models.IntegerField()
+    amount = models.FloatField(blank=True, null=True)
     order_id =  models.CharField(blank=True, null=True, max_length=255)
-    charge = models.IntegerField(blank=True, null=True)
+    charge = models.FloatField(blank=True, null=True)
+    tds = models.FloatField(blank=True, null=True)
+    comission = models.FloatField(blank=True, null=True)
     transaction_type = models.SmallIntegerField(choices=TYPE, db_index=True,)
     payment_remark = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(blank=False, null=False)  # new field
 
     def __str__(self):
         return f"{self.ref_id} - {self.user.username}"
 
-class UserTransactions(models.Model):
-    STATUS = (
-		(TransactionStatus.PENDING, 'PENDING'),
-		(TransactionStatus.FAILURE, 'FAILURE'),
-		(TransactionStatus.SUCCESS, 'SUCCESS'),
-	)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    bank_ref_number = models.CharField(max_length=255, blank=True, null=True)
-    user =  models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
+class FundRequests(models.Model):   
+    STATUS = (
+        (TransactionStatus.PENDING, 'PENDING'),
+        (TransactionStatus.FAILURE, 'FAILURE'),
+        (TransactionStatus.SUCCESS, 'SUCCESS'),
+        (TransactionStatus.REINITIATE, 'REINITIATE')
+    )
+
+    payment_choices = (
+        (PaymentMode.IMPS_RTGS_NEFT, 'IMPS_RTGS_NEFT'),
+        (PaymentMode.CASH, 'CASH'),
+        (PaymentMode.UPI, 'UPI'),
+        (PaymentMode.CHEQUE_DD, 'CHEQUE_DD'),
+    )
+
+    add_date = models.DateTimeField(auto_now_add=True)
+    bank_ref_number = models.CharField(max_length=255, unique=True)
+    user = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
     bank_name = models.CharField(max_length=255, blank=True, null=True)
     bank_acc_number = models.CharField(max_length=255, blank=True, null=True)
     remark = models.CharField(max_length=255, blank=True, null=True)
-    payment_date = models.DateField(blank=True,null=True)
-    transaction_status = models.SmallIntegerField(choices=STATUS, db_index=True,)
-    payment_mode = models.CharField(max_length=255, blank=True, null=True)
-    add_date = models.DateField(blank=True,null=True)
-    update_date = models.DateField(blank=True,null=True)
+    reference_number = models.CharField(max_length=255, blank=True, null=True)
+    cashslip = models.FileField(upload_to='profile_pics/', null=True, blank=True)
+    payment_date = models.DateField(blank=True, null=True)
+    transaction_status = models.SmallIntegerField(choices=STATUS, db_index=True)
+    payment_mode = models.SmallIntegerField(choices=payment_choices, db_index=True)
+    payment_remark = models.CharField(max_length=255, blank=True, null=True)
+    approvedate = models.DateTimeField(blank=True, null=True)
+    lastupdate = models.DateTimeField(blank=True, null=True)
     amount = models.FloatField()
-    opening_balance = models.FloatField()
-    running_balance = models.FloatField()
+    start_opening_balance = models.FloatField(blank=True, null=True)
+    start_closing_balance = models.FloatField(blank=True, null=True)
+    upd_opening_balance = models.FloatField(blank=True, null=True)
+    upd_closing_balance = models.FloatField(blank=True, null=True)
+    running_balance = models.FloatField(blank=True, null=True)
 
     def __str__(self):
         return self.user.name
+
+
 
 class BBPSProviders(models.Model):
     BILL_TYPE = (
@@ -424,6 +454,7 @@ class BBPSProviders(models.Model):
     provider_name = models.CharField(max_length=255, blank=True, null=True)
     type = models.SmallIntegerField(choices=BILL_TYPE, db_index=True, blank=True, null=True)
     Fields_Description = models.CharField(max_length=255, blank=True, null=True)
+
 
     def __str__(self):
         return self.provider_name
@@ -457,26 +488,55 @@ class BBPSTransactions(models.Model):
 	)
     user =  models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    number = models.CharField(max_length=255, blank=True, null=True)
     transaction_status = models.SmallIntegerField(choices=STATUS, db_index=True)
+    amount = models.FloatField(blank=True, null=True)
     remark = models.CharField(max_length=255, blank=True, null=True)
     bill_type = models.SmallIntegerField(choices=BILL_TYPE, db_index=True)
+    comission = models.FloatField(blank=True, null=True)
+    transaction_id = models.CharField(max_length=255, blank=True, null=True)
+    charge = models.CharField(max_length=255, blank=True, null=True)
 
-class Package(models.Model):
-    ISACTIVE = models.BooleanField(default=True)
-    pack_id = models.IntegerField(blank=True, )
-    pack_name = models.CharField(max_length=255, blank=True,)
-    start_value = models.IntegerField(blank=True)
-    surcharge = models.FloatField(blank=True)
-    end_value = models.IntegerField(blank=True)
-    is_flat = models.BooleanField(blank=True)
-    payment_type = models.CharField(max_length=256)
-    is_distributor = models.BooleanField(default=True)
-    distributor_back = models.FloatField(blank=True, )
-    is_company = models.BooleanField(default=True)
-    company_back = models.FloatField(blank=True, )
-    distributor_back = models.IntegerField(blank=True,)
-    tds = models.FloatField(blank=True, )
-    
+    def get_transaction_status_display(self):
+        return dict(self.STATUS).get(self.transaction_status, 'Unknown')
+
+    def get_bill_type_display(self):
+        return dict(self.BILL_TYPE).get(self.bill_type, 'Unknown')
+
+    def get_user_display(self):
+        return str(self.user) 
+
+    def __str__(self):
+        return f"{self.number} - {self.user}"
+
+class Surcharge(models.Model):
+    user =  models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
+    dmtflat_s101to2000 = models.FloatField(blank=True, null=True)
+    dmtperc_s2001to5000  = models.FloatField(blank=True, null=True)
+    dmtperc_s5001to10000  = models.FloatField(blank=True, null=True)
+    dmtperc_s10001to50000  = models.FloatField(blank=True, null=True)
+    dmtperc_s50001to100000  = models.FloatField(blank=True, null=True)
+    dmtperc_s100001to500000  = models.FloatField(blank=True, null=True)
+    dmtperc_s500001toall  = models.FloatField(blank=True, null=True)
+    payoutflat_s101to2000 = models.FloatField(blank=True, null=True)
+    payoutperc_s2001to5000  = models.FloatField(blank=True, null=True)
+    payoutperc_s5001to10000  = models.FloatField(blank=True, null=True)
+    payoutperc_s10001to50000  = models.FloatField(blank=True, null=True)
+    payoutperc_s50001to100000  = models.FloatField(blank=True, null=True)
+    payoutperc_s100001to500000  = models.FloatField(blank=True, null=True)
+    payoutperc_s500001toall  = models.FloatField(blank=True, null=True)
+    bbps_allperc = models.FloatField(blank=True, null=True)
+    upiflat_s101to2000 = models.FloatField(blank=True, null=True)
+    upiperc_s2001to5000  = models.FloatField(blank=True, null=True)
+    upiperc_s5001to10000  = models.FloatField(blank=True, null=True)
+    upiperc_s10001to50000  = models.FloatField(blank=True, null=True)
+    upiperc_s50001to100000  = models.FloatField(blank=True, null=True)
+    upiperc_s100001to500000  = models.FloatField(blank=True, null=True)
+    upiperc_s500001toall  = models.FloatField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.id} - {self.user}"
+
 class State(models.Model):
     state_id = models.IntegerField(blank=True, null=True)
     state_name = models.CharField(max_length=255, blank=True, null=True)
@@ -489,6 +549,10 @@ class State(models.Model):
     def __str__(self):
         return self.state_name
 
+class TransactionDirection:
+    DEBIT = 1
+    CREDIT = 2
+
 class WalletTransactions(models.Model):
     STATUS = (
 		(TransactionStatus.PENDING, 'PENDING'),
@@ -496,26 +560,42 @@ class WalletTransactions(models.Model):
 		(TransactionStatus.SUCCESS, 'SUCCESS'),
 	)
     TYPE = (
-		(TransactionType.WALLET, 'WALLET'),
+		(CompTransactionType.WALLET, 'WALLET'),
+		(CompTransactionType.DMT, 'DMT'),
+        (CompTransactionType.BBPS, 'BBPS'),
+        (CompTransactionType.UPI,'UPI')
 	)
-    created_at = models.DateTimeField(auto_now_add=True)
+    DIRECTION = (
+        (TransactionDirection.DEBIT, 'DEBIT'),
+        (TransactionDirection.CREDIT, 'CREDIT'),
+    )
+    
+    transaction_direction = models.SmallIntegerField(choices=DIRECTION, db_index=True, null=True)
     ref_id = models.CharField(max_length=255, blank=True, null=True)
     user =  models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
-    bank_acc_number = models.CharField(max_length=255, blank=True, null=True)
-    bene_id = models.IntegerField(blank=True, null=True)
     transaction_status = models.SmallIntegerField(choices=STATUS, db_index=True,)
-    amount = models.IntegerField()
+    amount = models.FloatField()
     transaction_type = models.SmallIntegerField(choices=TYPE, db_index=True,)
+    add_date = models.DateTimeField(blank=True,null=True)
+    opening_balance = models.FloatField(null=True)
+    closing_balance = models.FloatField(null=True)
+    charge = models.FloatField(blank=True, null=True)
+    tds = models.FloatField(blank=True, null=True)
+    comission = models.FloatField(blank=True, null=True)
+    remark = models.CharField(max_length=255, blank=True, null=True)
 
-from django.dispatch import receiver
-from django.db.models.signals import pre_save
+    def __str__(self):
+        return f"{self.ref_id} - {self.user.username}"
+    def get_transaction_direction_display(self):
+        return dict(self.DIRECTION)[self.transaction_direction]
 
-@receiver(pre_save, sender=UserTransactions)
+
+@receiver(pre_save, sender=FundRequests)
 def update_wallet_balance(sender, instance, **kwargs):
     if instance.pk:
         try:
-            old_instance = UserTransactions.objects.get(pk=instance.pk)
-        except UserTransactions.DoesNotExist:
+            old_instance = FundRequests.objects.get(pk=instance.pk)
+        except FundRequests.DoesNotExist:
             return
         if old_instance.transaction_status == TransactionStatus.PENDING and instance.transaction_status == TransactionStatus.SUCCESS:
             userwallet = UserWallet.objects.get(user_id=old_instance.user_id)
@@ -533,4 +613,37 @@ class Zpaybeneficiary(models.Model):
     user =  models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
     bank_acc_number = models.CharField(max_length=255, blank=True, null=True)
     bank_ifsc = models.IntegerField(blank=True, null=True)
+
+class Wallet_to_Wallet_transaction(models.Model):
+    STATUS = (
+		(TransactionStatus.PENDING, 'PENDING'),
+		(TransactionStatus.FAILURE, 'FAILURE'),
+		(TransactionStatus.SUCCESS, 'SUCCESS'),
+	)
+    TYPE = (
+		(CompTransactionType.WALLET, 'WALLET'),
+	)
+    DIRECTION = (
+        (TransactionDirection.DEBIT, 'DEBIT'),
+        (TransactionDirection.CREDIT, 'CREDIT'),
+    )
+    
+    transaction_direction = models.SmallIntegerField(choices=DIRECTION, db_index=True, null=True)
+    ref_id = models.CharField(max_length=255, blank=True, null=True)
+    user =  models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
+    mobile = models.CharField(max_length=255, blank=True, null=True)
+    sender = models.CharField(max_length=255, blank=True, null=True)
+    receiver = models.CharField(max_length=255, blank=True, null=True)
+    receivername = models.CharField(max_length=255, blank=True, null=True)
+    transaction_status = models.SmallIntegerField(choices=STATUS, db_index=True,)
+    amount = models.FloatField(blank=True, null=True)  
+    transaction_type = models.SmallIntegerField(choices=TYPE, db_index=True,)
+    add_date = models.DateTimeField(blank=True,null=True)
+
+    def __str__(self):
+        return f"{self.ref_id} - {self.user.username}"
+    def get_transaction_direction_display(self):
+        return dict(self.DIRECTION)[self.transaction_direction]
+
+    
    

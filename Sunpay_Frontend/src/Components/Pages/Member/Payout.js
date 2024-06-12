@@ -113,7 +113,7 @@ const Payout = (props) => {
 
     if (amount && txn_type && mobile && bankname && ifsc && name && email && payeeDetails){
       navigate('/member/confirmpayout', {
-        state: {payeee: payeeDetails, accno: accno, ifsc:ifsc, name:name, bankname:bankname, txn_type:txn_type, email:email, mobile:mobile_number, amount:amount, surcharge:surcharge},
+        state: {payeee: payeeDetails, accno: accno, ifsc:ifsc, name:name, bankname:bankname, txn_type:txn_type, email:email, mobile:mobile_number, amount:amount},
     });
     }
     else{

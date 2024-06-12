@@ -2,9 +2,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
-from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, CompanyBankSerializer, BBPSProviderSerializer, StateSerializer, CustomerSerializer, UserTransactionSerializer, PaysprinrbankSerializer, DmttransactionSerializer
+from .serializers import UserSerializer, BanksSerializer, BeneficiarySerializer, CompanyBankSerializer, BBPSProviderSerializer, StateSerializer, CustomerSerializer, FundRequestsSerializer, PaysprinrbankSerializer, DmttransactionSerializer, WalletTransactionSerializer, WallettoWalletTransactionSerializer, BBPSTransactionSerializer, SurchargeSerializer
 from .services import penny_drop,add_beneficary, del_beneficiary, query_remitter , register_remitter, fund_transfer, get_bill_details, pay_recharge, ansh_payout, send_otp, fetch_paysprintbeneficiary, zpay_verification, zpay_bankadd, zpay_transfer, zpay_upiadd, zpaygetallbeneficiary, zpaybeneficiarybyid, bank_verification
-from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, UserTransactions, BBPSTransactions, UserWallet, Package, CompanyBank, BBPSProviders, State, Customer, FundRequest, PaysprintBanks, ZpayBankDetail
+from .models import User, BankDetails, Bank, DMTTransactions, TransactionStatus, TransactionType, FundRequests, BBPSTransactions, UserWallet, Surcharge, CompanyBank, BBPSProviders, State, Customer, FundRequest, PaysprintBanks, ZpayBankDetail, WalletTransactions, CompTransactionType, TransactionDirection, Wallet_to_Wallet_transaction, Surcharge
 import uuid
 import random
 from django.http import JsonResponse
@@ -14,6 +14,10 @@ from rest_framework import viewsets, status, mixins
 from django.db import transaction
 import requests
 from ip2geotools.databases.noncommercial import DbIpCity
+from django.utils import timezone
+from django.db.models import Q  
+import re
+from datetime import datetime
 
 class RegisterUser(APIView):
     def post(self, request, *args, **kwargs):
@@ -91,6 +95,10 @@ class Paysprintbanklist(APIView):
         except State.DoesNotExist:
             return Response({"message": "State does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
+def generate_otp(length=4):
+    digits = "0123456789"
+    otp = ''.join(random.choice(digits) for _ in range(length))
+    return otp
 
 class LoginAPIView(APIView):
     def post(self, request, *args, **kwargs):
@@ -98,20 +106,31 @@ class LoginAPIView(APIView):
         password = request.data.get('password')
         # print(login_id, password)
         if login_id and password:
-            try:
-                user = User.objects.get(username=login_id,password=password)
-            except:
-                return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+            if re.fullmatch(r'\d{10}', login_id):
+                try:
+                    user = User.objects.get(mobile=login_id,password=password)
+                except:
+                    return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+            else: 
+                try:
+                    user = User.objects.get(username=login_id,password=password)    
+                except:
+                    return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+            
             if user:
                 if user.is_tpin_enabled:
                     return Response({"message": "User Found Proceed with TPIN","verification_enabled":"tpin"}, status=status.HTTP_200_OK)
                 else:
+                    gotp = generate_otp()
+                    send_otp(user.mobile, gotp)
+                    user.otp = gotp
+                    user.save()
+                    print(user.otp, gotp)
                     return Response({"message": "User Found Proceed with OTP","verification_enabled":"otp"}, status=status.HTTP_200_OK)
             else:
                 return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
         else:
-            return Response({"error": "login_id and password are required fields"}, status=status.HTTP_400_BAD_REQUEST)
-
+            return Response({"error": "login_id and password are required fields"}, status=status.HTTP_400_BAD_REQUEST)  
 
 class TPINVerification(APIView):
     def post(self, request, *args, **kwargs):
@@ -124,52 +143,53 @@ class TPINVerification(APIView):
             return Response({"error": "login_id, password, and TPIN are required fields"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            user = User.objects.get(username=username,password=password,tpin = tpin)
-            return Response({"message": "Login Successful", "data": UserSerializer(user).data}, status=status.HTTP_200_OK)
-        except User.DoesNotExist:
-            return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-        
-class LoginOTPView(APIView):
-    def post(self, request):
-        username = request.data.get('login_id')
-        password = request.data.get('password')
-        # print("Login OTP", username, password)
-        if not (username and password):
-            return Response({"error": "Username and Password are required fields"}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            user = User.objects.get(username=username, password=password)
-            # print("Login OTP", user)
-            if user is not None:
-                otp_stored = send_otp(user.mobile)
-                # print("Login OTP", send_otp)
-                with transaction.atomic():
-                    user.otp = otp_stored
-                    user.save()
-                # print("Stored OTP in user model:", otp_stored)
-                return Response({'message': 'OTP sent to your registered mobile number.', 'otp_stored': otp_stored})
+            if re.fullmatch(r'\d{10}', username):
+                try:
+                    print(username)
+                    user = User.objects.get(mobile=username,password=password,tpin = tpin)
+                    user.last_login=timezone.now()
+                    print(user)
+                    return Response({"message": "Login Successful", "data": UserSerializer(user).data}, status=status.HTTP_200_OK)
+                except:
+                    return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
             else:
-                return Response({'error': 'Invalid username or password.'}, status=400)
+                try:
+                    user = User.objects.get(username=username,password=password,tpin = tpin)
+                    return Response({"message": "Login Successful", "data": UserSerializer(user).data}, status=status.HTTP_200_OK)
+                except:
+                    return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
         except User.DoesNotExist:
             return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-
 
 class OTPVerification(APIView):
     def post(self, request):
-        otp_entered = request.data.get('otp_entered')
+        otp = request.data.get('otp')
         username = request.data.get('login_id')
-        try:
-            user = User.objects.get(username=username)
-            otp_stored = user.otp
-            # print("OTP entered:", otp_entered, "OTP stored:", otp_stored, "Username:", username)
-            if not (otp_entered and username):
-                return Response({"error": "OTP and Username are required fields."}, status=status.HTTP_400_BAD_REQUEST)
-            if otp_entered == str(otp_stored):
-                return Response({'message': 'Login successful', "data": UserSerializer(user).data },status=status.HTTP_200_OK)
-            else:
-                return Response({'error': 'Invalid OTP.'}, status=status.HTTP_400_BAD_REQUEST)
-        except User.DoesNotExist:
-            return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        password = request.data.get('password')
 
+        if re.fullmatch(r'\d{10}', username):
+            try:
+                user = User.objects.get(mobile=username,password=password)
+            except:
+                return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        else: 
+                try:
+                    user = User.objects.get(username=username,password=password) 
+                    print(user)   
+                except:
+                    return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+            
+        if user:
+            try:
+                otp_stored = user.otp
+                if not (otp and username):
+                    return Response({"error": "OTP and Username are required fields."}, status=status.HTTP_400_BAD_REQUEST)
+                if otp == otp_stored:
+                    return Response({'message': 'Login successful', "data": UserSerializer(user).data },status=status.HTTP_200_OK)
+                else:
+                    return Response({'error': 'Invalid OTP.'}, status=status.HTTP_400_BAD_REQUEST)
+            except User.DoesNotExist:
+                return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
 class AddBenAccount(APIView):
     def post(self, request, *args, **kwargs):
@@ -266,7 +286,6 @@ class Bankverify(APIView):
         else:
             return Response({"error": "Failed to verify Bank"}, status=status.HTTP_400_BAD_REQUEST)
 
-
 class DelBenAccount(APIView):
 
     def post(self, request, *args, **kwargs):
@@ -311,38 +330,7 @@ class GetAccountLinked(APIView):
             return Response({"Message": "Account not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-# class RegisterRemitter(APIView):
-#     def post(self, request, *args, **kwargs):
-#         first_name = request.data.get("first_name")
-#         last_name = request.data.get("last_name")
-#         adress = request.data.get("adress")
-#         pin_code = request.data.get("pin_code")
-#         otp = request.data.get("otp")
-#         stateresp = request.data.get("stateresp")
-#         mobile_number = request.data.get("mobile_number")
-#         dob = request.data.get("dob")
-#         if not mobile_number:
-#             return Response({"error": "Please add mobile_number in query params"}, status=status.HTTP_400_BAD_REQUEST)
-        
-#         payload = {
-#             "mobile": mobile_number,
-#             "firstname": first_name,
-#             "lastname": last_name,
-#             "address": adress,
-#             "otp": otp,
-#             "pincode": pin_code,
-#             "dob" : dob,
-#             "gst_state" : "17",
-#             "bank3_flag" : "no",
-#             "stateresp":stateresp}
-#         response = register_remitter(payload=payload)
-#         if response["status"]==True:
-#             return Response({"data":response["data"],})
-#         else:
-#             return Response({"error": "Please register first to send money"}, status=status.HTTP_400_BAD_REQUEST)
-        
+       
 class SendMoneyDMT(APIView):
 
     def post(self, request, *args, **kwargs):
@@ -450,41 +438,67 @@ class FundRequest(APIView):
         payment_date = request.data.get("payment_date")
         remark = request.data.get("remark")
         username = request.data.get("username")
-        add_date = request.data.get("add_date")
-        print('amount',amount)
-        if not all([amount, add_date,  ref_number, bank_acc_number, payment_mode, payment_date , remark, bank_name, username]):
+
+        if not all([amount, ref_number, bank_acc_number, payment_mode, payment_date, remark, bank_name, username]):
             return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
         try:
             wallet_obj = UserWallet.objects.get(user=user)
         except UserWallet.DoesNotExist:
             return Response({"error": "Wallet not found for the user"}, status=status.HTTP_404_NOT_FOUND)
-        
+
+        try:
+            # Convert payment_date to a date object if it's a valid string
+            payment_date_obj = datetime.strptime(payment_date, "%Y-%m-%d").date()
+        except (ValueError, TypeError):
+            return Response({"error": "Invalid date format. Expected YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
+
         opening_balance = wallet_obj.available_balance if wallet_obj else 0.0
-        running_balance = opening_balance + amount
-        tr_obj = UserTransactions.objects.create(
+        running_balance = wallet_obj.available_balance
+        ref_id = ''.join([str(random.randint(0, 9)) for _ in range(12)])
+
+        WalletTransactions.objects.create(
+            transaction_direction=TransactionDirection.DEBIT,
             user=user,
-            bank_name = bank_name,
+            ref_id=ref_id,
+            transaction_status=TransactionStatus.PENDING,
+            amount=amount,
+            add_date=timezone.now(),
+            transaction_type=CompTransactionType.WALLET,
+            opening_balance=opening_balance,
+            closing_balance=opening_balance
+        )
+
+        tr_obj = FundRequests.objects.create(
+            user=user,
+            bank_name=bank_name,
             bank_ref_number=ref_number,
             bank_acc_number=bank_acc_number,
             remark=remark,
-            payment_date=payment_date,
+            reference_number=ref_id,
+            payment_date=payment_date_obj,
             transaction_status=TransactionStatus.PENDING,
             payment_mode=payment_mode,
-            add_date = add_date,
+            add_date=timezone.now(),
             amount=amount,
-            opening_balance=opening_balance,
-            running_balance=running_balance
+            start_opening_balance =opening_balance,
+            start_closing_balance=running_balance,
+            upd_opening_balance = 0.0,
+            upd_closing_balance = 0.0
         )
+
         return Response({"message": "Successfully initiated fund request", "transaction_id": tr_obj.id})
-    
-    # def put(self, request, *args, **kwargs):
-    #     transaction_id = request.data.get("transaction_id")
-    #     if not transaction_id:
-    #         return Response({"error": "Transaction ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# def put(self, request, *args, **kwargs):
+#     transaction_id = request.data.get("transaction_id")
+#     if not transaction_id:
+#         return Response({"error": "Transaction ID is required"}, status=status.HTTP_400_BAD_REQUEST)
     #     try:
     #         tr_obj = UserTransactions.objects.get(id=transaction_id)
     #     except UserTransactions.DoesNotExist:
@@ -564,6 +578,111 @@ class PayRecharge(APIView):
         else:
             return Response({"error":"Please try again later"})
 
+class PaydummyRecharge(APIView):
+    def post(self, request, *args, **kwargs):
+        number = request.data.get("number")
+        provider_id = request.data.get("provider_id")
+        amount = request.data.get("amount")
+        client_id = request.data.get("client_id")
+        billcontext = request.data.get("billcontext")
+        user_id = request.data.get("user_id")
+        billtype = request.data.get("billtype")
+
+        print(number, provider_id, client_id, amount, billcontext, user_id, billtype)
+        if not (number and provider_id and client_id and amount and billcontext and user_id and billtype):
+            return Response({"error": "Please fill number client_id and provider_id"})
+        else:
+            try:
+                user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                return Response({"error": "Invalid user ID"}, status=status.HTTP_400_BAD_REQUEST)
+
+            if user:
+                
+                userwallet = UserWallet.objects.get(user_id=user.id)
+                surchargeobj = Surcharge.objects.get(user=user)
+                retcashback = user.rechretback
+                dicashback = user.rechdiback
+                rref_id = ''.join([str(random.randint(0, 9)) for _ in range(12)])
+                ropenbalance = userwallet.available_balance
+                surcharge = (amount * surchargeobj.bbps_allperc)
+                parentid = user.parent_id
+                
+
+                if ((amount + (amount * surcharge)) > userwallet.available_balance):
+                    return Response({"error": "You don't have sufficient balance in your wallet."})
+                else:
+                    userwallet.available_balance -= amount + (amount * surcharge)
+                    userwallet.save()  # Don't forget to save the wallet
+
+                    bbpstr = BBPSTransactions.objects.create(
+                        bill_type=billtype,
+                        transaction_status=TransactionStatus.SUCCESS,
+                        number = number,
+                        user=user,
+                        amount = amount,
+                        charge = surcharge,
+                        created_at=timezone.now(),
+                        transaction_id=rref_id,
+                        remark=billcontext,
+                    )
+
+                    wallobj = WalletTransactions.objects.create(
+                        user=user,
+                        ref_id=rref_id,
+                        transaction_direction=TransactionDirection.DEBIT,
+                        add_date=timezone.now(),
+                        transaction_status=TransactionStatus.PENDING,
+                        amount=amount,
+                        charge = surcharge,
+                        transaction_type=CompTransactionType.BBPS,
+                        opening_balance=ropenbalance,
+                        closing_balance=userwallet.available_balance,
+                        remark=f"Bill Pay: {billtype}#{number}",
+                    )
+
+                    response = True
+                    if response == True:
+                        retcomission = (surcharge * retcashback - (surcharge * retcashback) * 0.05)
+                        dicomission = (surcharge * dicashback - (surcharge * dicashback) * 0.05)
+
+                        # Updating user wallet & BBPS trans comission
+                        userwallet.available_balance += userwallet.available_balance + retcomission
+                        bbpstr.comission = retcomission
+                        bbpstr.save()
+                        wallobj.comission = retcomission
+                        wallobj.transaction_status = TransactionStatus.SUCCESS
+                        wallobj.save()  # Don't forget to save the WalletTransaction
+
+                        # DI cashback comission trans create & Update DI wallet with cashback
+                        parentuserwallet = UserWallet.objects.get(user_id=parentid)
+                        
+
+                        if parentuserwallet:
+                            print(parentuserwallet)
+                            popenbalance = parentuserwallet.available_balance
+                            parentuserwallet.available_balance += dicomission 
+                            parentuserwallet.save()
+                        
+                            WalletTransactions.objects.create(
+                                user_id=parentid,
+                                ref_id=rref_id,
+                                transaction_direction=TransactionDirection.CREDIT,
+                                add_date=timezone.now(),
+                                transaction_status=TransactionStatus.SUCCESS,
+                                amount=(surcharge * dicashback),
+                                transaction_type=CompTransactionType.BBPS,
+                                tds = ((surcharge * dicashback) * 0.05),
+                                opening_balance=popenbalance,
+                                closing_balance=parentuserwallet.available_balance,
+                                remark=f"Cashback for Bill Pay: {billtype}#{number}",
+                                comission=dicomission  # Save the DI comission
+                            )
+                            transaction_data = BBPSTransactionSerializer(bbpstr).data
+                            return Response({"message": "Transaction created successfully", "transaction":transaction_data}, status=status.HTTP_201_CREATED)
+            else:
+                return Response({"error": "Pass user ID"})
+
 class GetBillDetails(APIView):
     def post(self, request, *args, **kwargs):
         number = request.data.get("number")
@@ -625,8 +744,6 @@ class UserViewset(
                 {"details": "Pass user id"}, status=status.HTTP_400_BAD_REQUEST
             )
         user = User.objects.get(id=user_id)
-
-
         serializer = UserSerializer(user)
 
         return Response(serializer.data)
@@ -662,19 +779,16 @@ class UserViewset(
         kwargs["partial"] = True
         return self.update(request, *args, **kwargs)
 
-
-
-class GetPackageDetails(APIView):
+class GetSurchargeDetails(APIView):
     def get(self, request, *args, **kwargs):
         amount = request.query_params.get("amount")
         if not (amount):
             return Response({"error":"Please fill details"})
         try:
-            package = Package.objects.get(start_value_gte=amount, end_value__lte=amount)
-            return Response({"surcharge_amount":amount * package.surcharge if not package.is_flat else package.surcharge})
+            Surcharge = Surcharge.objects.get(start_value_gte=amount, end_value__lte=amount)
+            return Response({"surcharge_amount":amount * Surcharge.surcharge if not Surcharge.is_flat else Surcharge.surcharge})
         except:
             return Response({"error":"Please try again later"})
-
 
 class GetUsers(APIView):
     def get(self, request, id=None): 
@@ -752,7 +866,6 @@ class CheckCustomer(APIView):
         
         except Exception as e:
             return Response({'Message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
 
 class RegisterRemitter(APIView):
     def post(self, request):
@@ -856,17 +969,17 @@ class fetch_beneficiary(APIView):
             print("errorr",e)
             return Response({'Message': 'Customer not found, registering.'},status=status.HTTP_404_NOT_FOUND)
        
-class UpdateFundRequest(APIView):
+# class UpdateFundRequest(APIView):
 
-    def post(self, request, *args, **kwargs):
-        tr_id = request.data.get('transaction_id')
-        if tr_id:
-            tr = UserTransactions.objects.get(id=tr_id)
-            tr.transaction_status=TransactionStatus.SUCCESS
-            tr.save()
-            return Response({'details':"updated succesfully"})
-        else:
-            return Response({'Message': 'Error occured'})
+#     def post(self, request, *args, **kwargs):
+#         tr_id = request.data.get('transaction_id')
+#         if tr_id:
+#             tr = FundRequests.objects.get(id=tr_id)
+#             tr.transaction_status=TransactionStatus.SUCCESS
+#             tr.save()
+#             return Response({'details':"updated succesfully"})
+#         else:
+#             return Response({'Message': 'Error occured'})
 
 class GetFundRequest(APIView):
 
@@ -874,47 +987,146 @@ class GetFundRequest(APIView):
         user_id = request.query_params.get('user_id', None) 
         is_admin = request.query_params.get('is_admin', False) 
         if is_admin:
-            user_transactions = UserTransactions.objects.all()
-            data = UserTransactionSerializer(user_transactions,many=True).data
+            user_transactions = FundRequests.objects.all()
+            data = FundRequests(user_transactions,many=True).data
             return Response(data)
         if user_id:
-            user_transactions = UserTransactions.objects.filter(user_id=user_id)
-            data = UserTransactionSerializer(user_transactions,many=True).data
+            user_transactions = FundRequests.objects.filter(user_id=user_id)
+            data = FundRequestsSerializer(user_transactions,many=True).data
             return Response(data)
             
 class UpdateFundRequest(APIView):
 
     def post(self, request, *args, **kwargs):
         tr_id = request.data.get('transaction_id')
-        print(tr_id)
-        if tr_id:
-            tr = UserTransactions.objects.get(id=tr_id)
-            tr.transaction_status=TransactionStatus.SUCCESS
-            tr.save()
-            return Response({'details':"updated succesfully"})
+        action = request.data.get("action")
+        amount = request.data.get("amount")
+        bank_name = request.data.get("bank_name")
+        bank_acc_number = request.data.get("bank_acc_number")
+        ref_number = request.data.get("ref_number")
+        payment_mode = request.data.get("payment_mode")
+        payment_date = request.data.get("payment_date")
+        remark = request.data.get("remark")
+        upduser = request.data.get("upduser")
+
+        if tr_id and action:
+            try:
+                fundtran = FundRequests.objects.get(reference_number=tr_id)
+                walltrans = WalletTransactions.objects.get(ref_id=tr_id)
+
+            except FundRequests.DoesNotExist:
+                return Response({'Error': 'Transaction ID not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+            if action == "APPROVE":
+                try:
+                    comuser = User.objects.get(id=upduser)
+                    user = User.objects.get(username=fundtran.user)
+                    userwallet = UserWallet.objects.get(user_id=user.id)
+                except (WalletTransactions.DoesNotExist, User.DoesNotExist, UserWallet.DoesNotExist) as e:
+                    return Response({'Error': str(e)}, status=status.HTTP_404_NOT_FOUND)
+                
+                if fundtran.transaction_status == TransactionStatus.SUCCESS:
+                    return Response({'Error': 'Already Approved.'}, status=status.HTTP_200_OK)
+                
+                else:
+                    fundtran.upd_opening_balance = userwallet.available_balance
+                    fundtran.save()
+
+                    userwallet.available_balance += fundtran.amount
+                    userwallet.save()
+
+                    fundtran.upd_closing_balance = userwallet.available_balance
+                    fundtran.running_balance = userwallet.available_balance
+                    fundtran.transaction_status = TransactionStatus.SUCCESS
+                    fundtran.approvedate = timezone.now()
+                    fundtran.lastupdate = timezone.now()
+                    fundtran.payment_remark = f"FUNDREQUEST {action} by {comuser.name}" 
+                    fundtran.save()
+                    walltrans.closing_balance = userwallet.available_balance
+                    walltrans.STATUS=fundtran.transaction_status
+                    walltrans.save()
+
+
+                    return Response({'Message': "Updated successfully"}, status=status.HTTP_200_OK)
+
+            elif action == "UPDATE":
+                try:
+                    user = User.objects.get(username=fundtran.user)
+                except User.DoesNotExist:
+                    return Response({'Error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+                if fundtran.transaction_status == TransactionStatus.REINITIATE:
+                    fundtran.bank_acc_number = bank_acc_number
+                    fundtran.amount = amount
+                    fundtran.bank_name = bank_name
+                    fundtran.bank_ref_number = ref_number
+                    fundtran.payment_mode = payment_mode
+                    fundtran.payment_date = payment_date
+                    fundtran.remark = remark
+                    fundtran.transaction_status = TransactionStatus.PENDING
+                    fundtran.lastupdate = timezone.now()
+                    fundtran.payment_remark = f"FUNDREQUEST {action} by {user.name}"
+                    fundtran.save()
+                    walltrans.closing_balance = userwallet.available_balance
+                    walltrans.STATUS=fundtran.transaction_status
+                    walltrans.save()
+                    return Response({'Message': "Updated successfully"}, status=status.HTTP_200_OK)
+                else:
+                    return Response({'Error': 'Re-Initiate not possible.'}, status=status.HTTP_404_NOT_FOUND)
+
+            elif action == "REINITIATE":
+                try:
+                    comuser = User.objects.get(id=upduser)
+                except User.DoesNotExist:
+                    return Response({'Error': 'Initiating user not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+                if fundtran.transaction_status == TransactionStatus.PENDING:
+                    fundtran.lastupdate = timezone.now()
+                    fundtran.payment_remark = f"FUNDREQUEST {action} by {comuser.name}"
+                    fundtran.transaction_status = TransactionStatus.REINITIATE
+                    fundtran.save()
+                    walltrans.closing_balance = userwallet.available_balance
+                    walltrans.STATUS=fundtran.transaction_status
+                    walltrans.save()
+                    return Response({'Message': "Reinitiation successful"}, status=status.HTTP_200_OK)
+                else:
+                    return Response({'Error': 'Re-Initiate not possible.'}, status=status.HTTP_404_NOT_FOUND)
+            
+            elif action == "FAILURE":
+                
+                if fundtran.transaction_status == TransactionStatus.FAILURE:
+                    return Response({'Error': 'Already Failed.'}, status=status.HTTP_200_OK)
+                else:
+                    comuser = User.objects.get(id=upduser)
+                    fundtran.transaction_status = TransactionStatus.FAILURE
+                    fundtran.lastupdate = timezone.now()
+                    fundtran.payment_remark = f"FUNDREQUEST {action} by {comuser.name}"
+                    fundtran.save()
+                    walltrans.closing_balance = userwallet.available_balance
+                    walltrans.STATUS=fundtran.transaction_status
+                    walltrans.save()
+                    return Response({'Message': "Updated successfully"}, status=status.HTTP_200_OK)
+            else:
+                return Response({'Error': "Not a valid action"}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({'Message': 'Error occured'})
+            return Response({'Error': 'Kindly provide Transaction ID & Action both.'}, status=status.HTTP_400_BAD_REQUEST)
 
 class GetFundRequest(APIView):
 
     def get(self, request, *args, **kwargs):
-        user_id = request.query_params.get('user_id', None) 
-        is_admin = request.query_params.get('is_admin', False) 
+        user_id = request.query_params.get('user_id', None)
+        is_admin = request.query_params.get('is_admin', 'false').lower() == 'true'
+
         if is_admin:
-            user_transactions = UserTransactions.objects.all()
-            data = UserTransactionSerializer(user_transactions,many=True).data
-            return Response(data)
-        if user_id:
-            user_transactions = UserTransactions.objects.filter(user_id=user_id)
-            data = UserTransactionSerializer(user_transactions,many=True).data
-            return Response(data)
+            user_transactions = FundRequests.objects.all()
+            serializer = FundRequestsSerializer(user_transactions, many=True)
+            return Response({'Message': 'Fund requests fetched', 'Data':serializer.data}, status=status.HTTP_200_OK)
 
+        if user_id is not None:
+            user_transactions = FundRequests.objects.filter(user_id=user_id)
+            serializer = FundRequestsSerializer(user_transactions, many=True)
+            return Response({'Message': 'Fund requests fetched', 'Data':serializer.data},  status=status.HTTP_200_OK)
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.db.models import Q
-import requests
+        return Response({'error': 'user_id is required'}, status=status.HTTP_400_BAD_REQUEST)
 
 def zpay_bankadd(payload):
     headers = {
@@ -947,7 +1159,7 @@ class zpayaddbankbeneficiary(APIView):
 
         if not (bank_account_number and bank_ifsc_code and name_of_account_holder and email and phone):
             return Response({"Message": "Please fill details"})
-
+        print(bank_ifsc_code)
         payload = {
             "bank_account_number": bank_account_number,
             "bank_ifsc_code": bank_ifsc_code,
@@ -1002,7 +1214,6 @@ class zpayaddbankbeneficiary(APIView):
         else:
             return Response({"error": "Please try again later", "Message": "Beneficiary not fetched"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 class zpayaddvpabeneficiary(APIView):
     def post(self, request, *args, **kwargs):
 
@@ -1028,7 +1239,6 @@ class zpayaddvpabeneficiary(APIView):
         else:
             return Response({"error":"Please try again later"}, response)
         
-
 class zpaygetbeneficiary(APIView):
     def get(self, request, *args, **kwargs):
         result = zpaygetallbeneficiary()
@@ -1093,6 +1303,7 @@ class zpayverification(APIView):
             "merchant_reference_id": merchant_reference_id,
             "force_penny_drop": False
         }
+
         response = zpay_verification(payload=payload)
         print('views resp', response)
         if isinstance(response, dict) and 'data' in response and 'status' in response['data']:
@@ -1105,101 +1316,243 @@ class zpayverification(APIView):
         else:
             # Handle unexpected response format
             return Response({"Message": "Bad request from Zpay", "Response":response}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
+   
 class zpaybanktansfer(APIView):
-    
-    def post(self, request, *args, **kwargs):
 
+    def post(self, request, *args, **kwargs):
         beneficiary_id = request.data.get("beneficiary_id")
         amount = request.data.get("amount")
+        mobileno =  request.data.get("mobile")
+        bene_name =  request.data.get("bene_name")
         merchant_reference_id = request.data.get("merchant_reference_id")
         payment_remark = request.data.get("payment_remark")
         payment_mode = request.data.get("payment_mode")
         bank_acc_number = request.data.get("bank_acc_number")
         user_id = request.data.get("user_id")
-        surcharge =  request.data.get("surcharge")
         tpin = request.data.get("tpin")
-        print(beneficiary_id, amount, merchant_reference_id, payment_mode, bank_acc_number, user_id, surcharge, tpin)
-        if not (beneficiary_id and amount and merchant_reference_id and payment_mode and bank_acc_number and user_id and surcharge and tpin):
-            return Response({"error":"Please fill details"})
+                
+        if not (beneficiary_id and amount and merchant_reference_id and payment_mode and bank_acc_number and user_id and tpin):
+            return Response({"error": "Please fill details"}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            user=User.objects.get(id=user_id)
-        except:
-            return Response({"error": "Invalid mobile number"}, status=status.HTTP_400_BAD_REQUEST)
-        wallet_obj = user.userwallet
-        if not (amount+surcharge)<wallet_obj.available_balance:
-            return Response({"error": "Insufficient Balance"}, status=status.HTTP_400_BAD_REQUEST)
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({"error": "Invalid user ID"}, status=status.HTTP_400_BAD_REQUEST)
+        print(tpin, user.tpin)
         if str(user.tpin) != str(tpin):
             return Response({"error": "Invalid tpin"}, status=status.HTTP_400_BAD_REQUEST)
-
-        wallet_obj.available_balance = wallet_obj.available_balance - (amount + surcharge)
-        wallet_obj.save()
-
-        payload = {
-             "type":"account_number",
-             "debit_account_id" : "va_iGTXTqO47awKr9OdhaF0km2Qe",
-             "beneficiary_id": beneficiary_id,
-             "amount": amount,
-             "currency_code" : "inr",
-             "payment_mode" : payment_mode,
-             "merchant_reference_id": merchant_reference_id,
-             "payment_remark": payment_remark,
-             
-         }
-    
-#     response = zpay_transfer(payload=payload)
         
-#     if response["status"] == True:
-   
-        response = True
-        if response == True:
+        surchargeobj = Surcharge.objects.get(user=user)
+        
+        wallet_obj = user.userwallet
+        opening_balance = wallet_obj.available_balance
+
+        if 100<= amount <= 1000:
+            surp = surchargeobj.payoutflat_s101to2000
+            surcharge =  surchargeobj.payoutflat_s101to2000
+        elif 1001<= amount <= 5000:
+            surp = surchargeobj.payoutperc_s2001to5000
+            surcharge = (amount * surchargeobj.payoutperc_s2001to5000)
+        elif 5001<= amount <= 10000:
+            surp = surchargeobj.payoutperc_s5001to10000
+            surcharge = (amount * surchargeobj.payoutperc_s5001to10000)
+        elif 10001<= amount <= 50000:
+            surp = surchargeobj.payoutperc_s10001to50000
+            surcharge = (amount * surchargeobj.payoutperc_s10001to50000)
+        elif 50001<= amount <= 100000:
+            surp = surchargeobj.payoutperc_s50001to100000
+            surcharge = (amount * surchargeobj.payoutperc_s50001to100000)
+        elif 100001<= amount <= 500000:
+            surp = surchargeobj.payoutperc_s100001to500000
+            surcharge = (amount * surchargeobj.payoutperc_s100001to500000)
+        elif 500000<= amount:
+            surp = surchargeobj.payoutperc_s500001toall
+            surcharge = (amount * surchargeobj.payoutperc_s500001toall)
+    
+        if surcharge:
+
+            print(surcharge)
+            if (amount + surcharge) > wallet_obj.available_balance:
+                return Response({"error": "Insufficient Balance"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            wallet_obj.available_balance -= (amount + surcharge)
+            wallet_obj.save()
+            
             tr_obj = DMTTransactions.objects.create(
                 bank_acc_number=bank_acc_number,
-                ref_id = merchant_reference_id, 
+                ref_id=merchant_reference_id, 
                 user=user,  
-                bene_id = beneficiary_id, 
-                transaction_status = TransactionStatus.SUCCESS,
-                amount = amount,
-                charge = surcharge,
-                # order_id = response["data"]["utr"],
-                transaction_type = TransactionType.IMPS if payment_mode == "IMPS" else TransactionType.NEFT,
-                payment_remark = payment_remark
+                bene_id=beneficiary_id, 
+                transaction_status=TransactionStatus.PENDING,
+                amount=amount,
+                charge=surcharge,
+                bene_name=bene_name,
+                mobile=mobileno,
+                transaction_type=TransactionType.IMPS if payment_mode == "IMPS" else TransactionType.NEFT,
+                payment_remark=payment_remark,
+                created_at=timezone.now()
             )
-            print(user.parent_id)
-            if user.parent_id:
-                dicashback = user.diback
-                retcashback = user.retback
-                print('di cashback',dicashback)
-                print('retailer cashback',retcashback)
-                wallet_obj.refresh_from_db()
-                wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * retcashback -  (surcharge*retcashback)*0.05)
-                wallet_obj.save()
-                parent_user = UserWallet.objects.get(user_id=user.parent_id)
-                print('parent wallet',surcharge,surcharge*dicashback)
-                parent_user.available_balance = parent_user.available_balance + (surcharge * dicashback - (surcharge*dicashback)*0.05) 
-                parent_user.save()
-                main_wallet = UserWallet.objects.get(user_id=6)
-                print('company wallet',main_wallet)
-                main_wallet.available_balance = main_wallet.available_balance + (surcharge - ( (surcharge * retcashback -  (surcharge*retcashback)*0.05) + (surcharge * dicashback - (surcharge * dicashback)*0.05) ))
-                main_wallet.save()
+
+            wallobj = WalletTransactions.objects.create(
+                user=user,
+                transaction_direction=TransactionDirection.DEBIT,
+                add_date=timezone.now(),
+                ref_id=merchant_reference_id,
+                transaction_status=TransactionStatus.PENDING,
+                amount=amount,
+                transaction_type=CompTransactionType.DMT,
+                charge=surcharge,
+                remark=f"Money Transfer: A/c#{bank_acc_number} , Mob#{mobileno}",
+                opening_balance=opening_balance,
+                closing_balance=wallet_obj.available_balance 
+            )
+
+            payload = {
+                "type": "account_number",
+                "debit_account_id": "va_iGTXTqO47awKr9OdhaF0km2Qe",
+                "beneficiary_id": beneficiary_id,
+                "amount": amount,
+                "currency_code": "inr",
+                "payment_mode": payment_mode,
+                "merchant_reference_id": merchant_reference_id,
+                "payment_remark": payment_remark,
+            }
+        
+            # Simulate zpay_transfer response
+            response = True  # Replace this with the actual API call response
+
+            if response:
+                wallobj.transaction_status = TransactionStatus.SUCCESS
+                wallobj.save()
+                print(wallobj.closing_balance)
+                tr_obj.transaction_status = TransactionStatus.SUCCESS
+                tr_obj.save()  
+                
+                if(surp>0.03):
+                    self.update_wallets_on_success(user, surcharge, mobileno, merchant_reference_id, wallobj, bank_acc_number)
+                
+                transaction_data = DmttransactionSerializer(tr_obj).data
+                return Response({"message": "Funds transferred successfully", "transaction": transaction_data}, status=status.HTTP_201_CREATED)
             else:
-                dicashback = user.diback
-                retcashback = user.retback
-                print('di cashback',dicashback)
-                print('retailer cashback',retcashback)
-                wallet_obj.refresh_from_db()
-                wallet_obj.available_balance = wallet_obj.available_balance + (surcharge * retcashback -  (surcharge*retcashback)*0.05)
-                wallet_obj.save()
+                wallobj.transaction_status = TransactionStatus.PENDING
+                wallobj.save()
+                tr_obj.transaction_status = TransactionStatus.PENDING
+                tr_obj.save()
+                
+                comp_user = User.objects.get(id=6)
+                cref_id = ''.join([str(random.randint(0, 9)) for _ in range(12)])
                 main_wallet = UserWallet.objects.get(user_id=6)
-                main_wallet.available_balance = main_wallet.available_balance + (surcharge - (surcharge * retcashback -  (surcharge*retcashback)*0.05) )
+                copenbalance = main_wallet.available_balance
+                main_wallet.available_balance += (amount + surcharge)
                 main_wallet.save()
 
-            return Response({"message": "Funds transferred successfully"}, status=status.HTTP_201_CREATED)
-        else:
-            return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
+                WalletTransactions.objects.create(
+                    user=comp_user,
+                    ref_id=cref_id,
+                    transaction_direction=TransactionDirection.CREDIT,
+                    add_date=timezone.now(),
+                    transaction_status=TransactionStatus.SUCCESS,
+                    amount=amount ,
+                    transaction_type=CompTransactionType.DMT,
+                    opening_balance=copenbalance,
+                    closing_balance=main_wallet.available_balance,
+                    remark=f"Money Transfer: A/c#{bank_acc_number} , Mob#{mobileno}",
 
+                )
+
+                transaction_data = DmttransactionSerializer(tr_obj).data
+                return Response({"message": "Transaction id Pending", "transaction": transaction_data}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"message": "No Surcharge",},  status=status.HTTP_400_BAD_REQUEST)
+
+
+    def update_wallets_on_success(self, user, surcharge, mobileno, merchant_reference_id, wallobj, bank_acc_number):
+        dicashback = user.diback
+        retcashback = user.retback
+        wallet_obj = user.userwallet
+        
+        wallet_obj.refresh_from_db()
+        rref_id = ''.join([str(random.randint(0, 9)) for _ in range(12)])
+        ropening_balance = wallet_obj.available_balance
+        cashback_amount = (surcharge * retcashback -  (surcharge * retcashback) * 0.05)
+        wallet_obj.available_balance += cashback_amount
+
+        wallobj.tds = (surcharge * retcashback) * 0.05
+        wallobj.comission = cashback_amount
+        wallobj.save()
+        
+        # User wallet
+        if user.parent_id:
+            parent_userid = User.objects.get(id=user.parent_id)
+            parent_wallet = UserWallet.objects.get(user_id=user.parent_id)
+            popenbalance = parent_wallet.available_balance
+            parent_cashback = surcharge * dicashback - (surcharge * dicashback) * 0.05
+            parent_wallet.available_balance += parent_cashback
+            parent_wallet.save()
+            pref_id = ''.join([str(random.randint(0, 9)) for _ in range(12)])
+
+            WalletTransactions.objects.create(
+                user=parent_userid,
+                transaction_direction=TransactionDirection.CREDIT,
+                ref_id=rref_id,
+                add_date=timezone.now(),
+                transaction_status=TransactionStatus.SUCCESS,
+                amount=parent_cashback,
+                transaction_type=CompTransactionType.DMT,
+                opening_balance=popenbalance,
+                closing_balance=parent_wallet.available_balance,
+                charge=0,
+                tds=(surcharge * dicashback) * 0.05,
+                comission=parent_cashback,
+                remark=f"Money Transfer: A/c#{bank_acc_number} , Mob#{mobileno}",
+            )
+
+            # Company Wallet
+            main_wallet = UserWallet.objects.get(user_id=6)
+            comp_user = User.objects.get(id=6)
+            # cref_id = ''.join([str(random.randint(0, 9)) for _ in range(12)])
+
+            copenbalance = main_wallet.available_balance
+            company_cashback = surcharge - (cashback_amount + parent_cashback)
+            main_wallet.available_balance += company_cashback
+            main_wallet.save()
+
+            WalletTransactions.objects.create(
+                user=comp_user,
+                transaction_direction=TransactionDirection.CREDIT,
+                ref_id=rref_id,
+                add_date=timezone.now(),
+                transaction_status=TransactionStatus.SUCCESS,
+                amount=company_cashback,
+                transaction_type=CompTransactionType.WALLET,
+                opening_balance=copenbalance,
+                closing_balance=main_wallet.available_balance,
+                remark=f"Money Transfer: A/c#{bank_acc_number} , Mob#{mobileno}",
+            )
+        else:
+            # Company Wallet
+            main_wallet = UserWallet.objects.get(user_id=6)
+            comp_user = User.objects.get(id=6)
+            cref_id = ''.join([str(random.randint(0, 9)) for _ in range(12)])
+
+            copenbalance = main_wallet.available_balance
+            company_cashback = (surcharge -  (surcharge * retcashback) * 0.05)
+            main_wallet.available_balance += company_cashback
+            main_wallet.save()
+
+            WalletTransactions.objects.create(
+                user=comp_user,
+                transaction_direction=TransactionDirection.CREDIT,
+                ref_id=rref_id,
+                add_date=timezone.now(),
+                transaction_status=TransactionStatus.SUCCESS,
+                amount=company_cashback,
+                transaction_type=CompTransactionType.WALLET,
+                opening_balance=copenbalance,
+                closing_balance=main_wallet.available_balance,
+                remark=f"Money Transfer: A/c#{bank_acc_number} , Mob#{mobileno}",
+            )
+     
 class zpayupitansfer(APIView):
     def post(self, request, *args, **kwargs):
 
@@ -1226,56 +1579,170 @@ class zpayupitansfer(APIView):
             return Response({"error":"Please try again later"}, response)
 
 class GetDmtTransactions(APIView):
-    def get(self, request, id=None): 
+    def get(self, request, id=None):
         if id is not None:
             try:
-                userid = DMTTransactions.objects.get(user=id)
-                serializer = DmttransactionSerializer(userid)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            except User.DoesNotExist:
+                transactions = DMTTransactions.objects.filter(user=id)  # Filter transactions by user ID
+                if transactions.exists():
+                    serializer = DmttransactionSerializer(transactions, many=True)
+                    return Response({'Data':serializer.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"message": "Transactions not found"}, status=status.HTTP_404_NOT_FOUND)
+            except DMTTransactions.DoesNotExist:
                 return Response({"message": "Transactions not found"}, status=status.HTTP_404_NOT_FOUND)
         else:
-            trans = DMTTransactions.objects.all()
-            serializer = DmttransactionSerializer(trans, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-             
-# class Wallettowallet(APIView):
-
-#     def post(self, request, *args, **kwargs):
-
-#         amount = request.data.get("amount")
-#         bene_id =request.data.get("bene_id")
-#         amount =request.data.get("amount")
-#         mobile = request.data.get("mobile")
-#         mpin = request.data.get("mpin")
-#         user_id = request.data.get("user_id")
-
-#         if not amount and not bene_id  and not mobile and not mpin :
-#             return Response({"error": "Please provide required fields"}, status=status.HTTP_400_BAD_REQUEST)
-#         try:
-#             user=User.objects.get(id=user_id)
-#         except:
-#             return Response({"error": "Invalid mobile number"}, status=status.HTTP_400_BAD_REQUEST)
-#         wallet_obj = user.userwallet_set.first()
-#         if not (amount)<wallet_obj.available_balance:
-#             return Response({"error": "Insufficient Balance"}, status=status.HTTP_400_BAD_REQUEST)
-#         if not user.mpin == mpin:
-#             return Response({"error": "Invalid mpin"}, status=status.HTTP_400_BAD_REQUEST)
-
+            transactions = DMTTransactions.objects.all()
+            serializer = DmttransactionSerializer(transactions, many=True)
+            return Response({'Data':serializer.data}, status=status.HTTP_200_OK)
         
-#         bene_user = UserWallet.objects.get(user_id=bene_id)
-#         if(bene_user):
-#             bene_user.available_balance = bene_user.available_balance + (amount) 
-#             bene_user.save()
+class GetWalletTransactions(APIView):
+    def get(self, request, id=None):
+        
+        if id is not None:
+            try:
+                transactions = WalletTransactions.objects.filter(user=id)  # Filter transactions by user ID
+                if transactions.exists():
+                    serializer = WalletTransactionSerializer(transactions, many=True)
+                    return Response({'data':serializer.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"message": "Transactions not found"}, status=status.HTTP_404_NOT_FOUND)
+            except WalletTransactions.DoesNotExist:
+                print('ID',id)
+                return Response({"message": "Transactions not found"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            transactions = WalletTransactions.objects.all()
+            serializer = WalletTransactionSerializer(transactions, many=True)
+            return Response({'data':serializer.data}, status=status.HTTP_200_OK)
 
-#             wallet_obj.refresh_from_db()
-#             wallet_obj.available_balance = wallet_obj.available_balance + (amount)
-#             wallet_obj.save()
+class GetBBPSTransactions(APIView):
+    def get(self, request, id=None):
+        
+        if id is not None:
+            try:
+                transactions = BBPSTransactions.objects.filter(user=id)  # Filter transactions by user ID
+                if transactions.exists():
+                    serializer = BBPSTransactionSerializer(transactions, many=True)
+                    return Response({'data':serializer.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"message": "Transactions not found"}, status=status.HTTP_404_NOT_FOUND)
+            except BBPSTransactions.DoesNotExist:
+                print('ID',id)
+                return Response({"message": "Transactions not found"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            transactions = WalletTransactions.objects.all()
+            serializer = WalletTransactionSerializer(transactions, many=True)
+            return Response({'data':serializer.data}, status=status.HTTP_200_OK)
+           
+class Wallettowallet(APIView):
 
-#             ref_id = str(uuid.uuid4()).replace('-', 'D')[1:21]
+    def post(self, request, *args, **kwargs):
 
-#             if(ref_id):
-#                 return Response({"message": "Amount transferred successfully"}, status=status.HTTP_201_CREATED)
-#         else:
-#             return Response({"error": "Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
+        username =  request.data.get("username")
+        mobile = request.data.get("mobile")
+        amount = request.data.get("amount")
+        tpin = request.data.get("tpin")
+
+        if not username and not amount and not mobile and not tpin:
+            return Response({"error": "Please provide required fields"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = User.objects.get(username=username)
+            if user:
+                bene_user = User.objects.get(mobile=mobile)
+            else:
+                return Response({"error": "User Not found"}, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response({"error": "Mobile no not found"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if str(user.tpin) != str(tpin):
+            return Response({"error": "Invalid tpin"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if bene_user:
+            print("both found")
+            user_wallet = user.userwallet
+            bene_user_wallet = bene_user.userwallet
+            
+            if user_wallet and bene_user_wallet:
+                if not (amount)<user.available_balance:
+                    return Response({"error": "Insufficient Balance"}, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    ref_id = ''.join([str(random.randint(0, 9)) for _ in range(12)])
+                    openingbalance = user_wallet.available_balance
+                    print(user_wallet.available_balance)
+                    user_wallet.available_balance = user_wallet.available_balance - amount
+                    user_wallet.save()
+                    
+                    WalletTransactions.objects.create(
+                        transaction_direction=TransactionDirection.DEBIT,
+                        user=user,
+                        ref_id=ref_id,
+                        transaction_status=TransactionStatus.SUCCESS,
+                        amount=amount,
+                        add_date=timezone.now(),
+                        transaction_type=CompTransactionType.WALLET,
+                        opening_balance=openingbalance,
+                        closing_balance=user_wallet.available_balance
+                    )
+                    Wallet_to_Wallet_transaction.objects.create(
+                        transaction_direction = TransactionDirection.DEBIT,
+                        ref_id= ref_id,
+                        user = user,
+                        mobile = mobile,
+                        sender = user.username,
+                        receiver = bene_user.username,
+                        receivername = bene_user.name,
+                        transaction_status = TransactionStatus.SUCCESS,
+                        amount = amount,
+                        transaction_type = CompTransactionType.WALLET,
+                        add_date = timezone.now()
+                    )
+                    beneopeningbalance = bene_user_wallet.available_balance
+                    bene_user_wallet.available_balance = bene_user_wallet.available_balance + amount
+                    bene_user_wallet.save()
+
+                    WalletTransactions.objects.create(
+                        transaction_direction=TransactionDirection.CREDIT,
+                        user=bene_user,
+                        ref_id=ref_id,
+                        transaction_status=TransactionStatus.SUCCESS,
+                        amount=amount,
+                        add_date=timezone.now(),
+                        transaction_type=CompTransactionType.WALLET,
+                        opening_balance=beneopeningbalance,
+                        closing_balance=bene_user_wallet.available_balance
+                    )
+                    Wallet_to_Wallet_transaction.objects.create(
+                        transaction_direction = TransactionDirection.CREDIT,
+                        ref_id= ref_id,
+                        user = bene_user,
+                        mobile = mobile,
+                        receiver = bene_user.username,
+                        receivername = bene_user.name,
+                        sender = user.username,
+                        transaction_status = TransactionStatus.SUCCESS,
+                        amount = amount,
+                        transaction_type = CompTransactionType.WALLET,
+                        add_date = timezone.now()
+                    )
+                    return Response({"Message": "Wallet Traansferred Successfully"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "Userwallet & Beneficiary Userwallet not found."}, status=status.HTTP_400_BAD_REQUEST)
+
+                
+class GetWallettoWalletTransactions(APIView):
+    def get(self, request, id=None):
+        if id is not None:
+            try:
+                transactions = Wallet_to_Wallet_transaction.objects.filter(user=id)  # Filter transactions by user ID
+                if transactions.exists():
+                    serializer = WallettoWalletTransactionSerializer(transactions, many=True)  # Correctly instantiate the serializer
+                    return Response({'Data': serializer.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"message": "Transactions not found"}, status=status.HTTP_404_NOT_FOUND)
+            except Wallet_to_Wallet_transaction.DoesNotExist:
+                return Response({"message": "Transactions not found"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            transactions = Wallet_to_Wallet_transaction.objects.all()
+            serializer = WallettoWalletTransactionSerializer(transactions, many=True)  # Correctly instantiate the serializer
+            return Response({'Data': serializer.data}, status=status.HTTP_200_OK)
+            
 
